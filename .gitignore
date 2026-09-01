@@ -51,3 +51,6 @@ captures/
 # Native build intermediate directories
 .externalNativeBuild
 */.externalNativeBuild
+unityLibrary/symbols/
+symbols/
+
