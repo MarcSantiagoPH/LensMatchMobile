@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="240dp"
+    android:layout_margin="8dp"
+    app:cardBackgroundColor="@color/bgCard"
+    app:cardCornerRadius="12dp"
+    app:strokeColor="@color/borderCard"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/bgPrimary">
+
+            <ImageView
+                android:id="@+id/iv_frame"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_eyeglasses"
+                app:tint="@color/textSecondary" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tv_shape_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_confidence_chip"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:text="Aviator"
+            android:textColor="@color/accentGold"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/tv_frame_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Classic Aviator"
+            android:textColor="@color/textPrimary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_frame_material"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Metal"
+            android:textColor="@color/textSecondary"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tv_frame_price"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="$129.00"
+            android:textColor="@color/accentGold"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <!-- Top Navigation -->
+    <ImageView
+        android:id="@+id/btn_back_unity_ar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_scan"
+        app:tint="@android:color/white" />
+
+    <!-- Bottom AR Controls Overlay -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_bottom_gradient"
+        android:orientation="vertical"
+        android:paddingBottom="24dp"
+        android:paddingTop="16dp">
+
+        <!-- Tabs: Recommended vs All Frames -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/tab_recommended_unity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp">
+
+                <TextView
+                    android:id="@+id/tv_tab_recommended_unity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Recommended"
+                    android:textColor="@color/accentGold"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:id="@+id/indicator_recommended_unity"
+                    android:layout_width="100dp"
+                    android:layout_height="3dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@color/accentGold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tab_all_frames_unity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp">
+
+                <TextView
+                    android:id="@+id/tv_tab_all_frames_unity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="All Frames"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="15sp" />
+
+                <View
+                    android:id="@+id/indicator_all_frames_unity"
+                    android:layout_width="80dp"
+                    android:layout_height="3dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@android:color/transparent" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Horizontal Scrollable Circular Frame List -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/layout_frames_unity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp" />
+        </HorizontalScrollView>
+
+        <!-- Color Variations Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="12dp"
+            android:text="Color Variations:"
+            android:textColor="@color/textSecondary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/layout_colors_unity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="24dp" />
+        </HorizontalScrollView>
+    </LinearLayout>
+
+</FrameLayout>
