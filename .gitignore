@@ -11,9 +11,10 @@
 *.class
 
 # Generated files
-bin/
-gen/
-out/
+/bin/
+/gen/
+/out/
+!unityLibrary/src/main/assets/bin/
 build/
 */build/
 */*/build/
