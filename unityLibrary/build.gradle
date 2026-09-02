@@ -132,7 +132,7 @@ ext.BuildIl2CppImpl = { String workingDir, String configuration, String architec
         executableExtension = ".exe"
         commandLineArgs = commandLineArgs*.replace('\"', '\\\"')
     }
-    exec {
+    project.exec {
         executable "${workingDir}/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp${executableExtension}"
         args commandLineArgs
         environment "ANDROID_SDK_ROOT", getSdkDir()
@@ -143,8 +143,8 @@ ext.BuildIl2CppImpl = { String workingDir, String configuration, String architec
     def extensionToRemove = usePublicSymbols ? ".dbg.so" : ".sym.so"
     def extensionToKeep = usePublicSymbols ? ".sym.so" : ".dbg.so"
 
-    delete "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToRemove}"
-    ant.move(file: "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToKeep}", tofile: "${workingDir}/symbols/${abi}/libil2cpp.so")
+    project.delete "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToRemove}"
+    project.ant.move(file: "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToKeep}", tofile: "${workingDir}/symbols/${abi}/libil2cpp.so")
 
 }
 
