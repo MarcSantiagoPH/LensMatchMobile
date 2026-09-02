@@ -1,6 +1,7 @@
 # Built application files
 *.apk
 *.aar
+!unityLibrary/libs/*.aar
 *.ap_
 *.aab
 
