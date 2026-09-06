@@ -16,6 +16,7 @@ public class AppState {
     private boolean lastIsBorderline = false;
     private String lastRunnerUpShape = "Round";
     private String lastNotes = null;
+    private int lastActiveTab = 0;
 
     private String userName = "John Doe";
     private String userEmail = "johndoe@example.com";
@@ -40,6 +41,7 @@ public class AppState {
         state.lastIsBorderline = prefs.getBoolean("lastIsBorderline", false);
         state.lastRunnerUpShape = prefs.getString("lastRunnerUpShape", "Round");
         state.lastNotes = prefs.getString("lastNotes", null);
+        state.lastActiveTab = prefs.getInt("lastActiveTab", 0);
         state.userName = prefs.getString("userName", "John Doe");
         state.userEmail = prefs.getString("userEmail", "johndoe@example.com");
         state.userPhotoUrl = prefs.getString("userPhotoUrl", null);
@@ -120,6 +122,14 @@ public class AppState {
         }
     }
 
+    public int getLastActiveTab() { return lastActiveTab; }
+    public void setLastActiveTab(int tabId) {
+        this.lastActiveTab = tabId;
+        if (prefs != null) {
+            prefs.edit().putInt("lastActiveTab", tabId).apply();
+        }
+    }
+
     public String getUserName() { return userName; }
     public String getUserEmail() { return userEmail; }
     public String getUserPhotoUrl() { return userPhotoUrl; }
@@ -146,12 +156,14 @@ public class AppState {
         this.userName = "John Doe";
         this.userEmail = "johndoe@example.com";
         this.userPhotoUrl = null;
+        this.lastActiveTab = 0;
         if (prefs != null) {
             prefs.edit()
                     .putBoolean("isLoggedIn", false)
                     .remove("userName")
                     .remove("userEmail")
                     .remove("userPhotoUrl")
+                    .remove("lastActiveTab")
                     .apply();
         }
     }

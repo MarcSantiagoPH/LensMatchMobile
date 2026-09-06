@@ -2,42 +2,35 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_frame_circle_root"
-    android:layout_width="72dp"
+    android:layout_width="80dp"
     android:layout_height="wrap_content"
     android:gravity="center"
     android:orientation="vertical"
-    android:paddingHorizontal="6dp"
-    android:paddingVertical="4dp">
+    android:padding="4dp">
 
-    <!-- Circle button with icon -->
     <FrameLayout
         android:id="@+id/frame_circle_bg"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:background="@drawable/bg_ar_circle_unselected"
-        android:elevation="2dp">
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/bg_ar_circle_unselected">
 
         <ImageView
             android:id="@+id/iv_frame_icon"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_eyeglasses"
             app:tint="@color/white" />
     </FrameLayout>
 
-    <!-- Frame name label -->
     <TextView
         android:id="@+id/tv_frame_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="8dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:text="Wayfarer"
         android:textColor="@color/white"
-        android:textSize="11sp"
-        android:fontFamily="sans-serif"
-        android:letterSpacing="0.01" />
-
+        android:textSize="12sp" />
 </LinearLayout>

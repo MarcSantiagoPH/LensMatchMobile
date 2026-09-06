@@ -70,6 +70,11 @@ public class ResultFragment extends Fragment {
     /** Launches the Unity AR activity for frame try-on. */
     private void startUnityAR(String frameStyle, ArrayList<String> frames) {
         if (getContext() == null) return;
+        AppState.getInstance().setLastActiveTab(R.id.nav_result);
+        if (btnTryFramesOn != null) {
+            btnTryFramesOn.setEnabled(false);
+            btnTryFramesOn.setText("Opening 3D AR...");
+        }
         Intent intent = new Intent(requireContext(), com.unity3d.player.UnityPlayerGameActivity.class);
         intent.putExtra("frameStyle", frameStyle);
         intent.putStringArrayListExtra("recommendedFrames", frames);
@@ -79,6 +84,10 @@ public class ResultFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (btnTryFramesOn != null) {
+            btnTryFramesOn.setEnabled(true);
+            btnTryFramesOn.setText("Try Frames On");
+        }
         updateUI();
     }
 

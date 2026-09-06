@@ -14,7 +14,7 @@
     <color name="transparent">#00000000</color>
 
     <!-- Splash Screen Colors -->
-    <color name="windowSplashScreenAnimatedIconColor">#00000000</color>
-    <color name="staticSplashScreenBackgroundColor">#0A0A0A</color>
-    <color name="windowSplashScreenIconBackgroundColor">#00000000</color>
+    <color name="staticSplashScreenBackgroundColor">#FF231F20</color>
+    <color name="windowSplashScreenIconBackgroundColor">@android:color/transparent</color>
+    <color name="windowSplashScreenAnimatedIconColor">@android:color/transparent</color>
 </resources>

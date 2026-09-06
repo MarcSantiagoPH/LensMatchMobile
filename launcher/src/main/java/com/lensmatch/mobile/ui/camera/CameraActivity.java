@@ -164,8 +164,8 @@ public class CameraActivity extends AppCompatActivity {
                     Bitmap bmp = imageProxy.toBitmap();
                     if (bmp != null) {
                         Matrix matrix = new Matrix();
-                        matrix.preScale(-1f, 1f); // front camera mirror
                         matrix.postRotate(imageProxy.getImageInfo().getRotationDegrees());
+                        matrix.postScale(-1f, 1f); // front camera horizontal mirror
                         Bitmap orientedBmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
                         synchronized (temporalFrames) {
                             temporalFrames.add(orientedBmp);
@@ -464,14 +464,20 @@ public class CameraActivity extends AppCompatActivity {
                     break;
             }
 
-            // Mirror horizontally for natural selfie orientation on front camera
-            matrix.preScale(-1f, 1f);
+            // Mirror horizontally after rotation for natural selfie orientation on front camera
+            matrix.postScale(-1f, 1f);
 
             Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
             try (java.io.FileOutputStream out = new java.io.FileOutputStream(photoFile)) {
                 rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 92, out);
             }
+
+            try {
+                ExifInterface newExif = new ExifInterface(photoFile.getAbsolutePath());
+                newExif.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_NORMAL));
+                newExif.saveAttributes();
+            } catch (Exception ignored) {}
 
             return rotatedBitmap;
         } catch (Exception e) {

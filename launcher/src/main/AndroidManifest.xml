@@ -24,7 +24,7 @@
         tools:replace="android:theme">
 
         <meta-data android:name="unity.splash-mode" android:value="0" />
-        <meta-data android:name="unity.splash-enable" android:value="False" />
+        <meta-data android:name="unity.splash-enable" android:value="False" tools:replace="android:value" />
         <meta-data android:name="unity.launch-fullscreen" android:value="True" />
         <meta-data android:name="unity.render-outside-safearea" android:value="True" />
         <meta-data android:name="notch.config" android:value="portrait|landscape" />
@@ -32,7 +32,7 @@
         <meta-data android:name="unity.strip-engine-code" android:value="true" />
         <meta-data android:name="unity.auto-set-game-state" android:value="true" />
         <meta-data android:name="unityplayer.SkipPermissionsDialog" android:value="true" />
-        <meta-data android:name="com.google.ar.core" android:value="optional" />
+        <meta-data android:name="com.google.ar.core" android:value="optional" tools:replace="android:value" />
 
         <activity
             android:name="com.lensmatch.mobile.ui.auth.LoginActivity"
@@ -95,14 +95,16 @@
 
         <activity
             android:name="com.unity3d.player.UnityPlayerGameActivity"
+            android:process=":unity"
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density"
             android:enabled="true"
             android:exported="false"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
+            android:hardwareAccelerated="false"
+            android:launchMode="standard"
             android:resizeableActivity="true"
             android:screenOrientation="portrait"
-            android:theme="@style/BaseUnityGameActivityTheme">
+            android:theme="@style/BaseUnityGameActivityTheme"
+            tools:replace="android:exported,android:hardwareAccelerated,android:launchMode">
             <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
             <meta-data android:name="android.app.lib_name" android:value="game" />
             <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="@string/FreeformWindowSize_maximize" />
