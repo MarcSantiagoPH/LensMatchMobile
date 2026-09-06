@@ -60,17 +60,10 @@ public class UnityPlayerGameActivity extends GameActivity
     private View indicatorRecommended;
     private View indicatorAllFrames;
 
-    // Background sync to ensure the initial frame is attached as soon as ARCore detects the face
+    // One-shot handler: sends the first frame command 800ms after resume.
+    // Unity C# can call onUnityReady() early to cancel this and fire immediately.
     private final Handler mFrameSyncHandler = new Handler(Looper.getMainLooper());
-    private final Runnable mFrameSyncRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (!"none".equals(mCurrentShape)) {
-                updateFrame();
-            }
-            mFrameSyncHandler.postDelayed(this, 1200);
-        }
-    };
+    private View mLoadingOverlay;
 
     private final List<String> allFrames = Arrays.asList(
             "None", "Wayfarer", "Rectangle", "Square", "Cat Eye",
@@ -117,12 +110,6 @@ public class UnityPlayerGameActivity extends GameActivity
             mCurrentShape = normalizeShapeName(recommendedFrames.get(0));
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(android.Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{android.Manifest.permission.CAMERA}, 101);
-            }
-        }
-
         // Inflate and overlay custom UI layout matching LensMatch Try 6 reference
         LayoutInflater inflater = getLayoutInflater();
         View overlayView = inflater.inflate(R.layout.activity_ar_overlay, null);
@@ -131,7 +118,23 @@ public class UnityPlayerGameActivity extends GameActivity
                 ViewGroup.LayoutParams.MATCH_PARENT));
         overlayView.bringToFront();
 
+        mLoadingOverlay = overlayView.findViewById(R.id.unity_loading_overlay);
+        if (mLoadingOverlay != null) mLoadingOverlay.setVisibility(View.VISIBLE);
+
         setupNativeControls(overlayView);
+
+        // Request camera permission AFTER the Unity surface is created.
+        // If we request it before, the system pauses this activity mid-initialization
+        // which breaks ARCore's camera session and causes a black screen.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(android.Manifest.permission.CAMERA)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                // Permission not yet granted — request it now. The frame timer will
+                // be started from onRequestPermissionsResult once the user grants.
+                requestPermissions(new String[]{android.Manifest.permission.CAMERA}, 101);
+            }
+            // If already granted, onResume's 800ms timer will handle the first frame.
+        }
     }
 
     private String normalizeShapeName(String raw) {
@@ -245,13 +248,30 @@ public class UnityPlayerGameActivity extends GameActivity
         for (ColorOption opt : colorOptions) {
             TextView chip = new TextView(this);
             chip.setText(opt.label);
-            chip.setPadding(32, 16, 32, 16);
-            chip.setTextSize(13);
+            chip.setPadding(36, 14, 36, 14);
+            chip.setTextSize(12);
+            chip.setLetterSpacing(0.02f);
 
             boolean sel = opt.code.equalsIgnoreCase(mCurrentColor);
-            chip.setBackgroundResource(sel ? R.drawable.bg_confidence_chip : 0);
-            if (!sel) chip.setBackgroundColor(Color.parseColor("#141414"));
-            chip.setTextColor(sel ? Color.parseColor("#D4AF37") : Color.parseColor("#AFAFAF"));
+            if (sel) {
+                // Selected: gold border + subtle gold-tinted fill
+                android.graphics.drawable.GradientDrawable selBg = new android.graphics.drawable.GradientDrawable();
+                selBg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+                selBg.setCornerRadius(100f);
+                selBg.setColor(Color.parseColor("#1AD4AF37"));
+                selBg.setStroke(2, Color.parseColor("#D4AF37"));
+                chip.setBackground(selBg);
+                chip.setTextColor(Color.parseColor("#D4AF37"));
+            } else {
+                // Unselected: dark pill with subtle white border
+                android.graphics.drawable.GradientDrawable unselBg = new android.graphics.drawable.GradientDrawable();
+                unselBg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+                unselBg.setCornerRadius(100f);
+                unselBg.setColor(Color.parseColor("#1AFFFFFF"));
+                unselBg.setStroke(1, Color.parseColor("#33FFFFFF"));
+                chip.setBackground(unselBg);
+                chip.setTextColor(Color.parseColor("#AFAFAF"));
+            }
 
             chip.setOnClickListener(v -> {
                 mCurrentColor = opt.code;
@@ -261,10 +281,11 @@ public class UnityPlayerGameActivity extends GameActivity
 
             LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            p.setMargins(0, 0, 16, 0);
+            p.setMargins(0, 0, 10, 0);
             layoutColorsUnity.addView(chip, p);
         }
     }
+
 
     private void updateFrame() {
         try {
@@ -324,6 +345,24 @@ public class UnityPlayerGameActivity extends GameActivity
     public void onUnityPlayerQuitted() {
     }
 
+    /**
+     * Called by Unity C# (via AndroidJavaObject.Call("onUnityReady")) when the
+     * FrameManager scene object is fully initialized and ready to accept messages.
+     * This cancels the fallback timer and fires the first frame command immediately.
+     *
+     * Unity C# usage:
+     *   AndroidJavaClass up = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+     *   AndroidJavaObject activity = up.GetStatic<AndroidJavaObject>("currentActivity");
+     *   activity.Call("onUnityReady");
+     */
+    public void onUnityReady() {
+        mFrameSyncHandler.removeCallbacksAndMessages(null);
+        runOnUiThread(() -> {
+            if (mLoadingOverlay != null) mLoadingOverlay.setVisibility(View.GONE);
+            updateFrame();
+        });
+    }
+
     // Quit Unity - process Java callback before native
     @Override
     protected void onDestroy() {
@@ -371,12 +410,13 @@ public class UnityPlayerGameActivity extends GameActivity
         }
         super.onResume();
 
-        // Trigger immediate frame updates as ARCore acquires face tracking
+        // Single fallback: if Unity C# hasn't called onUnityReady() within 800ms,
+        // send the frame command anyway. onUnityReady() will cancel this if it fires first.
         mFrameSyncHandler.removeCallbacksAndMessages(null);
-        mFrameSyncHandler.postDelayed(this::updateFrame, 300);
-        mFrameSyncHandler.postDelayed(this::updateFrame, 800);
-        mFrameSyncHandler.postDelayed(this::updateFrame, 1500);
-        mFrameSyncHandler.postDelayed(mFrameSyncRunnable, 2200);
+        mFrameSyncHandler.postDelayed(() -> {
+            if (mLoadingOverlay != null) mLoadingOverlay.setVisibility(View.GONE);
+            updateFrame();
+        }, 800);
     }
 
     @Override
@@ -426,6 +466,17 @@ public class UnityPlayerGameActivity extends GameActivity
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (mUnityPlayer != null) {
             mUnityPlayer.permissionResponse(this, requestCode, permissions, grantResults);
+        }
+        // If camera was just granted, kick off the first frame update now.
+        // ARCore needs the permission to be in effect before its session can use the camera.
+        if (requestCode == 101
+                && grantResults.length > 0
+                && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            mFrameSyncHandler.removeCallbacksAndMessages(null);
+            mFrameSyncHandler.postDelayed(() -> {
+                if (mLoadingOverlay != null) mLoadingOverlay.setVisibility(View.GONE);
+                updateFrame();
+            }, 600);
         }
     }
 }

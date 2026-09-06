@@ -144,6 +144,57 @@
             app:backgroundTint="@color/accentGold"
             app:cornerRadius="12dp" />
 
+        <!-- Divider -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="@color/borderCard" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:text="OR SIGN UP WITH"
+                android:textColor="@color/textSecondary"
+                android:textSize="11sp"
+                android:letterSpacing="0.08"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="@color/borderCard" />
+        </LinearLayout>
+
+        <!-- Google Sign Up Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_google_signup"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:text="Sign up with Google"
+            android:textColor="@color/textPrimary"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/bgCard"
+            app:cornerRadius="12dp"
+            app:icon="@drawable/ic_google"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp"
+            app:iconTint="@null"
+            app:strokeColor="@color/borderCard"
+            app:strokeWidth="1dp" />
+
         <!-- Login Link -->
         <LinearLayout
             android:layout_width="wrap_content"

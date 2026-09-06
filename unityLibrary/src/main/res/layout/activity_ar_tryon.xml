@@ -24,7 +24,7 @@
         android:layout_height="48dp"
         android:layout_margin="16dp"
         android:padding="8dp"
-        android:src="@drawable/ic_scan"
+        android:src="@drawable/ic_chevron_left"
         app:tint="@color/white" />
 
     <!-- Bottom AR Controls Overlay matching screenshot -->

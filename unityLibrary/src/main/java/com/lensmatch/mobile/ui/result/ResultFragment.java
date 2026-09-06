@@ -33,6 +33,8 @@ public class ResultFragment extends Fragment {
     private ChipGroup chipGroupRecommended;
     private ChipGroup chipGroupAvoided;
     private MaterialButton btnTryFramesOn;
+    private View cardBorderlineNotice;
+    private TextView tvBorderlineNotes;
 
     private String currentShape = "Oval";
     private static Bitmap cachedFaceBitmap = null;
@@ -49,6 +51,8 @@ public class ResultFragment extends Fragment {
         ivFaceCrop = root.findViewById(R.id.iv_face_crop);
         tvDetectedShape = root.findViewById(R.id.tv_detected_shape);
         tvConfidenceMatch = root.findViewById(R.id.tv_confidence_match);
+        cardBorderlineNotice = root.findViewById(R.id.card_borderline_notice);
+        tvBorderlineNotes = root.findViewById(R.id.tv_borderline_notes);
         tvAiDescription = root.findViewById(R.id.tv_ai_description);
         chipGroupRecommended = root.findViewById(R.id.chip_group_recommended);
         chipGroupAvoided = root.findViewById(R.id.chip_group_avoided);
@@ -87,6 +91,21 @@ public class ResultFragment extends Fragment {
 
         tvDetectedShape.setText(currentShape);
         tvConfidenceMatch.setText(confidencePct + "% Match");
+
+        boolean isBorderline = state.getLastIsBorderline();
+        String notes = state.getLastNotes();
+        if (cardBorderlineNotice != null && tvBorderlineNotes != null) {
+            if (notes != null && !notes.trim().isEmpty()) {
+                tvBorderlineNotes.setText(notes);
+                cardBorderlineNotice.setVisibility(View.VISIBLE);
+            } else if (isBorderline) {
+                String runnerUp = state.getLastRunnerUpShape();
+                tvBorderlineNotes.setText("Borderline Result: Your facial features sit between " + currentShape + " and " + (runnerUp != null ? runnerUp : "Round") + ".");
+                cardBorderlineNotice.setVisibility(View.VISIBLE);
+            } else {
+                cardBorderlineNotice.setVisibility(View.GONE);
+            }
+        }
 
         String imagePath = state.getLastImagePath();
         if (imagePath != null) {

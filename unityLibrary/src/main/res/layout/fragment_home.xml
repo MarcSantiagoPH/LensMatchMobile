@@ -4,39 +4,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bgPrimary"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:scrollbars="none">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingHorizontal="24dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="32dp">
 
+        <!-- Header -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Welcome to"
             android:textColor="@color/textSecondary"
-            android:textSize="20sp"
-            android:letterSpacing="0.05" />
+            android:textSize="15sp"
+            android:letterSpacing="0.04"
+            android:fontFamily="sans-serif" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="LensMatch"
             android:textColor="@color/accentGold"
-            android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textSize="34sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginBottom="28dp" />
 
         <!-- Hero Scan Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            app:cardBackgroundColor="@color/bgCard"
-            app:cardCornerRadius="16dp"
+            app:cardBackgroundColor="#121212"
+            app:cardCornerRadius="20dp"
             app:strokeColor="@color/borderCard"
-            app:strokeWidth="1dp">
+            app:strokeWidth="1dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -45,117 +52,162 @@
                 android:padding="24dp"
                 android:gravity="center_horizontal">
 
+                <ImageView
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:src="@drawable/ic_scan"
+                    app:tint="@color/accentGold"
+                    android:layout_marginBottom="16dp" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Find your perfect frame"
+                    android:text="Find Your Perfect Frame"
                     android:textColor="@color/textPrimary"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textSize="19sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Scan your face to get AI-powered eyewear recommendations tailored to your face shape."
+                    android:text="Scan your face for AI-powered recommendations tailored to your face shape."
                     android:textColor="@color/textSecondary"
-                    android:textSize="14sp"
-                    android:gravity="center" />
+                    android:textSize="13sp"
+                    android:gravity="center"
+                    android:lineSpacingExtra="3dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_scan_face"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="24dp"
-                    android:text="Scan your face"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Scan Your Face"
                     android:textColor="@color/bgCard"
-                    android:textSize="16sp"
+                    android:textSize="15sp"
                     android:textStyle="bold"
+                    android:letterSpacing="0.01"
                     app:backgroundTint="@color/accentGold"
-                    app:cornerRadius="12dp" />
+                    app:cornerRadius="14dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Section label -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="Quick Links"
-            android:textColor="@color/textPrimary"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:layout_marginBottom="12dp"
+            android:text="QUICK LINKS"
+            android:textColor="@color/textSecondary"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.10"
+            android:fontFamily="sans-serif-medium" />
 
-        <!-- Quick Link 1: Last Result -->
+        <!-- Quick Link: Last Result -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_last_result"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/bgCard"
-            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="#121212"
+            app:cardCornerRadius="16dp"
             app:strokeColor="@color/borderCard"
-            app:strokeWidth="1dp">
+            app:strokeWidth="1dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="16dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="14dp"
                 android:gravity="center_vertical">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_avatar_circle">
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_history"
+                        app:tint="@color/accentGold" />
+                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:layout_marginStart="14dp"
                     android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Last result"
+                        android:text="Last Result"
                         android:textColor="@color/textPrimary"
-                        android:textSize="16sp" />
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tv_last_result_subtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Oval shape - 3 recommendations"
+                        android:layout_marginTop="2dp"
+                        android:text="Oval shape · 3 recommendations"
                         android:textColor="@color/textSecondary"
-                        android:textSize="13sp" />
+                        android:textSize="12sp" />
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_scan"
-                    app:tint="@color/textSecondary" />
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="#44FFFFFF" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Quick Link 2: My Reservations -->
+        <!-- Quick Link: Reservations -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_my_reservations"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardBackgroundColor="@color/bgCard"
-            app:cardCornerRadius="12dp"
+            android:layout_marginTop="10dp"
+            app:cardBackgroundColor="#121212"
+            app:cardCornerRadius="16dp"
             app:strokeColor="@color/borderCard"
-            app:strokeWidth="1dp">
+            app:strokeWidth="1dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="16dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="14dp"
                 android:gravity="center_vertical">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_avatar_circle">
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_calendar"
+                        app:tint="@color/accentGold" />
+                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:layout_marginStart="14dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -163,23 +215,24 @@
                         android:layout_height="wrap_content"
                         android:text="My Reservations"
                         android:textColor="@color/textPrimary"
-                        android:textSize="16sp" />
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tv_reservations_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="2dp"
                         android:text="0 items reserved"
                         android:textColor="@color/textSecondary"
-                        android:textSize="13sp" />
+                        android:textSize="12sp" />
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_eyeglasses"
-                    app:tint="@color/textSecondary" />
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="#44FFFFFF" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/bgPrimary"
-        app:navigationIcon="@drawable/ic_scan"
+        app:navigationIcon="@drawable/ic_chevron_left"
         app:navigationIconTint="@color/white"
         app:title="My Reservations"
         app:titleTextColor="@color/textPrimary" />

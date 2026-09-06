@@ -25,6 +25,11 @@ public class ARFrameOverlayView extends View {
     private String selectedFrame = "Wayfarer";
     private int frameColor = Color.parseColor("#141414");
 
+    // Cached face position for invalidate throttling (avoids redraw when face is still)
+    private float mLastFaceCenterX = -1f;
+    private float mLastFaceCenterY = -1f;
+    private static final float REDRAW_THRESHOLD_PX = 4f;
+
     // Rim – thick stroke for the frame border
     private final Paint rimPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     // Rim highlight for 3-D effect
@@ -37,12 +42,13 @@ public class ARFrameOverlayView extends View {
     private final Paint templePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     // Nose bridge
     private final Paint bridgePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    // Shadow under frame
+    // GPU-compatible drop shadow (semi-transparent offset copy, no BlurMaskFilter)
     private final Paint shadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     public ARFrameOverlayView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setLayerType(LAYER_TYPE_SOFTWARE, null); // needed for BlurMaskFilter
+        // Hardware layer: renders on GPU for smooth 30fps+ overlay
+        setLayerType(LAYER_TYPE_HARDWARE, null);
         initPaints();
     }
 
@@ -72,10 +78,11 @@ public class ARFrameOverlayView extends View {
         bridgePaint.setStrokeWidth(10f);
         bridgePaint.setStrokeCap(Paint.Cap.ROUND);
 
+        // Offset drop-shadow: semi-transparent, slightly thicker than the rim — no blur needed.
+        // Drawn shifted (+5px, +6px) before the rim to simulate depth without BlurMaskFilter.
         shadowPaint.setStyle(Paint.Style.STROKE);
-        shadowPaint.setMaskFilter(new BlurMaskFilter(18f, BlurMaskFilter.Blur.NORMAL));
-        shadowPaint.setColor(Color.argb(80, 0, 0, 0));
-        shadowPaint.setStrokeWidth(18f);
+        shadowPaint.setColor(Color.argb(60, 0, 0, 0));
+        shadowPaint.setStrokeWidth(20f);
         shadowPaint.setStrokeCap(Paint.Cap.ROUND);
         shadowPaint.setStrokeJoin(Paint.Join.ROUND);
     }
@@ -84,6 +91,24 @@ public class ARFrameOverlayView extends View {
         this.faces = faces;
         this.imageWidth = imageWidth;
         this.imageHeight = imageHeight;
+
+        // Throttle: only redraw if the primary face has moved more than REDRAW_THRESHOLD_PX.
+        // This prevents unnecessary GPU layer re-compositing when the user's head is still.
+        if (faces != null && !faces.isEmpty()) {
+            android.graphics.RectF box = faces.get(0).getBoundingBox() != null
+                    ? new android.graphics.RectF(faces.get(0).getBoundingBox())
+                    : null;
+            if (box != null) {
+                float cx = box.centerX();
+                float cy = box.centerY();
+                if (Math.abs(cx - mLastFaceCenterX) < REDRAW_THRESHOLD_PX
+                        && Math.abs(cy - mLastFaceCenterY) < REDRAW_THRESHOLD_PX) {
+                    return; // face hasn't moved enough — skip redraw
+                }
+                mLastFaceCenterX = cx;
+                mLastFaceCenterY = cy;
+            }
+        }
         invalidate();
     }
 

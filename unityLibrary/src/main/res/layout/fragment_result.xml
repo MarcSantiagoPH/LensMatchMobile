@@ -4,31 +4,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bgPrimary"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:scrollbars="none">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="40dp"
         android:gravity="center_horizontal">
 
+        <!-- Page title -->
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Analysis Result"
             android:textColor="@color/textPrimary"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginBottom="24dp" />
 
+        <!-- Face Photo Card -->
         <com.google.android.material.card.MaterialCardView
-            android:layout_width="140dp"
-            android:layout_height="180dp"
-            android:layout_marginTop="24dp"
-            app:cardBackgroundColor="@color/bgPrimary"
-            app:cardCornerRadius="12dp"
+            android:layout_width="130dp"
+            android:layout_height="160dp"
+            app:cardBackgroundColor="@color/bgCard"
+            app:cardCornerRadius="16dp"
             app:strokeColor="@color/borderCard"
-            app:strokeWidth="1dp">
+            app:strokeWidth="1dp"
+            app:cardElevation="0dp">
 
             <ImageView
                 android:id="@+id/iv_face_crop"
@@ -38,7 +45,7 @@
                 android:src="@drawable/ic_user" />
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Shape & Confidence Row -->
+        <!-- Shape + Confidence -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -52,8 +59,9 @@
                 android:layout_height="wrap_content"
                 android:text="Oval"
                 android:textColor="@color/accentGold"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" />
 
             <TextView
                 android:id="@+id/tv_confidence_match"
@@ -65,20 +73,60 @@
                 android:paddingVertical="6dp"
                 android:text="94% Match"
                 android:textColor="@color/accentGold"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- AI Description Card -->
+        <!-- Borderline / Calibration Notice Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_borderline_notice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="#1AFFB300"
+            app:cardCornerRadius="14dp"
+            app:strokeColor="#66FFB300"
+            app:strokeWidth="1dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="14dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_help"
+                    app:tint="#FFB300"
+                    android:layout_marginEnd="12dp" />
+
+                <TextView
+                    android:id="@+id/tv_borderline_notes"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Borderline Result: Your facial features sit between Oval and Round."
+                    android:textColor="@color/textPrimary"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="3dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- AI Stylist Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_ai_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            app:cardBackgroundColor="#1AD4AF37"
-            app:cardCornerRadius="12dp"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="#0FD4AF37"
+            app:cardCornerRadius="16dp"
             app:strokeColor="#33D4AF37"
-            app:strokeWidth="1dp">
+            app:strokeWidth="1dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -86,22 +134,37 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="AI Eyewear Stylist"
-                    android:textColor="@color/accentGold"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_eyeglasses"
+                        app:tint="@color/accentGold"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="AI Eyewear Stylist"
+                        android:textColor="@color/accentGold"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.04" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_ai_description"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
                     android:text="Based on your face shape, these frames will complement your features perfectly."
                     android:textColor="@color/textPrimary"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     android:lineSpacingExtra="4dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -111,46 +174,56 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="AI Recommended Frames"
-            android:textColor="@color/textPrimary"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:layout_marginBottom="10dp"
+            android:text="RECOMMENDED"
+            android:textColor="@color/textSecondary"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.10"
+            android:fontFamily="sans-serif-medium" />
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chip_group_recommended"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:chipSpacing="8dp" />
+            app:chipSpacing="6dp" />
 
-        <!-- Avoided Frames -->
+        <!-- Frames to avoid -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="Frames to avoid"
+            android:layout_marginBottom="10dp"
+            android:text="AVOID"
             android:textColor="@color/textSecondary"
-            android:textSize="16sp" />
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.10"
+            android:fontFamily="sans-serif-medium" />
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chip_group_avoided"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:chipSpacing="8dp" />
+            app:chipSpacing="6dp" />
 
-        <!-- Try Frames On Button -->
+        <!-- CTA Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_try_frames_on"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="32dp"
+            android:layout_height="54dp"
+            android:layout_marginTop="28dp"
             android:text="Try Frames On"
             android:textColor="@color/bgCard"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textStyle="bold"
+            android:letterSpacing="0.01"
             app:backgroundTint="@color/accentGold"
-            app:cornerRadius="12dp" />
+            app:cornerRadius="14dp"
+            app:icon="@drawable/ic_eyeglasses"
+            app:iconTint="@color/bgCard"
+            app:iconGravity="textStart"
+            app:iconPadding="10dp" />
 
     </LinearLayout>
 </ScrollView>

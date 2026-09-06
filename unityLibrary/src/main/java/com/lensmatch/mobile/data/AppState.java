@@ -13,6 +13,14 @@ public class AppState {
     private String lastImagePath;
     private String lastDetectedShape = "Oval";
     private float lastConfidence = 0.94f;
+    private boolean lastIsBorderline = false;
+    private String lastRunnerUpShape = "Round";
+    private String lastNotes = null;
+
+    private String userName = "John Doe";
+    private String userEmail = "johndoe@example.com";
+    private String userPhotoUrl = null;
+    private boolean isLoggedIn = false;
 
     private AppState() {}
 
@@ -29,6 +37,13 @@ public class AppState {
         state.lastImagePath = prefs.getString("lastImagePath", null);
         state.lastDetectedShape = prefs.getString("lastDetectedShape", "Oval");
         state.lastConfidence = prefs.getFloat("lastConfidence", 0.94f);
+        state.lastIsBorderline = prefs.getBoolean("lastIsBorderline", false);
+        state.lastRunnerUpShape = prefs.getString("lastRunnerUpShape", "Round");
+        state.lastNotes = prefs.getString("lastNotes", null);
+        state.userName = prefs.getString("userName", "John Doe");
+        state.userEmail = prefs.getString("userEmail", "johndoe@example.com");
+        state.userPhotoUrl = prefs.getString("userPhotoUrl", null);
+        state.isLoggedIn = prefs.getBoolean("isLoggedIn", false);
     }
 
     public List<FrameModel> getReservedFrames() {
@@ -78,6 +93,66 @@ public class AppState {
         this.lastConfidence = confidence;
         if (prefs != null) {
             prefs.edit().putFloat("lastConfidence", confidence).apply();
+        }
+    }
+
+    public boolean getLastIsBorderline() { return lastIsBorderline; }
+    public void setLastIsBorderline(boolean borderline) {
+        this.lastIsBorderline = borderline;
+        if (prefs != null) {
+            prefs.edit().putBoolean("lastIsBorderline", borderline).apply();
+        }
+    }
+
+    public String getLastRunnerUpShape() { return lastRunnerUpShape; }
+    public void setLastRunnerUpShape(String runnerUp) {
+        this.lastRunnerUpShape = runnerUp;
+        if (prefs != null) {
+            prefs.edit().putString("lastRunnerUpShape", runnerUp).apply();
+        }
+    }
+
+    public String getLastNotes() { return lastNotes; }
+    public void setLastNotes(String notes) {
+        this.lastNotes = notes;
+        if (prefs != null) {
+            prefs.edit().putString("lastNotes", notes).apply();
+        }
+    }
+
+    public String getUserName() { return userName; }
+    public String getUserEmail() { return userEmail; }
+    public String getUserPhotoUrl() { return userPhotoUrl; }
+    public boolean isLoggedIn() { return isLoggedIn; }
+
+    public void setUserProfile(String name, String email, String photoUrl) {
+        this.userName = (name != null && !name.trim().isEmpty()) ? name : "User";
+        this.userEmail = (email != null && !email.trim().isEmpty()) ? email : "user@lensmatch.com";
+        this.userPhotoUrl = photoUrl;
+        this.isLoggedIn = true;
+
+        if (prefs != null) {
+            prefs.edit()
+                    .putString("userName", this.userName)
+                    .putString("userEmail", this.userEmail)
+                    .putString("userPhotoUrl", this.userPhotoUrl)
+                    .putBoolean("isLoggedIn", true)
+                    .apply();
+        }
+    }
+
+    public void logout() {
+        this.isLoggedIn = false;
+        this.userName = "John Doe";
+        this.userEmail = "johndoe@example.com";
+        this.userPhotoUrl = null;
+        if (prefs != null) {
+            prefs.edit()
+                    .putBoolean("isLoggedIn", false)
+                    .remove("userName")
+                    .remove("userEmail")
+                    .remove("userPhotoUrl")
+                    .apply();
         }
     }
 }
