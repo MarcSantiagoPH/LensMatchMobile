@@ -1,20 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bgPrimary">#0A0A0A</color>
-    <color name="bgCard">#141414</color>
-    <color name="bgCardSelected">#1A1A24</color>
-    <color name="textPrimary">#F9F6EE</color>
-    <color name="textSecondary">#AFAFAF</color>
-    <color name="accentGold">#D4AF37</color>
-    <color name="borderCard">#2A2A35</color>
-    <color name="black">#000000</color>
-    <color name="white">#FFFFFF</color>
-    <color name="greenSuccess">#4CAF50</color>
-    <color name="redError">#F44336</color>
-    <color name="transparent">#00000000</color>
-
-    <!-- Splash Screen Colors -->
-    <color name="windowSplashScreenAnimatedIconColor">#00000000</color>
-    <color name="staticSplashScreenBackgroundColor">#0A0A0A</color>
-    <color name="windowSplashScreenIconBackgroundColor">#00000000</color>
+  <color name="staticSplashScreenBackgroundColor">#FF231F20</color>
+  <color name="windowSplashScreenIconBackgroundColor">@android:color/transparent</color>
+  <color name="windowSplashScreenAnimatedIconColor">@android:color/transparent</color>
 </resources>

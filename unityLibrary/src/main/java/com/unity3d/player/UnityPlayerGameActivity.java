@@ -4,305 +4,56 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.view.Window;
 
 import androidx.core.view.ViewCompat;
 
 import com.google.androidgamesdk.GameActivity;
-import com.lensmatch.bridge.UnityBridge;
-import com.lensmatch.mobile.R;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-public class UnityPlayerGameActivity extends GameActivity
-        implements IUnityPlayerLifecycleEvents, IUnityPermissionRequestSupport, IUnityPlayerSupport {
-
-    class GameActivitySurfaceView extends InputEnabledSurfaceView {
+public class UnityPlayerGameActivity extends GameActivity implements IUnityPlayerLifecycleEvents, IUnityPermissionRequestSupport, IUnityPlayerSupport
+{
+    class GameActivitySurfaceView extends InputEnabledSurfaceView
+    {
         GameActivity mGameActivity;
         public GameActivitySurfaceView(GameActivity activity) {
             super(activity);
             mGameActivity = activity;
         }
 
-        @Override
-        public boolean onCapturedPointerEvent(MotionEvent event) {
+        // Reroute motion events from captured pointer to normal events
+        // Otherwise when doing Cursor.lockState = CursorLockMode.Locked from C# the touch and mouse events will stop working
+        @Override public boolean onCapturedPointerEvent(MotionEvent event) {
             return mGameActivity.onTouchEvent(event);
         }
     }
 
     protected UnityPlayerForGameActivity mUnityPlayer;
-
-    private String mCurrentShape = "wayfarer";
-    private String mCurrentColor = "black";
-    private ArrayList<String> recommendedFrames = new ArrayList<>();
-    private int selectedTabIndex = 0;
-
-    private LinearLayout layoutFramesUnity;
-    private LinearLayout layoutColorsUnity;
-    private TextView tvTabRecommended;
-    private TextView tvTabAllFrames;
-    private View indicatorRecommended;
-    private View indicatorAllFrames;
-
-    // One-shot handler: sends the first frame command 800ms after resume.
-    // Unity C# can call onUnityReady() early to cancel this and fire immediately.
-    private final Handler mFrameSyncHandler = new Handler(Looper.getMainLooper());
-    private View mLoadingOverlay;
-
-    private final List<String> allFrames = Arrays.asList(
-            "None", "Wayfarer", "Rectangle", "Square", "Cat Eye",
-            "Round", "Aviator", "Geometric", "Browline", "Oval"
-    );
-
-    private static class ColorOption {
-        final String label;
-        final String code; // "black", "gold", "silver"
-        ColorOption(String label, String code) {
-            this.label = label;
-            this.code = code;
-        }
-    }
-
-    private final List<ColorOption> colorOptions = Arrays.asList(
-            new ColorOption("Original", "black"),
-            new ColorOption("Gold",     "gold"),
-            new ColorOption("Silver",   "silver")
-    );
-
-    protected String updateUnityCommandLineArguments(String cmdLine) {
+    protected String updateUnityCommandLineArguments(String cmdLine)
+    {
         return cmdLine;
     }
 
-    static {
+    static
+    {
         System.loadLibrary("game");
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-
+        // On devices with API Level >= 30 system bars are no longer accounted for and because of that window/views don't resize (see https://jira.unity3d.com/browse/UUM-18618)
+        // This is most likely due to deprecation of setSystemUiVisibility and changes to insets used in SystemUI.cpp
+        // This fix forces views to shrink to account for system bars
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             getWindow().setDecorFitsSystemWindows(true);
-        }
-
-        if (getIntent().hasExtra("recommendedFrames")) {
-            recommendedFrames = getIntent().getStringArrayListExtra("recommendedFrames");
-        }
-        if (getIntent().hasExtra("frameStyle")) {
-            mCurrentShape = normalizeShapeName(getIntent().getStringExtra("frameStyle"));
-        } else if (recommendedFrames != null && !recommendedFrames.isEmpty()) {
-            mCurrentShape = normalizeShapeName(recommendedFrames.get(0));
-        }
-
-        // Inflate and overlay custom UI layout matching LensMatch Try 6 reference
-        LayoutInflater inflater = getLayoutInflater();
-        View overlayView = inflater.inflate(R.layout.activity_ar_overlay, null);
-        addContentView(overlayView, new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        overlayView.bringToFront();
-
-        mLoadingOverlay = overlayView.findViewById(R.id.unity_loading_overlay);
-        if (mLoadingOverlay != null) mLoadingOverlay.setVisibility(View.VISIBLE);
-
-        setupNativeControls(overlayView);
-
-        // Request camera permission AFTER the Unity surface is created.
-        // If we request it before, the system pauses this activity mid-initialization
-        // which breaks ARCore's camera session and causes a black screen.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(android.Manifest.permission.CAMERA)
-                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                // Permission not yet granted — request it now. The frame timer will
-                // be started from onRequestPermissionsResult once the user grants.
-                requestPermissions(new String[]{android.Manifest.permission.CAMERA}, 101);
-            }
-            // If already granted, onResume's 800ms timer will handle the first frame.
-        }
-    }
-
-    private String normalizeShapeName(String raw) {
-        if (raw == null) return "wayfarer";
-        String lower = raw.trim().toLowerCase();
-        if (lower.contains("none")) return "none";
-        if (lower.contains("aviator")) return "aviator";
-        if (lower.contains("bowline") || lower.contains("browline")) return "bowline";
-        if (lower.contains("cat")) return "cateye";
-        if (lower.contains("geometric")) return "geometric";
-        if (lower.contains("oval")) return "oval";
-        if (lower.contains("rect")) return "rectangle";
-        if (lower.contains("round")) return "round";
-        if (lower.contains("square")) return "square";
-        return "wayfarer";
-    }
-
-    private void setupNativeControls(View overlay) {
-        ImageView btnBack = overlay.findViewById(R.id.btn_back_unity_ar);
-        if (btnBack != null) {
-            btnBack.setOnClickListener(v -> finish());
-        }
-
-        LinearLayout tabRec = overlay.findViewById(R.id.tab_recommended_unity);
-        LinearLayout tabAll = overlay.findViewById(R.id.tab_all_frames_unity);
-        tvTabRecommended    = overlay.findViewById(R.id.tv_tab_recommended_unity);
-        tvTabAllFrames      = overlay.findViewById(R.id.tv_tab_all_frames_unity);
-        indicatorRecommended = overlay.findViewById(R.id.indicator_recommended_unity);
-        indicatorAllFrames  = overlay.findViewById(R.id.indicator_all_frames_unity);
-        layoutFramesUnity   = overlay.findViewById(R.id.layout_frames_unity);
-        layoutColorsUnity   = overlay.findViewById(R.id.layout_colors_unity);
-
-        if (tabRec != null) {
-            tabRec.setOnClickListener(v -> {
-                selectedTabIndex = 0;
-                updateTabs();
-                setupFrameCircles();
-            });
-        }
-
-        if (tabAll != null) {
-            tabAll.setOnClickListener(v -> {
-                selectedTabIndex = 1;
-                updateTabs();
-                setupFrameCircles();
-            });
-        }
-
-        updateTabs();
-        setupFrameCircles();
-        setupColorChips();
-    }
-
-    private void updateTabs() {
-        int gold = Color.parseColor("#D4AF37");
-        int grey = Color.parseColor("#AFAFAF");
-        if (tvTabRecommended == null || tvTabAllFrames == null) return;
-        if (selectedTabIndex == 0) {
-            tvTabRecommended.setTextColor(gold);
-            tvTabAllFrames.setTextColor(grey);
-            if (indicatorRecommended != null) indicatorRecommended.setBackgroundColor(gold);
-            if (indicatorAllFrames   != null) indicatorAllFrames.setBackgroundColor(Color.TRANSPARENT);
-        } else {
-            tvTabRecommended.setTextColor(grey);
-            tvTabAllFrames.setTextColor(gold);
-            if (indicatorRecommended != null) indicatorRecommended.setBackgroundColor(Color.TRANSPARENT);
-            if (indicatorAllFrames   != null) indicatorAllFrames.setBackgroundColor(gold);
-        }
-    }
-
-    private void setupFrameCircles() {
-        if (layoutFramesUnity == null) return;
-        layoutFramesUnity.removeAllViews();
-
-        List<String> display;
-        if (selectedTabIndex == 0 && recommendedFrames != null && !recommendedFrames.isEmpty()) {
-            display = new ArrayList<>();
-            display.add("None");
-            display.addAll(recommendedFrames);
-        } else {
-            display = allFrames;
-        }
-
-        LayoutInflater inf = LayoutInflater.from(this);
-        for (String frame : display) {
-            View item = inf.inflate(R.layout.item_ar_frame_circle, layoutFramesUnity, false);
-            FrameLayout circleBg = item.findViewById(R.id.frame_circle_bg);
-            ImageView icon       = item.findViewById(R.id.iv_frame_icon);
-            TextView label       = item.findViewById(R.id.tv_frame_label);
-
-            label.setText(frame);
-            icon.setImageResource("None".equalsIgnoreCase(frame) ? R.drawable.ic_none : R.drawable.ic_eyeglasses);
-
-            boolean sel = normalizeShapeName(frame).equalsIgnoreCase(mCurrentShape);
-            circleBg.setBackgroundResource(sel ? R.drawable.bg_ar_circle_selected : R.drawable.bg_ar_circle_unselected);
-            label.setTextColor(sel ? Color.parseColor("#D4AF37") : Color.WHITE);
-
-            item.setOnClickListener(v -> {
-                mCurrentShape = normalizeShapeName(frame);
-                setupFrameCircles();
-                updateFrame();
-            });
-            layoutFramesUnity.addView(item);
-        }
-    }
-
-    private void setupColorChips() {
-        if (layoutColorsUnity == null) return;
-        layoutColorsUnity.removeAllViews();
-
-        for (ColorOption opt : colorOptions) {
-            TextView chip = new TextView(this);
-            chip.setText(opt.label);
-            chip.setPadding(36, 14, 36, 14);
-            chip.setTextSize(12);
-            chip.setLetterSpacing(0.02f);
-
-            boolean sel = opt.code.equalsIgnoreCase(mCurrentColor);
-            if (sel) {
-                // Selected: gold border + subtle gold-tinted fill
-                android.graphics.drawable.GradientDrawable selBg = new android.graphics.drawable.GradientDrawable();
-                selBg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
-                selBg.setCornerRadius(100f);
-                selBg.setColor(Color.parseColor("#1AD4AF37"));
-                selBg.setStroke(2, Color.parseColor("#D4AF37"));
-                chip.setBackground(selBg);
-                chip.setTextColor(Color.parseColor("#D4AF37"));
-            } else {
-                // Unselected: dark pill with subtle white border
-                android.graphics.drawable.GradientDrawable unselBg = new android.graphics.drawable.GradientDrawable();
-                unselBg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
-                unselBg.setCornerRadius(100f);
-                unselBg.setColor(Color.parseColor("#1AFFFFFF"));
-                unselBg.setStroke(1, Color.parseColor("#33FFFFFF"));
-                chip.setBackground(unselBg);
-                chip.setTextColor(Color.parseColor("#AFAFAF"));
-            }
-
-            chip.setOnClickListener(v -> {
-                mCurrentColor = opt.code;
-                setupColorChips();
-                updateFrame();
-            });
-
-            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            p.setMargins(0, 0, 10, 0);
-            layoutColorsUnity.addView(chip, p);
-        }
-    }
-
-
-    private void updateFrame() {
-        try {
-            if ("none".equals(mCurrentShape)) {
-                UnityBridge.clearFrame();
-            } else {
-                String message;
-                if ("black".equals(mCurrentColor)) {
-                    message = mCurrentShape;
-                } else {
-                    message = mCurrentColor + "_" + mCurrentShape;
-                }
-                android.util.Log.d("LensMatchDebug", "Sending showFrame: " + message);
-                UnityBridge.showFrame(message);
-            }
-        } catch (Throwable t) {
-            android.util.Log.w("UnityActivity", "Error in updateFrame: " + t.getMessage());
         }
     }
 
@@ -311,21 +62,22 @@ public class UnityPlayerGameActivity extends GameActivity
         return mUnityPlayer;
     }
 
-    private void applyInsetListener(SurfaceView surfaceView) {
+    // Soft keyboard relies on inset listener for listening to various events - keyboard opened/closed/text entered.
+    private void applyInsetListener(SurfaceView surfaceView)
+    {
         surfaceView.getViewTreeObserver().addOnGlobalLayoutListener(
                 () -> onApplyWindowInsets(surfaceView, ViewCompat.getRootWindowInsets(getWindow().getDecorView())));
     }
 
-    @Override
-    protected InputEnabledSurfaceView createSurfaceView() {
+    @Override protected InputEnabledSurfaceView createSurfaceView() {
         return new GameActivitySurfaceView(this);
     }
 
-    @Override
-    protected void onCreateSurfaceView() {
+    @Override protected void onCreateSurfaceView() {
         super.onCreateSurfaceView();
         FrameLayout frameLayout = findViewById(contentViewId);
 
+        // The workaround is not needed for Android 11 or above starting with GameActivity 4.3.0-alpha01
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q)
             applyInsetListener(mSurfaceView);
 
@@ -333,6 +85,9 @@ public class UnityPlayerGameActivity extends GameActivity
 
         String cmdLine = updateUnityCommandLineArguments(getIntent().getStringExtra("unity"));
         getIntent().putExtra("unity", cmdLine);
+        // Unity requires access to frame layout for setting the static splash screen.
+        // Note: we cannot initialize in onCreate (after super.onCreate), because game activity native thread would be already started and unity runtime initialized
+        //       we also cannot initialize before super.onCreate since frameLayout is not yet available.
         mUnityPlayer = new UnityPlayerForGameActivity(this, frameLayout, mSurfaceView, this);
     }
 
@@ -345,138 +100,78 @@ public class UnityPlayerGameActivity extends GameActivity
     public void onUnityPlayerQuitted() {
     }
 
-    /**
-     * Called by Unity C# (via AndroidJavaObject.Call("onUnityReady")) when the
-     * FrameManager scene object is fully initialized and ready to accept messages.
-     * This cancels the fallback timer and fires the first frame command immediately.
-     *
-     * Unity C# usage:
-     *   AndroidJavaClass up = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-     *   AndroidJavaObject activity = up.GetStatic<AndroidJavaObject>("currentActivity");
-     *   activity.Call("onUnityReady");
-     */
-    public void onUnityReady() {
-        mFrameSyncHandler.removeCallbacksAndMessages(null);
-        runOnUiThread(() -> {
-            if (mLoadingOverlay != null) mLoadingOverlay.setVisibility(View.GONE);
-            updateFrame();
-        });
-    }
-
-    // Quit Unity - process Java callback before native
-    @Override
-    protected void onDestroy() {
-        mFrameSyncHandler.removeCallbacksAndMessages(null);
-        if (mUnityPlayer != null) {
-            mUnityPlayer.destroy();
-        }
+    // Quit Unity
+    @Override protected void onDestroy ()
+    {
+        mUnityPlayer.destroy();
         super.onDestroy();
     }
 
-    // Stop Unity - process Java callback before native
-    @Override
-    protected void onStop() {
-        mFrameSyncHandler.removeCallbacksAndMessages(null);
-        if (mUnityPlayer != null) {
-            mUnityPlayer.onStop();
-        }
+    @Override protected void onStop()
+    {
+        // Note: we want Java onStop callbacks to be processed before the native part processes the onStop callback
+        mUnityPlayer.onStop();
         super.onStop();
     }
 
-    // Start Unity - process Java callback before native
-    @Override
-    protected void onStart() {
-        if (mUnityPlayer != null) {
-            mUnityPlayer.onStart();
-        }
+    @Override protected void onStart()
+    {
+        // Note: we want Java onStart callbacks to be processed before the native part processes the onStart callback
+        mUnityPlayer.onStart();
         super.onStart();
     }
 
-    // Pause Unity - process Java callback before native to immediately release camera and GPU resources
-    @Override
-    protected void onPause() {
-        mFrameSyncHandler.removeCallbacksAndMessages(null);
-        if (mUnityPlayer != null) {
-            mUnityPlayer.onPause();
-        }
+    // Pause Unity
+    @Override protected void onPause()
+    {
+        // Note: we want Java onPause callbacks to be processed before the native part processes the onPause callback
+        mUnityPlayer.onPause();
         super.onPause();
     }
 
-    // Resume Unity - process Java callback before native
-    @Override
-    protected void onResume() {
-        if (mUnityPlayer != null) {
-            mUnityPlayer.onResume();
-        }
+    // Resume Unity
+    @Override protected void onResume()
+    {
+        // Note: we want Java onResume callbacks to be processed before the native part processes the onResume callback
+        mUnityPlayer.onResume();
         super.onResume();
-
-        // Single fallback: if Unity C# hasn't called onUnityReady() within 800ms,
-        // send the frame command anyway. onUnityReady() will cancel this if it fires first.
-        mFrameSyncHandler.removeCallbacksAndMessages(null);
-        mFrameSyncHandler.postDelayed(() -> {
-            if (mLoadingOverlay != null) mLoadingOverlay.setVisibility(View.GONE);
-            updateFrame();
-        }, 800);
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        if (mUnityPlayer != null) {
-            mUnityPlayer.configurationChanged(newConfig);
-        }
+    // Configuration changes are used by Video playback logic in Unity
+    @Override public void onConfigurationChanged(Configuration newConfig)
+    {
+        mUnityPlayer.configurationChanged(newConfig);
         super.onConfigurationChanged(newConfig);
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        if (mUnityPlayer != null) {
-            mUnityPlayer.windowFocusChanged(hasFocus);
-        }
+    // Notify Unity of the focus change.
+    @Override public void onWindowFocusChanged(boolean hasFocus)
+    {
+        mUnityPlayer.windowFocusChanged(hasFocus);
         super.onWindowFocusChanged(hasFocus);
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
+    @Override protected void onNewIntent(Intent intent)
+    {
         super.onNewIntent(intent);
+        // To support deep linking, we need to make sure that the client can get access to
+        // the last sent intent. The clients access this through a JNI api that allows them
+        // to get the intent set on launch. To update that after launch we have to manually
+        // replace the intent with the one caught here.
         setIntent(intent);
-        if (mUnityPlayer != null) {
-            mUnityPlayer.newIntent(intent);
-        }
-
-        if (intent.hasExtra("frameStyle")) {
-            mCurrentShape = normalizeShapeName(intent.getStringExtra("frameStyle"));
-        }
-        if (intent.hasExtra("recommendedFrames")) {
-            recommendedFrames = intent.getStringArrayListExtra("recommendedFrames");
-        }
-        setupFrameCircles();
-        updateFrame();
+        mUnityPlayer.newIntent(intent);
     }
 
     @Override
     @TargetApi(Build.VERSION_CODES.M)
-    public void requestPermissions(PermissionRequest request) {
-        if (mUnityPlayer != null) {
-            mUnityPlayer.addPermissionRequest(request);
-        }
+    public void requestPermissions(PermissionRequest request)
+    {
+        mUnityPlayer.addPermissionRequest(request);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
+    {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (mUnityPlayer != null) {
-            mUnityPlayer.permissionResponse(this, requestCode, permissions, grantResults);
-        }
-        // If camera was just granted, kick off the first frame update now.
-        // ARCore needs the permission to be in effect before its session can use the camera.
-        if (requestCode == 101
-                && grantResults.length > 0
-                && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            mFrameSyncHandler.removeCallbacksAndMessages(null);
-            mFrameSyncHandler.postDelayed(() -> {
-                if (mLoadingOverlay != null) mLoadingOverlay.setVisibility(View.GONE);
-                updateFrame();
-            }, 600);
-        }
+        mUnityPlayer.permissionResponse(this, requestCode, permissions, grantResults);
     }
 }

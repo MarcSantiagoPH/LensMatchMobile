@@ -1,28 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.LensMatch" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/accentGold</item>
-        <item name="colorPrimaryVariant">@color/accentGold</item>
-        <item name="colorOnPrimary">@color/bgCard</item>
-        <item name="colorSecondary">@color/accentGold</item>
-        <item name="colorSecondaryVariant">@color/accentGold</item>
-        <item name="colorOnSecondary">@color/bgCard</item>
-        <item name="android:statusBarColor">@color/bgPrimary</item>
-        <item name="android:windowBackground">@color/bgPrimary</item>
-        <item name="android:textColorPrimary">@color/textPrimary</item>
-        <item name="android:textColorSecondary">@color/textSecondary</item>
-        <item name="bottomNavigationStyle">@style/Widget.LensMatch.BottomNavigationView</item>
-    </style>
-
-    <style name="Widget.LensMatch.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
-        <item name="backgroundTint">@color/bgCard</item>
-        <item name="itemIconTint">@color/bottom_nav_color</item>
-        <item name="itemTextColor">@color/bottom_nav_color</item>
-        <item name="elevation">8dp</item>
-    </style>
-
-    <style name="BaseUnityGameActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">@android:color/black</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-    </style>
+  <style name="UnityThemeSelector" parent="BaseUnityTheme">
+    <item name="android:windowBackground">@android:color/black</item>
+  </style>
+  <style name="BaseUnityTheme" parent="android:Theme.Holo.Light.NoActionBar.Fullscreen" />
+  <style name="UnityThemeSelector.Translucent" parent="@style/UnityThemeSelector">
+    <item name="android:windowIsTranslucent">true</item>
+    <item name="android:windowBackground">@android:color/transparent</item>
+  </style>
+  <style name="BaseUnityGameActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <item name="android:windowBackground">@android:color/black</item>
+  </style>
+  <style name="BaseUnityGameActivityTheme.Translucent" parent="@style/BaseUnityGameActivityTheme">
+    <item name="android:windowIsTranslucent">true</item>
+    <item name="android:windowBackground">@android:color/transparent</item>
+  </style>
 </resources>
