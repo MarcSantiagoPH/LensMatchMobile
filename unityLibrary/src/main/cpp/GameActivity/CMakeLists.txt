@@ -3,7 +3,7 @@ project(game)
 
 find_package(game-activity REQUIRED CONFIG)
 
-file(GLOB_RECURSE UNITY_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.h *.c)
+file(GLOB_RECURSE UNITY_SOURCE_FILES CONFIGURE_DEPENDS "*.cpp" "*.h" "*.c")
 
 # Keep commented
 # Shows preprocessed files, helpful when you want to see what your macro is epxanded to

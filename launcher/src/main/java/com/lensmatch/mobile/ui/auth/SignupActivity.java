@@ -3,7 +3,6 @@ package com.lensmatch.mobile.ui.auth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
-
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -12,6 +11,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.ui.MainActivity;
@@ -28,6 +30,7 @@ public class SignupActivity extends AppCompatActivity {
 
         TextInputEditText etName = findViewById(R.id.et_signup_name);
         TextInputEditText etEmail = findViewById(R.id.et_signup_email);
+        TextInputEditText etPassword = findViewById(R.id.et_signup_password);
         MaterialButton btnSignup = findViewById(R.id.btn_signup);
         MaterialButton btnGoogleSignup = findViewById(R.id.btn_google_signup);
         TextView btnGotoLogin = findViewById(R.id.btn_goto_login);
@@ -62,12 +65,57 @@ public class SignupActivity extends AppCompatActivity {
         btnSignup.setOnClickListener(v -> {
             String name = etName.getText() != null ? etName.getText().toString().trim() : "";
             String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
-            if (name.isEmpty()) name = "User";
-            if (email.isEmpty()) email = "user@lensmatch.com";
+            String password = etPassword != null && etPassword.getText() != null ? etPassword.getText().toString().trim() : "";
 
-            AppState.getInstance().setUserProfile(name, email, null);
-            Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show();
-            proceedToMain();
+            if (name.isEmpty()) {
+                etName.setError("Full name is required");
+                etName.requestFocus();
+                return;
+            }
+
+            if (email.isEmpty()) {
+                etEmail.setError("Email address is required");
+                etEmail.requestFocus();
+                return;
+            }
+
+            if (password.length() < 6) {
+                if (etPassword != null) {
+                    etPassword.setError("Password must be at least 6 characters");
+                    etPassword.requestFocus();
+                } else {
+                    Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+
+            btnSignup.setEnabled(false);
+            btnSignup.setText("Creating account...");
+
+            final String finalName = name;
+            final String finalEmail = email;
+
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        btnSignup.setEnabled(true);
+                        btnSignup.setText("Sign Up");
+
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                            if (user != null) {
+                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                        .setDisplayName(finalName)
+                                        .build();
+                                user.updateProfile(profileUpdates);
+                            }
+                            AppState.getInstance().setUserProfile(finalName, finalEmail, null);
+                            Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show();
+                            proceedToMain();
+                        } else {
+                            String error = task.getException() != null ? task.getException().getMessage() : "Registration failed.";
+                            Toast.makeText(SignupActivity.this, error, Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
 
         btnGotoLogin.setOnClickListener(v -> finish());

@@ -1,13 +1,16 @@
 package com.lensmatch.mobile.ui.catalog;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.FrameModel;
 
@@ -36,24 +39,49 @@ public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         FrameModel frame = frames.get(position);
+        Context context = holder.itemView.getContext();
+
         holder.tvName.setText(frame.getName());
-        holder.tvShapeBadge.setText(frame.getShape());
-        holder.tvMaterial.setText(frame.getMaterial());
+        holder.tvShapeBadge.setText(frame.getDisplayFrameStyle());
+        holder.tvMaterial.setText(frame.getMaterial() != null ? frame.getMaterial() : "Acetate");
         holder.tvPrice.setText(frame.getPrice());
+
+        if (!frame.isAvailable()) {
+            holder.tvShapeBadge.setText("Unavailable");
+            holder.tvShapeBadge.setTextColor(context.getColor(R.color.textSecondary));
+            holder.itemView.setAlpha(0.6f);
+        } else {
+            holder.tvShapeBadge.setTextColor(context.getColor(R.color.accentGold));
+            holder.itemView.setAlpha(1.0f);
+        }
+
+        holder.ivFrame.setImageTintList(null);
+        String imageUrl = frame.getImageUrl();
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            Glide.with(context)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_eyeglasses)
+                    .error(R.drawable.ic_eyeglasses)
+                    .into(holder.ivFrame);
+        } else {
+            holder.ivFrame.setImageResource(R.drawable.ic_eyeglasses);
+        }
 
         holder.itemView.setOnClickListener(v -> listener.onItemClick(frame));
     }
 
     @Override
     public int getItemCount() {
-        return frames.size();
+        return frames != null ? frames.size() : 0;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView ivFrame;
         TextView tvName, tvShapeBadge, tvMaterial, tvPrice;
 
         ViewHolder(View itemView) {
             super(itemView);
+            ivFrame = itemView.findViewById(R.id.iv_frame);
             tvName = itemView.findViewById(R.id.tv_frame_name);
             tvShapeBadge = itemView.findViewById(R.id.tv_shape_badge);
             tvMaterial = itemView.findViewById(R.id.tv_frame_material);

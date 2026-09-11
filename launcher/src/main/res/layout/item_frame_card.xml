@@ -26,8 +26,7 @@
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_eyeglasses"
-                app:tint="@color/textSecondary" />
+                android:src="@drawable/ic_eyeglasses" />
         </FrameLayout>
 
         <TextView

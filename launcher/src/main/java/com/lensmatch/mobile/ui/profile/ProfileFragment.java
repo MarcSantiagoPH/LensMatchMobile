@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.ui.auth.LoginActivity;
@@ -48,6 +48,7 @@ public class ProfileFragment extends Fragment {
         itemHelpSupport.setOnClickListener(v -> startActivity(new Intent(requireContext(), HelpSupportActivity.class)));
 
         btnLogout.setOnClickListener(v -> {
+            FirebaseAuth.getInstance().signOut();
             AppState.getInstance().logout();
             Intent intent = new Intent(requireContext(), LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

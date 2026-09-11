@@ -48,10 +48,12 @@ dependencies {
 
 android {
     namespace "com.unity3d.player"
-    ndkPath "C:/Program Files/Unity/Hub/Editor/6000.0.76f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK"
+    // ndkPath "C:/Program Files/Unity/Hub/Editor/6000.0.76f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK"
     ndkVersion "27.2.12479018"
     compileSdk 36
     buildToolsVersion = "36.0.0"
+
+
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -75,6 +77,10 @@ android {
                 arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
             }
         }
+    }
+
+    buildFeatures {
+        prefab true
     }
 
     lint {
@@ -109,7 +115,7 @@ def GetIl2CppSymbolPath(String workingDir, String abi) {
     return "${workingDir}/symbols/${abi}/libil2cpp.so";
 }
 
-def BuildIl2CppImpl(String workingDir, String configuration, String architecture, String abi, String[] staticLibraries) {
+ext.BuildIl2CppImpl = { String workingDir, String configuration, String architecture, String abi, String[] staticLibraries ->
     def commandLineArgs = []
     commandLineArgs.add("--compile-cpp")
     commandLineArgs.add("--platform=Android")
@@ -138,7 +144,7 @@ def BuildIl2CppImpl(String workingDir, String configuration, String architecture
         executableExtension = ".exe"
         commandLineArgs = commandLineArgs*.replace('\"', '\\\"')
     }
-    exec {
+    project.exec {
         executable "${workingDir}/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp${executableExtension}"
         args commandLineArgs
         environment "ANDROID_SDK_ROOT", getSdkDir()
@@ -149,8 +155,8 @@ def BuildIl2CppImpl(String workingDir, String configuration, String architecture
     def extensionToRemove = usePublicSymbols ? ".dbg.so" : ".sym.so"
     def extensionToKeep = usePublicSymbols ? ".sym.so" : ".dbg.so"
 
-    delete "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToRemove}"
-    ant.move(file: "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToKeep}", tofile: "${workingDir}/symbols/${abi}/libil2cpp.so")
+    project.delete "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToRemove}"
+    project.ant.move(file: "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToKeep}", tofile: "${workingDir}/symbols/${abi}/libil2cpp.so")
 
 }
 
@@ -171,7 +177,10 @@ android {
         }
         doLast {
             archs.each { arch, abi ->
-                BuildIl2CppImpl(workingDir, 'Release', arch, abi, staticLibs[arch] as String[]);
+                def outSo = file("${workingDir}/src/main/jniLibs/${abi}/libil2cpp.so")
+                if (!outSo.exists()) {
+                    project.ext.BuildIl2CppImpl(workingDir, 'Release', arch, abi, staticLibs[arch] as String[]);
+                }
             }
         }
     }
@@ -198,6 +207,4 @@ android.externalNativeBuild {
         path "src/main/cpp/CMakeLists.txt"
     }
 }
-android.buildFeatures {
-    prefab true
-}
+

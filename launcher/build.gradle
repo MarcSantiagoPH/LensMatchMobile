@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 apply from: 'setupSymbols.gradle'
 apply from: '../shared/keepUnitySymbols.gradle'
 
@@ -35,8 +36,14 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.google.code.gson:gson:2.10.1'
 
-    // Google Sign-In
+    // Google Sign-In & Firebase
     implementation 'com.google.android.gms:play-services-auth:21.2.0'
+    implementation platform('com.google.firebase:firebase-bom:33.1.2')
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+
+    // Glide (Image Loading)
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
 
     // Guava ListenableFuture
     implementation 'com.google.guava:guava:33.2.1-android'
@@ -53,7 +60,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.lensmatch.mobile"
+        applicationId "com.franselle.lensmatch.lensmatch"
         versionName "1.0.0"
         minSdk 30
         targetSdk 36

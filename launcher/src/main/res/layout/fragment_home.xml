@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/bgPrimary"
     android:fillViewport="true"
+    android:clipToPadding="false"
     android:scrollbars="none">
 
     <LinearLayout
@@ -13,7 +14,7 @@
         android:orientation="vertical"
         android:paddingHorizontal="24dp"
         android:paddingTop="28dp"
-        android:paddingBottom="32dp">
+        android:paddingBottom="100dp">
 
         <!-- Header -->
         <TextView

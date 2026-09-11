@@ -1,6 +1,9 @@
 package com.lensmatch.mobile.ui.profile;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -8,10 +11,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.lensmatch.mobile.R;
-import com.lensmatch.mobile.data.AppState;
-import com.lensmatch.mobile.ui.catalog.FrameAdapter;
+import com.lensmatch.mobile.data.ReservationModel;
+import com.lensmatch.mobile.service.FirestoreService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReservationsActivity extends AppCompatActivity {
+    private RecyclerView rvReservations;
+    private ProgressBar progressReservations;
+    private TextView tvEmptyReservations;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,10 +30,50 @@ public class ReservationsActivity extends AppCompatActivity {
         MaterialToolbar toolbar = findViewById(R.id.toolbar_reservations);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        RecyclerView rvReservations = findViewById(R.id.rv_reservations);
+        rvReservations = findViewById(R.id.rv_reservations);
+        progressReservations = findViewById(R.id.progress_reservations);
+        tvEmptyReservations = findViewById(R.id.tv_empty_reservations);
+
         rvReservations.setLayoutManager(new LinearLayoutManager(this));
 
-        FrameAdapter adapter = new FrameAdapter(AppState.getInstance().getReservedFrames(), frame -> {});
-        rvReservations.setAdapter(adapter);
+        loadReservations();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadReservations();
+    }
+
+    private void loadReservations() {
+        if (progressReservations != null) progressReservations.setVisibility(View.VISIBLE);
+        if (tvEmptyReservations != null) tvEmptyReservations.setVisibility(View.GONE);
+
+        FirestoreService.getUserReservations(new FirestoreService.Callback<List<ReservationModel>>() {
+            @Override
+            public void onSuccess(List<ReservationModel> list) {
+                if (isFinishing() || isDestroyed()) return;
+                if (progressReservations != null) progressReservations.setVisibility(View.GONE);
+
+                if (list == null || list.isEmpty()) {
+                    if (tvEmptyReservations != null) tvEmptyReservations.setVisibility(View.VISIBLE);
+                    rvReservations.setAdapter(new ReservationAdapter(new ArrayList<>()));
+                } else {
+                    if (tvEmptyReservations != null) tvEmptyReservations.setVisibility(View.GONE);
+                    rvReservations.setAdapter(new ReservationAdapter(list));
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (isFinishing() || isDestroyed()) return;
+                if (progressReservations != null) progressReservations.setVisibility(View.GONE);
+                if (tvEmptyReservations != null) {
+                    tvEmptyReservations.setText("No active reservations.");
+                    tvEmptyReservations.setVisibility(View.VISIBLE);
+                }
+                rvReservations.setAdapter(new ReservationAdapter(new ArrayList<>()));
+            }
+        });
     }
 }

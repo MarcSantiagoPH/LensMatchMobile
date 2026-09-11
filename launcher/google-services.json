@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "2770988839",
+    "project_id": "lensmatch-a2dbc",
+    "storage_bucket": "lensmatch-a2dbc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2770988839:android:6eae6445a0c8e487160302",
+        "android_client_info": {
+          "package_name": "com.franselle.lensmatch.lensmatch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "2770988839-alv3hi6m53dmdc7u6d3bclv80iaeui79.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.franselle.lensmatch.lensmatch",
+            "certificate_hash": "a64060f54bc6c3153a9b5a0ae7996fc08e1602e5"
+          }
+        },
+        {
+          "client_id": "2770988839-ojjsu9eb754jdfo6li1ej565n1actj2g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKUSLeHFGaMISG6LpXhG8FAdc42okxxnA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "2770988839-ojjsu9eb754jdfo6li1ej565n1actj2g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "2770988839-avgnqjoopt9slcppvdonhsmvcskil89n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.franselle.lensmatch.lensmatch"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

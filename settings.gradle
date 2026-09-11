@@ -22,3 +22,14 @@ dependencyResolutionManagement {
         }
     }
 }
+
+// Ensure AGP uses JDK 17 for child subprocesses (like Prefab) to avoid JDK 21+ restricted method warnings on stderr
+def configuredJavaHome = providers.gradleProperty("org.gradle.java.home").orNull
+if (configuredJavaHome != null && new File(configuredJavaHome).exists()) {
+    System.setProperty("java.home", configuredJavaHome)
+} else {
+    def fallbackJdk = new File("D:/Downloads/.jdks/ms-17.0.20.1")
+    if (fallbackJdk.exists()) {
+        System.setProperty("java.home", fallbackJdk.absolutePath)
+    }
+}
