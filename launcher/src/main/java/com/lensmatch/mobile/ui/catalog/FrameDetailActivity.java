@@ -51,14 +51,17 @@ public class FrameDetailActivity extends AppCompatActivity {
             tvName.setText(frame.getName());
             tvPrice.setText(frame.getPrice());
             tvShapeBadge.setText(frame.getDisplayFrameStyle());
-            tvMaterial.setText(frame.getMaterial());
+
+            String mat = frame.getMaterial();
+            tvMaterial.setText(mat != null && !mat.trim().isEmpty() ? mat : "—");
             tvShapeVal.setText(frame.getDisplayFrameStyle());
 
             if (frame.getDescription() != null && !frame.getDescription().trim().isEmpty()) {
                 tvDescription.setText(frame.getDescription());
             } else {
+                String matDesc = mat != null && !mat.trim().isEmpty() ? mat.toLowerCase() : "materials";
                 tvDescription.setText("Elevate your look with the " + frame.getName() + ". Crafted from premium "
-                        + frame.getMaterial().toLowerCase() + ", these frames offer a perfect blend of durability and luxury style. Ideal for all-day comfort.");
+                        + matDesc + ", these frames offer a perfect blend of durability and luxury style. Ideal for all-day comfort.");
             }
 
             if (ivDetailImage != null) {

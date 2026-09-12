@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lensmatch.mobile.data.AppState;
+import com.lensmatch.mobile.data.ClinicModel;
 import com.lensmatch.mobile.data.FrameModel;
 import com.lensmatch.mobile.data.ReservationModel;
 
@@ -19,6 +20,8 @@ public class FirestoreService {
     private static final String TAG = "FirestoreService";
     public static final String COLLECTION_FRAME_CATALOG = "FRAME_CATALOG";
     public static final String COLLECTION_RESERVATIONS = "RESERVATIONS";
+    public static final String COLLECTION_CLINIC_INFORMATION = "CLINIC_INFORMATION";
+    public static final String DOC_CLINIC_GENERAL = "general";
 
     public interface Callback<T> {
         void onSuccess(T result);
@@ -73,6 +76,12 @@ public class FirestoreService {
         });
     }
 
+    public static boolean isActiveStatus(String status) {
+        if (status == null) return false;
+        String s = status.trim().toUpperCase();
+        return "PENDING".equals(s) || "APPROVED".equals(s) || "CONFIRMED".equals(s);
+    }
+
     public static void createReservation(FrameModel frame, Callback<String> callback) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
@@ -98,15 +107,39 @@ public class FirestoreService {
         }
         final String customerEmail = email != null ? email : "";
 
-        // Check for existing pending reservation for this authenticated user
+        // Query user's existing reservations to check duplicates & 5-active-reservation limit
         getDb().collection(COLLECTION_RESERVATIONS)
                 .whereEqualTo("customerId", customerId)
-                .whereEqualTo("frameId", frame.getId())
-                .whereEqualTo("status", "Pending")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
+                    int activeCount = 0;
+                    boolean hasPendingForFrame = false;
+
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Map<String, Object> data = doc.getData();
+                        if (data != null) {
+                            String fId = data.containsKey("frameId") ? String.valueOf(data.get("frameId")) : "";
+                            String status = data.containsKey("status") ? String.valueOf(data.get("status")) : "Pending";
+
+                            if (fId.equals(frame.getId()) && "Pending".equalsIgnoreCase(status.trim())) {
+                                hasPendingForFrame = true;
+                            }
+
+                            if (isActiveStatus(status)) {
+                                activeCount++;
+                            }
+                        }
+                    }
+
+                    if (hasPendingForFrame) {
                         if (callback != null) callback.onError("You already have a pending reservation for this frame.");
+                        return;
+                    }
+
+                    if (activeCount >= 5) {
+                        if (callback != null) {
+                            callback.onError("You can have a maximum of 5 active reservations at a time. Please wait for an existing reservation to be completed or cancelled before making another reservation.");
+                        }
                         return;
                     }
 
@@ -138,7 +171,7 @@ public class FirestoreService {
                             });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error checking duplicate reservation: " + e.getMessage(), e);
+                    Log.e(TAG, "Error checking user reservations: " + e.getMessage(), e);
                     if (callback != null) callback.onError(e.getMessage());
                 });
     }
@@ -174,6 +207,24 @@ public class FirestoreService {
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error fetching user reservations: " + e.getMessage(), e);
                     if (callback != null) callback.onError(e.getMessage());
+                });
+    }
+
+    public static void getClinicInformation(Callback<ClinicModel> callback) {
+        getDb().collection(COLLECTION_CLINIC_INFORMATION)
+                .document(DOC_CLINIC_GENERAL)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists() && documentSnapshot.getData() != null) {
+                        ClinicModel model = ClinicModel.fromMap(documentSnapshot.getData());
+                        if (callback != null) callback.onSuccess(model);
+                    } else {
+                        if (callback != null) callback.onSuccess(new ClinicModel("Franselle Optical Clinic", "", "", "", ""));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error fetching clinic information: " + e.getMessage(), e);
+                    if (callback != null) callback.onSuccess(new ClinicModel("Franselle Optical Clinic", "", "", "", ""));
                 });
     }
 }

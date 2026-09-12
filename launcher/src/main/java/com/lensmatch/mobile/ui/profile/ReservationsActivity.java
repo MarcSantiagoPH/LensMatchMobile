@@ -1,5 +1,6 @@
 package com.lensmatch.mobile.ui.profile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -66,7 +67,11 @@ public class ReservationsActivity extends AppCompatActivity {
                     rvReservations.setAdapter(new ReservationAdapter(new ArrayList<>()));
                 } else {
                     if (tvEmptyReservations != null) tvEmptyReservations.setVisibility(View.GONE);
-                    rvReservations.setAdapter(new ReservationAdapter(list));
+                    rvReservations.setAdapter(new ReservationAdapter(list, item -> {
+                        Intent intent = new Intent(ReservationsActivity.this, ReservationDetailActivity.class);
+                        intent.putExtra("reservation", item);
+                        startActivity(intent);
+                    }));
                 }
             }
 

@@ -101,10 +101,10 @@ public class FrameCatalogFragment extends Fragment {
 
                 // Offline fallback frames
                 List<FrameModel> fallback = new ArrayList<>();
-                fallback.add(new FrameModel("1", "Classic Aviator", "Aviator", "Metal", "$129.00"));
-                fallback.add(new FrameModel("2", "Retro Square", "Square", "Acetate", "$145.00"));
-                fallback.add(new FrameModel("3", "Minimalist Wire", "Round", "Titanium", "$189.00"));
-                fallback.add(new FrameModel("4", "Bold Rectangle", "Rectangle", "Acetate", "$115.00"));
+                fallback.add(new FrameModel("1", "Classic Aviator", "Aviator", "Metal", "₱129.00"));
+                fallback.add(new FrameModel("2", "Retro Square", "Square", "Acetate", "₱145.00"));
+                fallback.add(new FrameModel("3", "Minimalist Wire", "Round", "Titanium", "₱189.00"));
+                fallback.add(new FrameModel("4", "Bold Rectangle", "Rectangle", "Acetate", "₱115.00"));
 
                 FrameAdapter adapter = new FrameAdapter(fallback, frame -> {
                     Intent intent = new Intent(requireContext(), FrameDetailActivity.class);

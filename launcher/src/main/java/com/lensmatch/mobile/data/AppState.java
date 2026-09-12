@@ -20,8 +20,8 @@ public class AppState {
 
     private String userName = "John Doe";
     private String userEmail = "johndoe@example.com";
-    private String userPhone = "+1 (555) 234-5678";
-    private String userAddress = "123 Main St, Apt 4B, Springfield";
+    private String userPhone = "";
+    private String userAddress = "";
     private String userPhotoUrl = null;
     private boolean isLoggedIn = false;
 
@@ -46,8 +46,8 @@ public class AppState {
         state.lastActiveTab = prefs.getInt("lastActiveTab", 0);
         state.userName = prefs.getString("userName", "John Doe");
         state.userEmail = prefs.getString("userEmail", "johndoe@example.com");
-        state.userPhone = prefs.getString("userPhone", "+1 (555) 234-5678");
-        state.userAddress = prefs.getString("userAddress", "123 Main St, Apt 4B, Springfield");
+        state.userPhone = prefs.getString("userPhone", "");
+        state.userAddress = prefs.getString("userAddress", "");
         state.userPhotoUrl = prefs.getString("userPhotoUrl", null);
         state.isLoggedIn = prefs.getBoolean("isLoggedIn", false);
     }
@@ -177,8 +177,8 @@ public class AppState {
         this.isLoggedIn = false;
         this.userName = "John Doe";
         this.userEmail = "johndoe@example.com";
-        this.userPhone = "+1 (555) 234-5678";
-        this.userAddress = "123 Main St, Apt 4B, Springfield";
+        this.userPhone = "";
+        this.userAddress = "";
         this.userPhotoUrl = null;
         this.lastActiveTab = 0;
         if (prefs != null) {

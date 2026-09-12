@@ -43,7 +43,8 @@ public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.ViewHolder> 
 
         holder.tvName.setText(frame.getName());
         holder.tvShapeBadge.setText(frame.getDisplayFrameStyle());
-        holder.tvMaterial.setText(frame.getMaterial() != null ? frame.getMaterial() : "Acetate");
+        String mat = frame.getMaterial();
+        holder.tvMaterial.setText(mat != null && !mat.trim().isEmpty() ? mat : "—");
         holder.tvPrice.setText(frame.getPrice());
 
         if (!frame.isAvailable()) {

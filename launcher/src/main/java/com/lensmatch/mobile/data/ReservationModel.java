@@ -58,7 +58,8 @@ public class ReservationModel implements Serializable {
         String img = data.containsKey("imageUrl") ? String.valueOf(data.get("imageUrl")) : "";
         String statusStr = data.containsKey("status") ? String.valueOf(data.get("status")) : "Pending";
 
-        double priceVal = parsePriceDouble(data.get("price"));
+        Object rawPrice = data.containsKey("price") ? data.get("price") : data.get("framePrice");
+        double priceVal = parsePriceDouble(rawPrice);
         Date createdDate = parseDate(data.get("createdAt"));
         Date updatedDate = parseDate(data.get("statusUpdatedAt"));
 
@@ -80,8 +81,8 @@ public class ReservationModel implements Serializable {
     }
 
     private static Date parseDate(Object raw) {
-        if (raw instanceof com.google.firebase.Timestamp) {
-            return ((com.google.firebase.Timestamp) raw).toDate();
+        if (raw instanceof Timestamp) {
+            return ((Timestamp) raw).toDate();
         } else if (raw instanceof Date) {
             return (Date) raw;
         } else if (raw instanceof String) {
@@ -118,14 +119,21 @@ public class ReservationModel implements Serializable {
     public String getBrand() { return brand; }
     public String getFrameStyle() { return frameStyle; }
     public double getPriceValue() { return price; }
-    public String getFormattedPrice() { return String.format(Locale.US, "$%.2f", price); }
+    public String getFormattedPrice() { return String.format(Locale.US, "₱%,.2f", price); }
     public String getImageUrl() { return imageUrl; }
     public String getStatus() { return status != null ? status : "Pending"; }
     public Date getCreatedAt() { return createdAt; }
+    public Date getStatusUpdatedAt() { return statusUpdatedAt; }
 
     public String getFormattedDate() {
         if (createdAt == null) return "Recent";
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
         return sdf.format(createdAt);
+    }
+
+    public String getFormattedUpdatedDate() {
+        if (statusUpdatedAt == null) return null;
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
+        return sdf.format(statusUpdatedAt);
     }
 }

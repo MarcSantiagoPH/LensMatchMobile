@@ -69,6 +69,10 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name="com.lensmatch.mobile.ui.profile.ReservationDetailActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name="com.lensmatch.mobile.ui.profile.ScanHistoryActivity"
             android:screenOrientation="portrait" />
 

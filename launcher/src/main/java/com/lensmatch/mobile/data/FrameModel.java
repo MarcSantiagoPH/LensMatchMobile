@@ -3,6 +3,7 @@ package com.lensmatch.mobile.data;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class FrameModel implements Serializable {
@@ -60,12 +61,13 @@ public class FrameModel implements Serializable {
         String style = data.containsKey("frameStyle") ? String.valueOf(data.get("frameStyle"))
                 : (data.containsKey("style") ? String.valueOf(data.get("style"))
                 : (data.containsKey("shape") ? String.valueOf(data.get("shape")) : ""));
-        String mat = data.containsKey("material") ? String.valueOf(data.get("material")) : "Acetate";
-        String desc = data.containsKey("description") ? String.valueOf(data.get("description")) : "";
-        String img = data.containsKey("imageUrl") ? String.valueOf(data.get("imageUrl")) : "";
-        String arUrl = data.containsKey("arModelUrl") ? String.valueOf(data.get("arModelUrl")) : "";
+        String mat = data.containsKey("material") && data.get("material") != null ? String.valueOf(data.get("material")).trim() : "";
+        String desc = data.containsKey("description") && data.get("description") != null ? String.valueOf(data.get("description")) : "";
+        String img = data.containsKey("imageUrl") && data.get("imageUrl") != null ? String.valueOf(data.get("imageUrl")) : "";
+        String arUrl = data.containsKey("arModelUrl") && data.get("arModelUrl") != null ? String.valueOf(data.get("arModelUrl")) : "";
 
-        double priceVal = parsePriceDouble(data.get("price"));
+        Object rawPrice = data.containsKey("price") ? data.get("price") : data.get("framePrice");
+        double priceVal = parsePriceDouble(rawPrice);
         boolean isAvailable = parseAvailability(data.get("availability"));
 
         return new FrameModel(id, name, brand, style, priceVal, mat, desc, img, arUrl, isAvailable);
@@ -104,8 +106,8 @@ public class FrameModel implements Serializable {
     public String getFrameStyle() { return frameStyle != null ? frameStyle : ""; }
     public String getShape() { return getFrameStyle(); }
     public double getPriceValue() { return price; }
-    public String getPrice() { return String.format("$%.2f", price); }
-    public String getMaterial() { return material != null ? material : "Acetate"; }
+    public String getPrice() { return String.format(Locale.US, "₱%,.2f", price); }
+    public String getMaterial() { return material != null ? material : ""; }
     public String getDescription() { return description != null ? description : ""; }
     public String getImageUrl() { return imageUrl != null ? imageUrl : ""; }
     public String getArModelUrl() { return arModelUrl != null ? arModelUrl : ""; }

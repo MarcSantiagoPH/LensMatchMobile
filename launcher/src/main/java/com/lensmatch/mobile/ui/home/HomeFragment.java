@@ -15,8 +15,12 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
+import com.lensmatch.mobile.data.ReservationModel;
+import com.lensmatch.mobile.service.FirestoreService;
 import com.lensmatch.mobile.ui.MainActivity;
 import com.lensmatch.mobile.ui.profile.ReservationsActivity;
+
+import java.util.List;
 
 public class HomeFragment extends Fragment {
     private TextView tvLastResultSubtitle;
@@ -62,7 +66,31 @@ public class HomeFragment extends Fragment {
 
     private void updateQuickLinks() {
         AppState state = AppState.getInstance();
-        tvLastResultSubtitle.setText(state.getLastDetectedShape() + " shape - 3 recommendations");
-        tvReservationsCount.setText(state.getReservedFrames().size() + " items reserved");
+        if (tvLastResultSubtitle != null) {
+            tvLastResultSubtitle.setText(state.getLastDetectedShape() + " shape · 3 recommendations");
+        }
+
+        FirestoreService.getUserReservations(new FirestoreService.Callback<List<ReservationModel>>() {
+            @Override
+            public void onSuccess(List<ReservationModel> list) {
+                if (!isAdded() || getContext() == null || tvReservationsCount == null) return;
+                int count = 0;
+                if (list != null) {
+                    for (ReservationModel item : list) {
+                        if (FirestoreService.isActiveStatus(item.getStatus())) {
+                            count++;
+                        }
+                    }
+                }
+                String text = count + (count == 1 ? " item reserved" : " items reserved");
+                tvReservationsCount.setText(text);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (!isAdded() || getContext() == null || tvReservationsCount == null) return;
+                tvReservationsCount.setText("Unable to load reservations");
+            }
+        });
     }
 }

@@ -19,9 +19,19 @@ import java.util.List;
 
 public class ReservationAdapter extends RecyclerView.Adapter<ReservationAdapter.ViewHolder> {
     private final List<ReservationModel> reservations;
+    private final OnItemClickListener listener;
+
+    public interface OnItemClickListener {
+        void onItemClick(ReservationModel item);
+    }
+
+    public ReservationAdapter(List<ReservationModel> reservations, OnItemClickListener listener) {
+        this.reservations = reservations;
+        this.listener = listener;
+    }
 
     public ReservationAdapter(List<ReservationModel> reservations) {
-        this.reservations = reservations;
+        this(reservations, null);
     }
 
     @NonNull
@@ -57,6 +67,7 @@ public class ReservationAdapter extends RecyclerView.Adapter<ReservationAdapter.
         }
 
         if (item.getImageUrl() != null && !item.getImageUrl().trim().isEmpty()) {
+            holder.ivImage.setImageTintList(null);
             Glide.with(context)
                     .load(item.getImageUrl())
                     .placeholder(R.drawable.ic_eyeglasses)
@@ -65,6 +76,12 @@ public class ReservationAdapter extends RecyclerView.Adapter<ReservationAdapter.
         } else {
             holder.ivImage.setImageResource(R.drawable.ic_eyeglasses);
         }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(item);
+            }
+        });
     }
 
     @Override
