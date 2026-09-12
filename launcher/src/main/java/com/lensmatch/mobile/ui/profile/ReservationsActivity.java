@@ -13,6 +13,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.ReservationModel;
 import com.lensmatch.mobile.service.FirestoreService;
+import com.lensmatch.mobile.utils.StatusBarUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,11 @@ public class ReservationsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reservations);
+
+        View root = findViewById(R.id.reservations_root);
+        if (root != null) {
+            StatusBarUtils.applyTopWindowInsets(root);
+        }
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar_reservations);
         toolbar.setNavigationOnClickListener(v -> finish());

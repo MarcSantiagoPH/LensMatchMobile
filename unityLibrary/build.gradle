@@ -53,8 +53,6 @@ android {
     compileSdk 36
     buildToolsVersion = "36.0.0"
 
-
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -98,8 +96,6 @@ android {
         }
     }
 }
-
-
 
 def getSdkDir() {
     Properties local = new Properties()
@@ -157,7 +153,6 @@ ext.BuildIl2CppImpl = { String workingDir, String configuration, String architec
 
     project.delete "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToRemove}"
     project.ant.move(file: "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToKeep}", tofile: "${workingDir}/symbols/${abi}/libil2cpp.so")
-
 }
 
 android {
@@ -190,10 +185,14 @@ android {
             def mergeTaskName = "merge${variant.name.capitalize()}JniLibFolders"
             def mergeTask = tasks.findByName(mergeTaskName)
             if (mergeTask != null) {
-                mergeTask.dependsOn buildIl2Cpp
+                def libSo = file("${projectDir}/src/main/jniLibs/arm64-v8a/libil2cpp.so")
+                if (!libSo.exists()) {
+                    mergeTask.dependsOn buildIl2Cpp
+                }
             }
         }
     }
+
     sourceSets {
         main {
             jni.srcDirs = ["src/main/Il2CppOutputProject"]
@@ -207,4 +206,3 @@ android.externalNativeBuild {
         path "src/main/cpp/CMakeLists.txt"
     }
 }
-

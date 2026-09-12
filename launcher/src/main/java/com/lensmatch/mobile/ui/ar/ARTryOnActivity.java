@@ -30,6 +30,7 @@ import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.lensmatch.mobile.R;
+import com.lensmatch.mobile.utils.StatusBarUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,6 +105,7 @@ public class ARTryOnActivity extends AppCompatActivity {
 
         ImageView btnBack = findViewById(R.id.btn_back_ar);
         btnBack.setOnClickListener(v -> finish());
+        StatusBarUtils.applyTopMargin(btnBack);
 
         LinearLayout tabRecommended = findViewById(R.id.tab_recommended);
         LinearLayout tabAllFrames = findViewById(R.id.tab_all_frames);

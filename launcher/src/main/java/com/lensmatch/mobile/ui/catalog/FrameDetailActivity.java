@@ -15,6 +15,7 @@ import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.data.FrameModel;
 import com.lensmatch.mobile.service.FirestoreService;
+import com.lensmatch.mobile.utils.StatusBarUtils;
 import com.unity3d.player.UnityPlayerGameActivity;
 
 public class FrameDetailActivity extends AppCompatActivity {
@@ -35,6 +36,7 @@ public class FrameDetailActivity extends AppCompatActivity {
 
         ImageView btnBack = findViewById(R.id.btn_back_detail);
         btnBack.setOnClickListener(v -> finish());
+        StatusBarUtils.applyTopMargin(btnBack);
 
         ivDetailImage = findViewById(R.id.iv_detail_image);
         TextView tvName = findViewById(R.id.tv_detail_name);
