@@ -4,21 +4,24 @@
     android:layout_height="match_parent"
     android:background="@color/bgPrimary"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:paddingHorizontal="24dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Frame Catalog"
         android:textColor="@color/textPrimary"
-        android:textSize="24sp"
-        android:textStyle="bold" />
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="24dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_frames"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="16dp"
         android:clipToPadding="false" />
 
 </LinearLayout>

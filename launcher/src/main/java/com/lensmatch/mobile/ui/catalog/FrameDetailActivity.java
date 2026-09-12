@@ -12,6 +12,7 @@ import com.google.android.material.button.MaterialButton;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.data.FrameModel;
+import com.lensmatch.mobile.utils.StatusBarUtils;
 
 public class FrameDetailActivity extends AppCompatActivity {
     private FrameModel frame;
@@ -30,6 +31,7 @@ public class FrameDetailActivity extends AppCompatActivity {
 
         ImageView btnBack = findViewById(R.id.btn_back_detail);
         btnBack.setOnClickListener(v -> finish());
+        StatusBarUtils.applyTopMargin(btnBack);
 
         TextView tvName = findViewById(R.id.tv_detail_name);
         TextView tvPrice = findViewById(R.id.tv_detail_price);

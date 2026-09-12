@@ -16,6 +16,7 @@ import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.ui.MainActivity;
 import com.lensmatch.mobile.utils.GoogleAuthHelper;
+import com.lensmatch.mobile.utils.StatusBarUtils;
 
 public class SignupActivity extends AppCompatActivity {
     private GoogleAuthHelper googleAuthHelper;
@@ -25,6 +26,9 @@ public class SignupActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        android.view.View root = findViewById(R.id.signup_root);
+        StatusBarUtils.applyTopWindowInsets(root);
 
         TextInputEditText etName = findViewById(R.id.et_signup_name);
         TextInputEditText etEmail = findViewById(R.id.et_signup_email);

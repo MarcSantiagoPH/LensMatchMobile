@@ -20,6 +20,8 @@ public class AppState {
 
     private String userName = "John Doe";
     private String userEmail = "johndoe@example.com";
+    private String userPhone = "+1 (555) 234-5678";
+    private String userAddress = "123 Main St, Apt 4B, Springfield";
     private String userPhotoUrl = null;
     private boolean isLoggedIn = false;
 
@@ -44,6 +46,8 @@ public class AppState {
         state.lastActiveTab = prefs.getInt("lastActiveTab", 0);
         state.userName = prefs.getString("userName", "John Doe");
         state.userEmail = prefs.getString("userEmail", "johndoe@example.com");
+        state.userPhone = prefs.getString("userPhone", "+1 (555) 234-5678");
+        state.userAddress = prefs.getString("userAddress", "123 Main St, Apt 4B, Springfield");
         state.userPhotoUrl = prefs.getString("userPhotoUrl", null);
         state.isLoggedIn = prefs.getBoolean("isLoggedIn", false);
     }
@@ -132,8 +136,26 @@ public class AppState {
 
     public String getUserName() { return userName; }
     public String getUserEmail() { return userEmail; }
+    public String getUserPhone() { return userPhone; }
+    public String getUserAddress() { return userAddress; }
     public String getUserPhotoUrl() { return userPhotoUrl; }
     public boolean isLoggedIn() { return isLoggedIn; }
+
+    public void updateAccountDetails(String name, String phone, String address, String email) {
+        this.userName = (name != null && !name.trim().isEmpty()) ? name.trim() : "John Doe";
+        this.userPhone = (phone != null && !phone.trim().isEmpty()) ? phone.trim() : "";
+        this.userAddress = (address != null && !address.trim().isEmpty()) ? address.trim() : "";
+        this.userEmail = (email != null && !email.trim().isEmpty()) ? email.trim() : "johndoe@example.com";
+
+        if (prefs != null) {
+            prefs.edit()
+                    .putString("userName", this.userName)
+                    .putString("userPhone", this.userPhone)
+                    .putString("userAddress", this.userAddress)
+                    .putString("userEmail", this.userEmail)
+                    .apply();
+        }
+    }
 
     public void setUserProfile(String name, String email, String photoUrl) {
         this.userName = (name != null && !name.trim().isEmpty()) ? name : "User";
@@ -155,6 +177,8 @@ public class AppState {
         this.isLoggedIn = false;
         this.userName = "John Doe";
         this.userEmail = "johndoe@example.com";
+        this.userPhone = "+1 (555) 234-5678";
+        this.userAddress = "123 Main St, Apt 4B, Springfield";
         this.userPhotoUrl = null;
         this.lastActiveTab = 0;
         if (prefs != null) {
@@ -162,6 +186,8 @@ public class AppState {
                     .putBoolean("isLoggedIn", false)
                     .remove("userName")
                     .remove("userEmail")
+                    .remove("userPhone")
+                    .remove("userAddress")
                     .remove("userPhotoUrl")
                     .remove("lastActiveTab")
                     .apply();

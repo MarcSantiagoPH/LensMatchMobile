@@ -12,8 +12,8 @@ import java.util.List;
  */
 public class PoseNormalizer {
 
-    public static final float MAX_YAW_DEG = 12.0f;
-    public static final float MAX_PITCH_DEG = 10.0f;
+    public static final float MAX_YAW_DEG = 18.0f;
+    public static final float MAX_PITCH_DEG = 16.0f;
 
     // Eye landmarks for roll and IPD
     private static final int LEFT_EYE_IRIS = 468;

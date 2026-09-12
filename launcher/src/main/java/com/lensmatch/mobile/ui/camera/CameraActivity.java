@@ -8,9 +8,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.content.Context;
+import android.content.res.ColorStateList;
 import android.media.ExifInterface;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -21,6 +27,7 @@ import java.nio.ByteBuffer;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.AspectRatio;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
@@ -29,6 +36,10 @@ import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
+import androidx.camera.view.TransformExperimental;
+import androidx.camera.view.transform.CoordinateTransform;
+import androidx.camera.view.transform.ImageProxyTransformFactory;
+import androidx.camera.view.transform.OutputTransform;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -42,6 +53,7 @@ import com.google.android.material.button.MaterialButton;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.ui.FaceMeshOverlayView;
+import com.lensmatch.mobile.utils.StatusBarUtils;
 import com.lensmatch.mobile.utils.TFLiteFaceDetector;
 
 import java.io.File;
@@ -57,6 +69,7 @@ public class CameraActivity extends AppCompatActivity {
 
     private PreviewView viewFinder;
     private FaceMeshOverlayView faceMeshOverlay;
+    private View layoutInstructionPill;
     private TextView tvInstruction;
     private MaterialButton btnCapture;
     private ProgressBar progressCapture;
@@ -66,11 +79,13 @@ public class CameraActivity extends AppCompatActivity {
     private TFLiteFaceDetector tfliteDetector;
     private ExecutorService cameraExecutor;
 
-    private boolean isAligned = false;
-    private int alignedFrameCount = 0;
-    private int unalignedFrameCount = 0;
     private Face latestFace = null;
     private boolean isCapturing = false;
+
+    // Auto-capture progress tracking
+    private float scanProgress = 0f;
+    private static final float SCAN_INCREMENT = 0.042f; // ~24 frames (~1.0s at 24-30fps)
+    private static final float SCAN_DECAY = 0.02f;      // Gentle decay on slight movement
 
     // Multi-Frame Temporal Averaging buffer (15-30 frames over ~1.5s)
     private final List<Bitmap> temporalFrames = new ArrayList<>();
@@ -84,14 +99,20 @@ public class CameraActivity extends AppCompatActivity {
 
         viewFinder = findViewById(R.id.view_finder);
         faceMeshOverlay = findViewById(R.id.face_mesh_overlay);
+        layoutInstructionPill = findViewById(R.id.layout_instruction_pill);
         tvInstruction = findViewById(R.id.tv_instruction);
         btnCapture = findViewById(R.id.btn_capture);
         progressCapture = findViewById(R.id.progress_capture);
 
         ImageView btnClose = findViewById(R.id.btn_close);
         btnClose.setOnClickListener(v -> finish());
+        StatusBarUtils.applyTopMargin(btnClose);
+        StatusBarUtils.applyTopMargin(layoutInstructionPill);
 
-        btnCapture.setOnClickListener(v -> captureAndProcessImage());
+        btnCapture.setOnClickListener(v -> {
+            triggerHapticFeedback();
+            captureAndProcessImage();
+        });
 
         FaceDetectorOptions options = new FaceDetectorOptions.Builder()
                 .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
@@ -134,12 +155,17 @@ public class CameraActivity extends AppCompatActivity {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
 
-                Preview preview = new Preview.Builder().build();
+                Preview preview = new Preview.Builder()
+                        .setTargetAspectRatio(AspectRatio.RATIO_16_9)
+                        .build();
                 preview.setSurfaceProvider(viewFinder.getSurfaceProvider());
 
-                imageCapture = new ImageCapture.Builder().build();
+                imageCapture = new ImageCapture.Builder()
+                        .setTargetAspectRatio(AspectRatio.RATIO_16_9)
+                        .build();
 
                 ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
+                        .setTargetAspectRatio(AspectRatio.RATIO_16_9)
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
 
@@ -157,6 +183,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     @androidx.camera.core.ExperimentalGetImage
+    @TransformExperimental
     private void processImageProxy(ImageProxy imageProxy) {
         if (isCapturing) {
             if (remainingTemporalSamples > 0) {
@@ -186,9 +213,19 @@ public class CameraActivity extends AppCompatActivity {
             InputImage inputImage = InputImage.fromMediaImage(imageProxy.getImage(), imageProxy.getImageInfo().getRotationDegrees());
             float luminance = calculateLuminance(imageProxy);
 
+            OutputTransform sourceTransform = null;
+            try {
+                ImageProxyTransformFactory factory = new ImageProxyTransformFactory();
+                factory.setUsingRotationDegrees(true);
+                sourceTransform = factory.getOutputTransform(imageProxy);
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to get source OutputTransform", e);
+            }
+
+            final OutputTransform finalSourceTransform = sourceTransform;
             faceDetector.process(inputImage)
                     .addOnSuccessListener(faces -> {
-                        evaluateFaces(faces, inputImage.getWidth(), inputImage.getHeight(), luminance);
+                        evaluateFaces(faces, finalSourceTransform, inputImage.getWidth(), inputImage.getHeight(), luminance);
                         imageProxy.close();
                     })
                     .addOnFailureListener(e -> imageProxy.close());
@@ -215,12 +252,33 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    private void evaluateFaces(List<Face> faces, int imageWidth, int imageHeight, float luminance) {
+    @TransformExperimental
+    private Matrix getScreenTransformMatrix(OutputTransform sourceTransform) {
+        if (sourceTransform == null || viewFinder == null) return null;
+        try {
+            OutputTransform targetTransform = viewFinder.getOutputTransform();
+            if (targetTransform == null) return null;
+            CoordinateTransform coordinateTransform = new CoordinateTransform(sourceTransform, targetTransform);
+            Matrix matrix = new Matrix();
+            coordinateTransform.transform(matrix);
+            return matrix;
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to compute CoordinateTransform matrix", e);
+            return null;
+        }
+    }
+
+    @TransformExperimental
+    private void evaluateFaces(List<Face> faces, OutputTransform sourceTransform, int imageWidth, int imageHeight, float luminance) {
+        if (isCapturing) return;
+
         if (faces.isEmpty()) {
             latestFace = null;
+            scanProgress = Math.max(0f, scanProgress - 0.08f);
             runOnUiThread(() -> {
-                faceMeshOverlay.updateState(null, FaceMeshOverlayView.GuideState.SEARCHING, imageWidth, imageHeight);
-                setInstruction("Position face within the scan dots", FaceMeshOverlayView.GuideState.SEARCHING);
+                Matrix matrix = getScreenTransformMatrix(sourceTransform);
+                faceMeshOverlay.updateState(null, FaceMeshOverlayView.GuideState.SEARCHING, scanProgress, matrix, imageWidth, imageHeight);
+                setInstruction("Position face in camera", FaceMeshOverlayView.GuideState.SEARCHING);
             });
             return;
         }
@@ -229,116 +287,181 @@ public class CameraActivity extends AppCompatActivity {
         latestFace = face;
         Rect bounds = face.getBoundingBox();
 
-        // 1. Luminance Quality Gate (50 <= Y <= 215)
-        if (luminance < 50f) {
+        // 1. Luminance Quality Gate (Forgiving: 30 <= Y <= 235)
+        if (luminance < 30f) {
+            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, imageWidth, imageHeight);
-                setInstruction("Lighting too dark - move to better lighting", FaceMeshOverlayView.GuideState.MISALIGNED);
+                Matrix matrix = getScreenTransformMatrix(sourceTransform);
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
+                setInstruction("Lighting too dark — move to light", FaceMeshOverlayView.GuideState.MISALIGNED);
             });
             return;
         }
-        if (luminance > 215f) {
+        if (luminance > 235f) {
+            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, imageWidth, imageHeight);
-                setInstruction("Lighting too harsh - avoid direct glare", FaceMeshOverlayView.GuideState.MISALIGNED);
+                Matrix matrix = getScreenTransformMatrix(sourceTransform);
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
+                setInstruction("Lighting too harsh — avoid direct glare", FaceMeshOverlayView.GuideState.MISALIGNED);
             });
             return;
         }
 
-        // 2. Size Quality Gate: Face bounding box must occupy 35%–65% of screen height
+        // 2. Size Quality Gate: Face occupies 20%–85% of screen height
         float faceHeight = bounds.height();
-        if (faceHeight < imageHeight * 0.35f) {
+        if (faceHeight < imageHeight * 0.20f) {
+            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, imageWidth, imageHeight);
-                setInstruction("Move closer to align with scan dots", FaceMeshOverlayView.GuideState.MISALIGNED);
+                Matrix matrix = getScreenTransformMatrix(sourceTransform);
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
+                setInstruction("Move slightly closer", FaceMeshOverlayView.GuideState.MISALIGNED);
             });
             return;
         }
-        if (faceHeight > imageHeight * 0.65f) {
+        if (faceHeight > imageHeight * 0.85f) {
+            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, imageWidth, imageHeight);
-                setInstruction("Move further away", FaceMeshOverlayView.GuideState.MISALIGNED);
+                Matrix matrix = getScreenTransformMatrix(sourceTransform);
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
+                setInstruction("Move a little further back", FaceMeshOverlayView.GuideState.MISALIGNED);
             });
             return;
         }
 
-        // 3. Center Quality Gate: Face must be centered within 10% of frame center
+        // 3. Center Quality Gate: Relaxed 28% tolerance
         float centerX = bounds.centerX();
         float centerY = bounds.centerY();
-        if (Math.abs(centerX - (imageWidth / 2f)) > imageWidth * 0.10f ||
-            Math.abs(centerY - (imageHeight / 2f)) > imageHeight * 0.12f) {
+        if (Math.abs(centerX - (imageWidth / 2f)) > imageWidth * 0.28f ||
+            Math.abs(centerY - (imageHeight / 2f)) > imageHeight * 0.28f) {
+            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, imageWidth, imageHeight);
-                setInstruction("Center your face with the scan dots", FaceMeshOverlayView.GuideState.MISALIGNED);
+                Matrix matrix = getScreenTransformMatrix(sourceTransform);
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
+                setInstruction("Center face in camera", FaceMeshOverlayView.GuideState.MISALIGNED);
             });
             return;
         }
 
-        // 4. 3D Head Pose Orientation Check (Yaw <= 12°, Pitch <= 10°, Roll <= 8°)
+        // 4. 3D Head Pose Orientation Check (Yaw <= 18°, Pitch <= 16°, Roll <= 16°)
         float yaw = face.getHeadEulerAngleY();   // Left / Right turn
         float pitch = face.getHeadEulerAngleX(); // Up / Down tilt
         float roll = face.getHeadEulerAngleZ();  // Sideways ear-to-shoulder tilt
 
-        if (Math.abs(yaw) > 12.0f) {
+        if (Math.abs(yaw) > 18.0f) {
+            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, imageWidth, imageHeight);
+                Matrix matrix = getScreenTransformMatrix(sourceTransform);
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Look straight at the camera", FaceMeshOverlayView.GuideState.TILTED);
             });
             return;
         }
-        if (Math.abs(pitch) > 10.0f) {
+        if (Math.abs(pitch) > 16.0f) {
+            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, imageWidth, imageHeight);
+                Matrix matrix = getScreenTransformMatrix(sourceTransform);
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Level your head", FaceMeshOverlayView.GuideState.TILTED);
             });
             return;
         }
-        if (Math.abs(roll) > 8.0f) {
+        if (Math.abs(roll) > 16.0f) {
+            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, imageWidth, imageHeight);
+                Matrix matrix = getScreenTransformMatrix(sourceTransform);
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Keep head upright", FaceMeshOverlayView.GuideState.TILTED);
             });
             return;
         }
 
-        runOnUiThread(() -> {
-            faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.ALIGNED, imageWidth, imageHeight);
-            setInstruction("Face Aligned! Tap to scan.", FaceMeshOverlayView.GuideState.ALIGNED);
-        });
+        // Face is in great scanning position!
+        scanProgress = Math.min(1.0f, scanProgress + SCAN_INCREMENT);
+
+        if (scanProgress >= 1.0f) {
+            runOnUiThread(() -> {
+                Matrix matrix = getScreenTransformMatrix(sourceTransform);
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.SUCCESS, 1.0f, matrix, imageWidth, imageHeight);
+                setInstruction("Face Aligned! Ready to scan.", FaceMeshOverlayView.GuideState.SUCCESS);
+                triggerHapticFeedback();
+                captureAndProcessImage();
+            });
+        } else {
+            final float currentProgress = scanProgress;
+            runOnUiThread(() -> {
+                FaceMeshOverlayView.GuideState state = FaceMeshOverlayView.GuideState.ALIGNED;
+                Matrix matrix = getScreenTransformMatrix(sourceTransform);
+                faceMeshOverlay.updateState(faces, state, currentProgress, matrix, imageWidth, imageHeight);
+                setInstruction("Face Aligned! Ready to scan.", state);
+            });
+        }
     }
 
     private void setInstruction(String text, FaceMeshOverlayView.GuideState state) {
-        boolean aligned = (state == FaceMeshOverlayView.GuideState.ALIGNED);
-        if (aligned) {
-            alignedFrameCount++;
-            unalignedFrameCount = 0;
-        } else {
-            unalignedFrameCount++;
-            alignedFrameCount = 0;
-        }
-
-        if (alignedFrameCount >= 3) {
-            isAligned = true;
-        } else if (unalignedFrameCount >= 4) {
-            isAligned = false;
-        }
-
         tvInstruction.setText(text);
-        if (state == FaceMeshOverlayView.GuideState.ALIGNED) {
-            tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.greenSuccess));
-            btnCapture.setText("Capture & Scan");
-            btnCapture.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.accentGold));
-            btnCapture.setTextColor(ContextCompat.getColor(this, R.color.bgCard));
-        } else if (state == FaceMeshOverlayView.GuideState.TILTED) {
-            tvInstruction.setTextColor(Color.parseColor("#FFB300")); // Warning amber
-            btnCapture.setText("Position Face in Frame");
-        } else if (state == FaceMeshOverlayView.GuideState.MISALIGNED) {
-            tvInstruction.setTextColor(Color.parseColor("#FF5252")); // Alert red
-            btnCapture.setText("Position Face in Frame");
-        } else {
+        if (state == FaceMeshOverlayView.GuideState.SUCCESS) {
+            if (layoutInstructionPill != null) {
+                layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill_green);
+            }
             tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
-            btnCapture.setText("Position Face in Frame");
+            btnCapture.setText("Processing...");
+            btnCapture.setEnabled(false);
+        } else if (state == FaceMeshOverlayView.GuideState.SCANNING || state == FaceMeshOverlayView.GuideState.ALIGNED) {
+            if (layoutInstructionPill != null) {
+                layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill_green);
+            }
+            tvInstruction.setText("Face Aligned! Ready to scan.");
+            tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
+            btnCapture.setText("Capture & Scan");
+            btnCapture.setEnabled(true);
+            btnCapture.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.accentGold));
+            btnCapture.setTextColor(Color.BLACK);
+        } else if (state == FaceMeshOverlayView.GuideState.TILTED) {
+            if (layoutInstructionPill != null) {
+                layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill_amber);
+            }
+            tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
+            btnCapture.setText("Capture & Scan");
+            btnCapture.setEnabled(latestFace != null);
+            btnCapture.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.accentGold));
+            btnCapture.setTextColor(Color.BLACK);
+        } else if (state == FaceMeshOverlayView.GuideState.MISALIGNED) {
+            if (layoutInstructionPill != null) {
+                layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill);
+            }
+            tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
+            btnCapture.setText("Capture & Scan");
+            btnCapture.setEnabled(latestFace != null);
+            if (latestFace != null) {
+                btnCapture.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.accentGold));
+                btnCapture.setTextColor(Color.BLACK);
+            } else {
+                btnCapture.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#40E0A96D")));
+                btnCapture.setTextColor(Color.parseColor("#80000000"));
+            }
+        } else {
+            if (layoutInstructionPill != null) {
+                layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill);
+            }
+            tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
+            btnCapture.setText("Capture & Scan");
+            btnCapture.setEnabled(false);
+            btnCapture.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#40E0A96D")));
+            btnCapture.setTextColor(Color.parseColor("#80000000"));
         }
+    }
+
+    private void triggerHapticFeedback() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                if (vibrator != null && vibrator.hasVibrator()) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE));
+                }
+            } else if (viewFinder != null) {
+                viewFinder.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+            }
+        } catch (Exception ignored) {}
     }
 
     private void captureAndProcessImage() {

@@ -200,6 +200,9 @@ public class ResultFragment extends Fragment {
     }
 
     private void fetchRecommendations(String shape) {
+        if (tvAiDescription != null) {
+            tvAiDescription.setText("Contacting Gemini AI for " + shape + " recommendations...");
+        }
         GeminiService.fetchRecommendations(shape, new GeminiService.Callback() {
             @Override
             public void onSuccess(FaceShapeDetector.ShapeRecommendation rec) {
@@ -210,7 +213,13 @@ public class ResultFragment extends Fragment {
             }
 
             @Override
-            public void onError(String message) {}
+            public void onError(String message) {
+                if (!isAdded() || getContext() == null) return;
+                if (tvAiDescription != null) {
+                    tvAiDescription.setText("⚠️ " + message);
+                    tvAiDescription.setTextIsSelectable(true);
+                }
+            }
         });
     }
 }

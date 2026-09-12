@@ -2,6 +2,7 @@ package com.lensmatch.mobile.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -19,6 +20,7 @@ import com.lensmatch.mobile.ui.catalog.FrameCatalogFragment;
 import com.lensmatch.mobile.ui.home.HomeFragment;
 import com.lensmatch.mobile.ui.profile.ProfileFragment;
 import com.lensmatch.mobile.ui.result.ResultFragment;
+import com.lensmatch.mobile.utils.StatusBarUtils;
 
 public class MainActivity extends AppCompatActivity {
     private static final String KEY_SELECTED_TAB = "selected_nav_item";
@@ -41,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        View fragmentContainer = findViewById(R.id.fragment_container);
+        StatusBarUtils.applyTopWindowInsets(fragmentContainer);
 
         bottomNav = findViewById(R.id.bottom_navigation);
         FloatingActionButton fabCamera = findViewById(R.id.fab_camera);

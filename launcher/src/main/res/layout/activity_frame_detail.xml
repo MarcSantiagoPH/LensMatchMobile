@@ -36,7 +36,7 @@
                     android:layout_height="48dp"
                     android:layout_margin="16dp"
                     android:padding="8dp"
-                    android:src="@drawable/ic_scan"
+                    android:src="@drawable/ic_chevron_left"
                     app:tint="@color/white" />
             </FrameLayout>
 
@@ -59,7 +59,7 @@
 
                         <TextView
                             android:id="@+id/tv_detail_name"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Classic Aviator"
                             android:textColor="@color/textPrimary"
@@ -68,7 +68,7 @@
 
                         <TextView
                             android:id="@+id/tv_detail_price"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="$129.00"
@@ -91,7 +91,7 @@
                 </RelativeLayout>
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
                     android:text="Details"
