@@ -27,4 +27,9 @@
     <string name="catalog_no_frames">No frames found.</string>
     <string name="catalog_no_frames_style">No frames found for selected style.</string>
     <string name="catalog_no_frames_matching">No frames found matching \"%1$s\".</string>
+
+    <!-- Reservation Detail Special Instructions -->
+    <string name="instruction_pending">Your reservation is currently being reviewed by the clinic. Please wait for the clinic to approve your reservation.</string>
+    <string name="instruction_approved">Please present your Reservation ID upon visiting the clinic for the fitting and pick-up.</string>
+    <string name="instruction_rejected">This reservation was not approved by the clinic. You may make a new reservation for another available frame.</string>
 </resources>

@@ -384,11 +384,12 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tv_special_instructions"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:lineSpacingExtra="2dp"
-                        android:text="Please present your Reservation ID upon visiting the clinic for fitting and pick-up."
+                        android:text="@string/instruction_pending"
                         android:textColor="@color/textSecondary"
                         android:textSize="12sp" />
                 </LinearLayout>

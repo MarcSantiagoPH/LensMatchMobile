@@ -92,6 +92,17 @@ public class ReservationDetailActivity extends AppCompatActivity {
                 tvStatusMessage.setText("Your reservation request has been received.\n\nOur staff is currently reviewing your request. We'll update the status once the review is complete.");
             }
 
+            TextView tvSpecialInstructions = findViewById(R.id.tv_special_instructions);
+            if (tvSpecialInstructions != null) {
+                if ("APPROVED".equals(statusUpper)) {
+                    tvSpecialInstructions.setText(R.string.instruction_approved);
+                } else if ("REJECTED".equals(statusUpper)) {
+                    tvSpecialInstructions.setText(R.string.instruction_rejected);
+                } else { // PENDING or default
+                    tvSpecialInstructions.setText(R.string.instruction_pending);
+                }
+            }
+
             if (ivFrame != null) {
                 ivFrame.setImageTintList(null);
                 if (reservation.getImageUrl() != null && !reservation.getImageUrl().trim().isEmpty()) {
