@@ -2,6 +2,7 @@ package com.lensmatch.mobile.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -11,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.lensmatch.mobile.R;
@@ -24,6 +26,7 @@ public class LoginActivity extends AppCompatActivity {
     private GoogleAuthHelper googleAuthHelper;
     private ActivityResultLauncher<Intent> googleSignInLauncher;
     private MaterialButton btnLogin;
+    private AuthCredential pendingGoogleCredential = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +43,7 @@ public class LoginActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_login);
 
-        android.view.View root = findViewById(R.id.login_root);
+        View root = findViewById(R.id.login_root);
         StatusBarUtils.applyTopWindowInsets(root);
 
         etEmail = findViewById(R.id.et_login_email);
@@ -56,6 +59,21 @@ public class LoginActivity extends AppCompatActivity {
             public void onAuthSuccess(String name, String email, String photoUrl) {
                 Toast.makeText(LoginActivity.this, "Welcome back, " + name + "!", Toast.LENGTH_SHORT).show();
                 handleLogin();
+            }
+
+            @Override
+            public void onAccountCollision(String email, AuthCredential pendingCredential) {
+                pendingGoogleCredential = pendingCredential;
+                if (email != null && !email.isEmpty() && etEmail != null) {
+                    etEmail.setText(email);
+                }
+                if (btnLogin != null) {
+                    btnLogin.setText("Log In & Link Google Account");
+                }
+                Toast.makeText(LoginActivity.this, "An account already exists for " + email + ". Please enter your password to link Google Sign-In.", Toast.LENGTH_LONG).show();
+                if (etPassword != null) {
+                    etPassword.requestFocus();
+                }
             }
 
             @Override
@@ -118,16 +136,34 @@ public class LoginActivity extends AppCompatActivity {
             FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
                         btnLogin.setEnabled(true);
-                        btnLogin.setText("Log In");
+                        btnLogin.setText(pendingGoogleCredential != null ? "Log In & Link Google Account" : "Log In");
 
                         if (task.isSuccessful()) {
                             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                            String name = (user != null && user.getDisplayName() != null && !user.getDisplayName().isEmpty())
-                                    ? user.getDisplayName()
-                                    : (email.contains("@") ? email.substring(0, email.indexOf("@")) : "User");
-                            AppState.getInstance().setUserProfile(name, email, null);
-                            Toast.makeText(LoginActivity.this, "Welcome back, " + name + "!", Toast.LENGTH_SHORT).show();
-                            handleLogin();
+                            if (user != null && pendingGoogleCredential != null) {
+                                user.linkWithCredential(pendingGoogleCredential)
+                                        .addOnCompleteListener(linkTask -> {
+                                            pendingGoogleCredential = null;
+                                            if (linkTask.isSuccessful()) {
+                                                Toast.makeText(LoginActivity.this, "Google Sign-In successfully linked to your account!", Toast.LENGTH_SHORT).show();
+                                            } else {
+                                                String linkErr = linkTask.getException() != null ? linkTask.getException().getMessage() : "Failed to link Google account.";
+                                                Toast.makeText(LoginActivity.this, linkErr, Toast.LENGTH_LONG).show();
+                                            }
+                                            String name = (user.getDisplayName() != null && !user.getDisplayName().isEmpty())
+                                                    ? user.getDisplayName()
+                                                    : (email.contains("@") ? email.substring(0, email.indexOf("@")) : "User");
+                                            AppState.getInstance().setUserProfile(name, email, null);
+                                            handleLogin();
+                                        });
+                            } else {
+                                String name = (user != null && user.getDisplayName() != null && !user.getDisplayName().isEmpty())
+                                        ? user.getDisplayName()
+                                        : (email.contains("@") ? email.substring(0, email.indexOf("@")) : "User");
+                                AppState.getInstance().setUserProfile(name, email, null);
+                                Toast.makeText(LoginActivity.this, "Welcome back, " + name + "!", Toast.LENGTH_SHORT).show();
+                                handleLogin();
+                            }
                         } else {
                             String error = task.getException() != null ? task.getException().getMessage() : "Authentication failed.";
                             Toast.makeText(LoginActivity.this, error, Toast.LENGTH_LONG).show();

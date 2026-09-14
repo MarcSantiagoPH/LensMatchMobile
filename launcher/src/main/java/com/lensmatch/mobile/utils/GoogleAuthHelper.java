@@ -14,6 +14,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.lensmatch.mobile.data.AppState;
@@ -30,6 +31,7 @@ public class GoogleAuthHelper {
     public interface AuthCallback {
         void onAuthSuccess(String name, String email, String photoUrl);
         void onAuthFailure(String errorMessage);
+        default void onAccountCollision(String email, AuthCredential pendingCredential) {}
     }
 
     public GoogleAuthHelper(Activity activity, AuthCallback callback) {
@@ -85,8 +87,16 @@ public class GoogleAuthHelper {
                                         callback.onAuthSuccess(finalName, finalEmail, photoUrl);
                                     }
                                 } else {
-                                    String msg = authTask.getException() != null ? authTask.getException().getMessage() : "Firebase sign-in failed.";
-                                    if (callback != null) callback.onAuthFailure(msg);
+                                    Exception ex = authTask.getException();
+                                    if (ex instanceof FirebaseAuthUserCollisionException) {
+                                        String email = account.getEmail();
+                                        if (callback != null) {
+                                            callback.onAccountCollision(email, credential);
+                                        }
+                                    } else {
+                                        String msg = ex != null ? ex.getMessage() : "Firebase sign-in failed.";
+                                        if (callback != null) callback.onAuthFailure(msg);
+                                    }
                                 }
                             });
                 } else {

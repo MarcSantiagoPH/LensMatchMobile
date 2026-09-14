@@ -3,6 +3,7 @@ package com.lensmatch.mobile.ui.profile;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,6 +13,12 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.utils.StatusBarUtils;
@@ -34,12 +41,21 @@ public class AccountDetailsActivity extends AppCompatActivity {
 
     private MaterialButton btnSave;
 
+    // Password Linking Section Views
+    private TextView tvHeaderSetPassword;
+    private TextView tvSubSetPassword;
+    private TextInputLayout tilNewPassword;
+    private TextInputLayout tilConfirmPassword;
+    private TextInputEditText etNewPassword;
+    private TextInputEditText etConfirmPassword;
+    private MaterialButton btnLinkPassword;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account_details);
 
-        android.view.View root = findViewById(R.id.account_details_root);
+        View root = findViewById(R.id.account_details_root);
         StatusBarUtils.applyTopWindowInsets(root);
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar_account_details);
@@ -61,8 +77,18 @@ public class AccountDetailsActivity extends AppCompatActivity {
 
         btnSave = findViewById(R.id.btn_save_account);
 
+        // Password Linking Views
+        tvHeaderSetPassword = findViewById(R.id.tv_header_set_password);
+        tvSubSetPassword = findViewById(R.id.tv_sub_set_password);
+        tilNewPassword = findViewById(R.id.til_account_new_password);
+        tilConfirmPassword = findViewById(R.id.til_account_confirm_password);
+        etNewPassword = findViewById(R.id.et_account_new_password);
+        etConfirmPassword = findViewById(R.id.et_account_confirm_password);
+        btnLinkPassword = findViewById(R.id.btn_link_password);
+
         loadUserData();
         setupRealtimeHeaderUpdates();
+        setupPasswordLinking();
 
         btnSave.setOnClickListener(v -> saveAccountDetails());
     }
@@ -136,6 +162,107 @@ public class AccountDetailsActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
+    }
+
+    private void setupPasswordLinking() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            hidePasswordSection();
+            return;
+        }
+
+        boolean hasPasswordProvider = false;
+        for (UserInfo info : user.getProviderData()) {
+            if (info != null && "password".equalsIgnoreCase(info.getProviderId())) {
+                hasPasswordProvider = true;
+                break;
+            }
+        }
+
+        if (hasPasswordProvider) {
+            if (tvHeaderSetPassword != null) tvHeaderSetPassword.setText(R.string.title_email_signin);
+            if (tvSubSetPassword != null) tvSubSetPassword.setText(R.string.sub_email_signin);
+            if (tilNewPassword != null) tilNewPassword.setVisibility(View.GONE);
+            if (tilConfirmPassword != null) tilConfirmPassword.setVisibility(View.GONE);
+            if (btnLinkPassword != null) btnLinkPassword.setVisibility(View.GONE);
+        } else {
+            if (tvHeaderSetPassword != null) tvHeaderSetPassword.setText(R.string.title_set_password);
+            if (tvSubSetPassword != null) tvSubSetPassword.setText(R.string.sub_set_password);
+            if (tilNewPassword != null) tilNewPassword.setVisibility(View.VISIBLE);
+            if (tilConfirmPassword != null) tilConfirmPassword.setVisibility(View.VISIBLE);
+            if (btnLinkPassword != null) {
+                btnLinkPassword.setVisibility(View.VISIBLE);
+                btnLinkPassword.setOnClickListener(v -> linkNewPassword(user));
+            }
+        }
+    }
+
+    private void hidePasswordSection() {
+        if (tvHeaderSetPassword != null) tvHeaderSetPassword.setVisibility(View.GONE);
+        if (tvSubSetPassword != null) tvSubSetPassword.setVisibility(View.GONE);
+        if (tilNewPassword != null) tilNewPassword.setVisibility(View.GONE);
+        if (tilConfirmPassword != null) tilConfirmPassword.setVisibility(View.GONE);
+        if (btnLinkPassword != null) btnLinkPassword.setVisibility(View.GONE);
+    }
+
+    private void linkNewPassword(FirebaseUser user) {
+        String newPassword = etNewPassword != null && etNewPassword.getText() != null ? etNewPassword.getText().toString() : "";
+        String confirmPassword = etConfirmPassword != null && etConfirmPassword.getText() != null ? etConfirmPassword.getText().toString() : "";
+
+        if (tilNewPassword != null) tilNewPassword.setError(null);
+        if (tilConfirmPassword != null) tilConfirmPassword.setError(null);
+
+        if (newPassword.isEmpty()) {
+            if (tilNewPassword != null) tilNewPassword.setError(getString(R.string.err_new_password_required));
+            return;
+        }
+
+        if (newPassword.length() < 6) {
+            if (tilNewPassword != null) tilNewPassword.setError(getString(R.string.err_password_min_length));
+            return;
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            if (tilConfirmPassword != null) tilConfirmPassword.setError(getString(R.string.err_passwords_do_not_match));
+            return;
+        }
+
+        String email = user.getEmail();
+        if (email == null || email.isEmpty()) {
+            email = etEmail != null && etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
+        }
+
+        if (email.isEmpty()) {
+            Toast.makeText(this, R.string.err_email_required_for_password, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (btnLinkPassword != null) {
+            btnLinkPassword.setEnabled(false);
+            btnLinkPassword.setText(R.string.btn_adding_password);
+        }
+
+        AuthCredential credential = EmailAuthProvider.getCredential(email, newPassword);
+        user.linkWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                    if (btnLinkPassword != null) {
+                        btnLinkPassword.setEnabled(true);
+                        btnLinkPassword.setText(R.string.btn_add_password);
+                    }
+
+                    if (task.isSuccessful()) {
+                        Toast.makeText(AccountDetailsActivity.this, R.string.msg_password_added_success, Toast.LENGTH_LONG).show();
+                        setupPasswordLinking();
+                    } else {
+                        Exception ex = task.getException();
+                        if (ex instanceof FirebaseAuthUserCollisionException) {
+                            Toast.makeText(AccountDetailsActivity.this, R.string.err_account_collision, Toast.LENGTH_LONG).show();
+                        } else {
+                            String errorMsg = ex != null ? ex.getMessage() : getString(R.string.err_failed_to_add_password);
+                            Toast.makeText(AccountDetailsActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
 
     private void saveAccountDetails() {

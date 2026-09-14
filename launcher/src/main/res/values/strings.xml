@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="game_view_content_description">Game view</string>
-  <string name="app_name">LensMatch</string>
+    <string name="game_view_content_description">Game view</string>
+    <string name="app_name">LensMatch</string>
+
+    <!-- Account Details Password Linking Strings -->
+    <string name="title_set_password">SET PASSWORD FOR EMAIL LOGIN</string>
+    <string name="sub_set_password">Create a new password to sign in with your email address.</string>
+    <string name="hint_new_password">New Password</string>
+    <string name="hint_confirm_new_password">Confirm New Password</string>
+    <string name="btn_add_password">Add Password to Account</string>
+    <string name="title_email_signin">EMAIL SIGN-IN</string>
+    <string name="sub_email_signin">A password is linked to your account for email sign-in.</string>
+    <string name="msg_password_added_success">Password added successfully! You can now sign in with your email and password.</string>
+    <string name="btn_adding_password">Adding Password...</string>
+    <string name="err_new_password_required">New password is required</string>
+    <string name="err_password_min_length">Password must be at least 6 characters</string>
+    <string name="err_passwords_do_not_match">Passwords do not match</string>
+    <string name="err_email_required_for_password">An email address is required to set a password.</string>
+    <string name="err_account_collision">An account with this email/password already exists.</string>
+    <string name="err_failed_to_add_password">Failed to add password to account.</string>
 </resources>
