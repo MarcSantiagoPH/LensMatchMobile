@@ -12,11 +12,19 @@
     <string name="title_email_signin">EMAIL SIGN-IN</string>
     <string name="sub_email_signin">A password is linked to your account for email sign-in.</string>
     <string name="msg_password_added_success">Password added successfully! You can now sign in with your email and password.</string>
-    <string name="btn_adding_password">Adding Password...</string>
+    <string name="btn_adding_password">Adding Password…</string>
     <string name="err_new_password_required">New password is required</string>
     <string name="err_password_min_length">Password must be at least 6 characters</string>
     <string name="err_passwords_do_not_match">Passwords do not match</string>
     <string name="err_email_required_for_password">An email address is required to set a password.</string>
     <string name="err_account_collision">An account with this email/password already exists.</string>
     <string name="err_failed_to_add_password">Failed to add password to account.</string>
+
+    <!-- Frame Catalog Search & Strings -->
+    <string name="desc_search_catalog">Search Catalog</string>
+    <string name="hint_catalog_search">Search brand or frame name…</string>
+    <string name="desc_close_search">Close Search</string>
+    <string name="catalog_no_frames">No frames found.</string>
+    <string name="catalog_no_frames_style">No frames found for selected style.</string>
+    <string name="catalog_no_frames_matching">No frames found matching \"%1$s\".</string>
 </resources>
