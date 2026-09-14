@@ -213,18 +213,20 @@
                     android:padding="20dp">
 
                     <TextView
+                        android:id="@+id/tv_support_clinic_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Customer Care &amp; Support"
+                        android:text="@string/support_clinic_name"
                         android:textColor="@color/textPrimary"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="4dp" />
 
                     <TextView
+                        android:id="@+id/tv_support_subtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="support@lensmatch.com • Mon–Fri, 9am–6pm"
+                        android:text="@string/support_default_subtitle"
                         android:textColor="@color/textSecondary"
                         android:textSize="13sp"
                         android:layout_marginBottom="16dp" />

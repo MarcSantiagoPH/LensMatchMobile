@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
+import com.lensmatch.mobile.service.FirestoreService;
 import com.lensmatch.mobile.utils.StatusBarUtils;
 
 public class AccountDetailsActivity extends AppCompatActivity {
@@ -285,8 +286,36 @@ public class AccountDetailsActivity extends AppCompatActivity {
 
         if (hasError) return;
 
+        // Update local SharedPreferences & AppState memory first
         AppState.getInstance().updateAccountDetails(name, phone, address, email);
-        Toast.makeText(this, "Account details updated successfully!", Toast.LENGTH_SHORT).show();
-        finish();
+
+        if (btnSave != null) {
+            btnSave.setEnabled(false);
+            btnSave.setText("Saving...");
+        }
+
+        // Update CUSTOMERS/{uid} in Firestore with partial merge
+        FirestoreService.updateCustomerProfile(name, phone, address, new FirestoreService.Callback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                if (isFinishing() || isDestroyed()) return;
+                if (btnSave != null) {
+                    btnSave.setEnabled(true);
+                    btnSave.setText("Save Changes");
+                }
+                Toast.makeText(AccountDetailsActivity.this, "Account details updated successfully!", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (isFinishing() || isDestroyed()) return;
+                if (btnSave != null) {
+                    btnSave.setEnabled(true);
+                    btnSave.setText("Save Changes");
+                }
+                Toast.makeText(AccountDetailsActivity.this, errorMessage != null ? errorMessage : "Failed to update profile.", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.data.ClinicModel;
 import com.lensmatch.mobile.data.FrameModel;
@@ -13,6 +14,7 @@ import com.lensmatch.mobile.data.ReservationModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +23,7 @@ public class FirestoreService {
     public static final String COLLECTION_FRAME_CATALOG = "FRAME_CATALOG";
     public static final String COLLECTION_RESERVATIONS = "RESERVATIONS";
     public static final String COLLECTION_CLINIC_INFORMATION = "CLINIC_INFORMATION";
+    public static final String COLLECTION_CUSTOMERS = "CUSTOMERS";
     public static final String DOC_CLINIC_GENERAL = "general";
 
     public interface Callback<T> {
@@ -225,6 +228,30 @@ public class FirestoreService {
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error fetching clinic information: " + e.getMessage(), e);
                     if (callback != null) callback.onSuccess(new ClinicModel("Franselle Optical Clinic", "", "", "", ""));
+                });
+    }
+
+    public static void updateCustomerProfile(String fullName, String phoneNumber, String address, Callback<Void> callback) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            if (callback != null) callback.onError("You must be logged in to update your profile.");
+            return;
+        }
+
+        Map<String, Object> updateData = new HashMap<>();
+        if (fullName != null) updateData.put("fullName", fullName.trim());
+        if (phoneNumber != null) updateData.put("phoneNumber", phoneNumber.trim());
+        if (address != null) updateData.put("address", address.trim());
+
+        getDb().collection(COLLECTION_CUSTOMERS)
+                .document(user.getUid())
+                .set(updateData, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> {
+                    if (callback != null) callback.onSuccess(null);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error updating customer profile: " + e.getMessage(), e);
+                    if (callback != null) callback.onError("Failed to update profile: " + e.getMessage());
                 });
     }
 }

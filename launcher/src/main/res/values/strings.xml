@@ -32,4 +32,9 @@
     <string name="instruction_pending">Your reservation is currently being reviewed by the clinic. Please wait for the clinic to approve your reservation.</string>
     <string name="instruction_approved">Please present your Reservation ID upon visiting the clinic for the fitting and pick-up.</string>
     <string name="instruction_rejected">This reservation was not approved by the clinic. You may make a new reservation for another available frame.</string>
+
+    <!-- Help & Support Strings -->
+    <string name="support_clinic_name">Franselle Optical Clinic</string>
+    <string name="support_default_subtitle">Contact us for assistance.</string>
+    <string name="err_no_email_app">No email client found. Please contact support.</string>
 </resources>
