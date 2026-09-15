@@ -37,4 +37,7 @@
     <string name="support_clinic_name">Franselle Optical Clinic</string>
     <string name="support_default_subtitle">Contact us for assistance.</string>
     <string name="err_no_email_app">No email client found. Please contact support.</string>
+
+    <!-- AR Navigation Strings -->
+    <string name="btn_ar_continue">Continue →</string>
 </resources>

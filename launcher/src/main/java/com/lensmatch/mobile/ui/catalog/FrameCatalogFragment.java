@@ -113,6 +113,7 @@ public class FrameCatalogFragment extends Fragment {
             });
         }
 
+        syncChipWithSelectedStyle();
         updateChipStyles();
         loadCatalogFrames();
         return root;
@@ -122,6 +123,29 @@ public class FrameCatalogFragment extends Fragment {
     public void onResume() {
         super.onResume();
         loadCatalogFrames();
+    }
+
+    public void setInitialStyle(String style) {
+        if (style == null || style.trim().isEmpty()) return;
+        this.selectedStyle = style.trim();
+        if (chipGroupFilter != null && rvFrames != null) {
+            syncChipWithSelectedStyle();
+            updateChipStyles();
+            applyLocalFilters();
+        }
+    }
+
+    private void syncChipWithSelectedStyle() {
+        if (chipGroupFilter == null || selectedStyle == null || selectedStyle.trim().isEmpty()) return;
+        for (int i = 0; i < chipGroupFilter.getChildCount(); i++) {
+            View child = chipGroupFilter.getChildAt(i);
+            if (child instanceof Chip chip) {
+                if (chip.getText() != null && chip.getText().toString().equalsIgnoreCase(this.selectedStyle.trim())) {
+                    chip.setChecked(true);
+                    break;
+                }
+            }
+        }
     }
 
     private void updateChipStyles() {
@@ -216,24 +240,26 @@ public class FrameCatalogFragment extends Fragment {
             }
         }
 
-        if (filtered.isEmpty()) {
-            if (tvEmptyCatalog != null) {
-                if (!q.isEmpty()) {
-                    tvEmptyCatalog.setText(getString(R.string.catalog_no_frames_matching, searchQuery.trim()));
-                } else {
-                    tvEmptyCatalog.setText(getString(R.string.catalog_no_frames_style));
+        if (rvFrames != null) {
+            if (filtered.isEmpty()) {
+                if (tvEmptyCatalog != null) {
+                    if (!q.isEmpty()) {
+                        tvEmptyCatalog.setText(getString(R.string.catalog_no_frames_matching, searchQuery.trim()));
+                    } else {
+                        tvEmptyCatalog.setText(getString(R.string.catalog_no_frames_style));
+                    }
+                    tvEmptyCatalog.setVisibility(View.VISIBLE);
                 }
-                tvEmptyCatalog.setVisibility(View.VISIBLE);
+                rvFrames.setAdapter(new FrameAdapter(new ArrayList<>(), frame -> {}));
+            } else {
+                if (tvEmptyCatalog != null) tvEmptyCatalog.setVisibility(View.GONE);
+                FrameAdapter adapter = new FrameAdapter(filtered, frame -> {
+                    Intent intent = new Intent(requireContext(), FrameDetailActivity.class);
+                    intent.putExtra("frame", frame);
+                    startActivity(intent);
+                });
+                rvFrames.setAdapter(adapter);
             }
-            rvFrames.setAdapter(new FrameAdapter(new ArrayList<>(), frame -> {}));
-        } else {
-            if (tvEmptyCatalog != null) tvEmptyCatalog.setVisibility(View.GONE);
-            FrameAdapter adapter = new FrameAdapter(filtered, frame -> {
-                Intent intent = new Intent(requireContext(), FrameDetailActivity.class);
-                intent.putExtra("frame", frame);
-                startActivity(intent);
-            });
-            rvFrames.setAdapter(adapter);
         }
     }
 }

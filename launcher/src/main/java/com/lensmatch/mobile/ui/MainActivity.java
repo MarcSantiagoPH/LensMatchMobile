@@ -79,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
         int targetTab = (savedTab != 0) ? savedTab : R.id.nav_home;
         bottomNav.setSelectedItemId(targetTab);
 
+        handleIncomingIntent(getIntent());
+
         fabCamera.setOnClickListener(v -> openCameraScan());
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -92,6 +94,29 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIncomingIntent(intent);
+    }
+
+    private void handleIncomingIntent(Intent intent) {
+        if (intent == null) return;
+        if (intent.hasExtra("selectedStyle")) {
+            String style = intent.getStringExtra("selectedStyle");
+            if (catalogFragment instanceof FrameCatalogFragment) {
+                ((FrameCatalogFragment) catalogFragment).setInitialStyle(style);
+            }
+        }
+        if (intent.hasExtra("open_tab")) {
+            int targetTab = intent.getIntExtra("open_tab", R.id.nav_frame);
+            if (bottomNav != null) {
+                bottomNav.setSelectedItemId(targetTab);
+            }
+        }
     }
 
     @Override

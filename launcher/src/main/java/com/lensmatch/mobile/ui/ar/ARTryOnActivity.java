@@ -1,6 +1,7 @@
 package com.lensmatch.mobile.ui.ar;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,8 +14,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ExperimentalGetImage;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
@@ -30,6 +33,7 @@ import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.lensmatch.mobile.R;
+import com.lensmatch.mobile.ui.MainActivity;
 import com.lensmatch.mobile.utils.StatusBarUtils;
 
 import java.util.ArrayList;
@@ -104,8 +108,16 @@ public class ARTryOnActivity extends AppCompatActivity {
         layoutColorsAr = findViewById(R.id.layout_colors_ar);
 
         ImageView btnBack = findViewById(R.id.btn_back_ar);
-        btnBack.setOnClickListener(v -> finish());
-        StatusBarUtils.applyTopMargin(btnBack);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+            StatusBarUtils.applyTopMargin(btnBack);
+        }
+
+        View btnContinue = findViewById(R.id.btn_continue_ar);
+        if (btnContinue != null) {
+            btnContinue.setOnClickListener(v -> continueToFrameCatalog(selectedFrameStyle));
+            StatusBarUtils.applyTopMargin(btnContinue);
+        }
 
         LinearLayout tabRecommended = findViewById(R.id.tab_recommended);
         LinearLayout tabAllFrames = findViewById(R.id.tab_all_frames);
@@ -175,7 +187,7 @@ public class ARTryOnActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
-    @androidx.camera.core.ExperimentalGetImage
+    @ExperimentalGetImage
     private void processImageProxy(ImageProxy imageProxy) {
         if (imageProxy.getImage() != null) {
             InputImage inputImage = InputImage.fromMediaImage(imageProxy.getImage(), imageProxy.getImageInfo().getRotationDegrees());
@@ -286,7 +298,7 @@ public class ARTryOnActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @androidx.annotation.NonNull String[] permissions, @androidx.annotation.NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_REQUEST_CAMERA && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             startCamera();
@@ -300,5 +312,34 @@ public class ARTryOnActivity extends AppCompatActivity {
         super.onDestroy();
         if (cameraExecutor != null) cameraExecutor.shutdown();
         if (faceDetector != null) faceDetector.close();
+    }
+
+    private void continueToFrameCatalog(String rawStyle) {
+        if (rawStyle == null || "None".equalsIgnoreCase(rawStyle.trim())) {
+            Toast.makeText(this, "Please select a frame shape first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String targetStyle = normalizeCatalogStyle(rawStyle);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("open_tab", R.id.nav_frame);
+        intent.putExtra("selectedStyle", targetStyle);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
+    }
+
+    private String normalizeCatalogStyle(String raw) {
+        if (raw == null) return "Wayfarer";
+        String lower = raw.trim().toLowerCase();
+        if (lower.contains("aviator")) return "Aviator";
+        if (lower.contains("bowline") || lower.contains("browline")) return "Browline";
+        if (lower.contains("cat")) return "Cat-Eye";
+        if (lower.contains("geometric")) return "Geometric";
+        if (lower.contains("oval")) return "Oval";
+        if (lower.contains("rect")) return "Rectangle";
+        if (lower.contains("round")) return "Round";
+        if (lower.contains("square")) return "Square";
+        return "Wayfarer";
     }
 }

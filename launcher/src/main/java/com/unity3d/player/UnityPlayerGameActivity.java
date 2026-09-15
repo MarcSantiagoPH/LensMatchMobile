@@ -1,14 +1,18 @@
 package com.unity3d.player;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
@@ -19,12 +23,14 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.view.ViewCompat;
 
 import com.google.androidgamesdk.GameActivity;
 import com.lensmatch.bridge.UnityBridge;
 import com.lensmatch.mobile.R;
+import com.lensmatch.mobile.ui.MainActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -120,8 +126,8 @@ public class UnityPlayerGameActivity extends GameActivity
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(android.Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{android.Manifest.permission.CAMERA}, 101);
+            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, 101);
             }
         }
 
@@ -151,6 +157,35 @@ public class UnityPlayerGameActivity extends GameActivity
         return "wayfarer";
     }
 
+    private void continueToFrameCatalog(String rawStyle) {
+        if (rawStyle == null || "none".equalsIgnoreCase(rawStyle.trim())) {
+            Toast.makeText(this, "Please select a frame shape first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String targetStyle = toCatalogStyleName(rawStyle);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("open_tab", R.id.nav_frame);
+        intent.putExtra("selectedStyle", targetStyle);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
+    }
+
+    private String toCatalogStyleName(String raw) {
+        if (raw == null) return "Wayfarer";
+        String lower = raw.trim().toLowerCase();
+        if (lower.contains("aviator")) return "Aviator";
+        if (lower.contains("bowline") || lower.contains("browline")) return "Browline";
+        if (lower.contains("cat")) return "Cat-Eye";
+        if (lower.contains("geometric")) return "Geometric";
+        if (lower.contains("oval")) return "Oval";
+        if (lower.contains("rect")) return "Rectangle";
+        if (lower.contains("round")) return "Round";
+        if (lower.contains("square")) return "Square";
+        return "Wayfarer";
+    }
+
     private void setupNativeControls(View overlay) {
         loadingOverlay = overlay.findViewById(R.id.unity_loading_overlay);
         tvLoadingSubtitle = overlay.findViewById(R.id.tv_loading_subtitle);
@@ -162,6 +197,11 @@ public class UnityPlayerGameActivity extends GameActivity
         ImageView btnBack = overlay.findViewById(R.id.btn_back_unity_ar);
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
+        }
+
+        View btnContinue = overlay.findViewById(R.id.btn_continue_unity_ar);
+        if (btnContinue != null) {
+            btnContinue.setOnClickListener(v -> continueToFrameCatalog(mCurrentShape));
         }
 
         LinearLayout tabRec = overlay.findViewById(R.id.tab_recommended_unity);
@@ -286,11 +326,11 @@ public class UnityPlayerGameActivity extends GameActivity
                 } else {
                     message = mCurrentColor + "_" + mCurrentShape;
                 }
-                android.util.Log.d("LensMatchDebug", "Sending showFrame: " + message);
+                Log.d("LensMatchDebug", "Sending showFrame: " + message);
                 UnityBridge.showFrame(message);
             }
         } catch (Throwable t) {
-            android.util.Log.w("UnityActivity", "Error in updateFrame: " + t.getMessage());
+            Log.w("UnityActivity", "Error in updateFrame: " + t.getMessage());
         }
     }
 
@@ -365,7 +405,7 @@ public class UnityPlayerGameActivity extends GameActivity
             try {
                 Thread.sleep(800);
             } catch (InterruptedException ignored) {}
-            android.os.Process.killProcess(android.os.Process.myPid());
+            Process.killProcess(Process.myPid());
         }).start();
     }
 

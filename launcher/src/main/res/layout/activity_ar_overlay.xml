@@ -5,15 +5,37 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent">
 
-    <!-- Top Navigation -->
-    <ImageView
-        android:id="@+id/btn_back_unity_ar"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_margin="16dp"
-        android:padding="8dp"
-        android:src="@drawable/ic_scan"
-        app:tint="@android:color/white" />
+    <!-- Top Navigation Row -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/btn_back_unity_ar"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_alignParentStart="true"
+            android:padding="8dp"
+            android:src="@drawable/ic_scan"
+            app:tint="@android:color/white" />
+
+        <TextView
+            android:id="@+id/btn_continue_unity_ar"
+            android:layout_width="wrap_content"
+            android:layout_height="38dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/bg_btn_continue"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:text="@string/btn_ar_continue"
+            android:textColor="@color/accentGold"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
 
     <!-- Bottom AR Controls Overlay -->
     <LinearLayout
