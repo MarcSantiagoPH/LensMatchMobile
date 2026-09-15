@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.lensmatch.mobile.R;
-import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.data.FrameModel;
 import com.lensmatch.mobile.service.FirestoreService;
 import com.lensmatch.mobile.utils.StatusBarUtils;
@@ -122,12 +121,27 @@ public class FrameDetailActivity extends AppCompatActivity {
             if (!frame.isAvailable()) {
                 btnReserveNow.setEnabled(false);
                 btnReserveNow.setText("Unavailable");
-            } else if (AppState.getInstance().isReserved(frame.getId())) {
-                btnReserveNow.setEnabled(false);
-                btnReserveNow.setText("Already Reserved");
             } else {
-                btnReserveNow.setEnabled(true);
-                btnReserveNow.setText("Reserve Now");
+                FirestoreService.checkHasActiveReservation(frame.getId(), new FirestoreService.Callback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean hasActive) {
+                        if (isFinishing() || isDestroyed()) return;
+                        if (Boolean.TRUE.equals(hasActive)) {
+                            btnReserveNow.setEnabled(false);
+                            btnReserveNow.setText("Already Reserved");
+                        } else {
+                            btnReserveNow.setEnabled(true);
+                            btnReserveNow.setText("Reserve Now");
+                        }
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        if (isFinishing() || isDestroyed()) return;
+                        btnReserveNow.setEnabled(true);
+                        btnReserveNow.setText("Reserve Now");
+                    }
+                });
             }
         }
     }

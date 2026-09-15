@@ -82,7 +82,7 @@ public class FirestoreService {
     public static boolean isActiveStatus(String status) {
         if (status == null) return false;
         String s = status.trim().toUpperCase();
-        return "PENDING".equals(s) || "APPROVED".equals(s) || "CONFIRMED".equals(s);
+        return "PENDING".equals(s) || "APPROVED".equals(s);
     }
 
     public static void createReservation(FrameModel frame, Callback<String> callback) {
@@ -116,7 +116,7 @@ public class FirestoreService {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     int activeCount = 0;
-                    boolean hasPendingForFrame = false;
+                    boolean hasActiveForFrame = false;
 
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
                         Map<String, Object> data = doc.getData();
@@ -124,8 +124,8 @@ public class FirestoreService {
                             String fId = data.containsKey("frameId") ? String.valueOf(data.get("frameId")) : "";
                             String status = data.containsKey("status") ? String.valueOf(data.get("status")) : "Pending";
 
-                            if (fId.equals(frame.getId()) && "Pending".equalsIgnoreCase(status.trim())) {
-                                hasPendingForFrame = true;
+                            if (fId.equals(frame.getId()) && isActiveStatus(status)) {
+                                hasActiveForFrame = true;
                             }
 
                             if (isActiveStatus(status)) {
@@ -134,8 +134,8 @@ public class FirestoreService {
                         }
                     }
 
-                    if (hasPendingForFrame) {
-                        if (callback != null) callback.onError("You already have a pending reservation for this frame.");
+                    if (hasActiveForFrame) {
+                        if (callback != null) callback.onError("You already have an active reservation for this frame.");
                         return;
                     }
 
@@ -252,6 +252,37 @@ public class FirestoreService {
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error updating customer profile: " + e.getMessage(), e);
                     if (callback != null) callback.onError("Failed to update profile: " + e.getMessage());
+                });
+    }
+
+    public static void checkHasActiveReservation(String frameId, Callback<Boolean> callback) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            if (callback != null) callback.onSuccess(false);
+            return;
+        }
+
+        getDb().collection(COLLECTION_RESERVATIONS)
+                .whereEqualTo("customerId", user.getUid())
+                .whereEqualTo("frameId", frameId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    boolean hasActive = false;
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Map<String, Object> data = doc.getData();
+                        if (data != null) {
+                            String status = data.containsKey("status") ? String.valueOf(data.get("status")) : "Pending";
+                            if (isActiveStatus(status)) {
+                                hasActive = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (callback != null) callback.onSuccess(hasActive);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error checking active reservation for frame: " + e.getMessage(), e);
+                    if (callback != null) callback.onSuccess(false);
                 });
     }
 }
