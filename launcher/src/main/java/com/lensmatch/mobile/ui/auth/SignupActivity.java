@@ -26,8 +26,15 @@ public class SignupActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getDelegate().setLocalNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        androidx.core.view.WindowInsetsControllerCompat controller = 
+                androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(true);
+        }
 
         android.view.View root = findViewById(R.id.signup_root);
         StatusBarUtils.applyTopWindowInsets(root);

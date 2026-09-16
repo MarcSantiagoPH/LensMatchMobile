@@ -47,6 +47,14 @@ public class MainActivity extends AppCompatActivity {
         View fragmentContainer = findViewById(R.id.fragment_container);
         StatusBarUtils.applyTopWindowInsets(fragmentContainer);
 
+        androidx.core.view.WindowInsetsControllerCompat controller = 
+                androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(false);
+            controller.setAppearanceLightNavigationBars(false);
+        }
+        getWindow().setNavigationBarColor(androidx.core.content.ContextCompat.getColor(this, R.color.bottomBarBackground));
+
         bottomNav = findViewById(R.id.bottom_navigation);
         FloatingActionButton fabCamera = findViewById(R.id.fab_camera);
 

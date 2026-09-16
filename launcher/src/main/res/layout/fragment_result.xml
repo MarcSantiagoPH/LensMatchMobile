@@ -123,11 +123,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="#0FD4AF37"
+            app:cardBackgroundColor="@color/heroCardBg"
             app:cardCornerRadius="16dp"
-            app:strokeColor="#33D4AF37"
-            app:strokeWidth="1dp"
-            app:cardElevation="0dp">
+            app:strokeColor="@color/heroCardStroke"
+            app:strokeWidth="1.5dp"
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -146,14 +146,14 @@
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_eyeglasses"
-                        app:tint="@color/accentGold"
+                        app:tint="@color/brandOrange"
                         android:layout_marginEnd="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="AI Eyewear Stylist"
-                        android:textColor="@color/accentGold"
+                        android:textColor="@color/brandOrange"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         android:letterSpacing="0.04" />
@@ -164,7 +164,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Based on your face shape, these frames will complement your features perfectly."
-                    android:textColor="@color/textPrimary"
+                    android:textColor="@color/heroCardTitle"
                     android:textSize="13sp"
                     android:lineSpacingExtra="4dp" />
             </LinearLayout>
@@ -177,7 +177,7 @@
             android:layout_marginTop="24dp"
             android:layout_marginBottom="10dp"
             android:text="RECOMMENDED"
-            android:textColor="@color/textSecondary"
+            android:textColor="@color/brandBlue"
             android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.10"
@@ -196,7 +196,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
             android:text="AVOID"
-            android:textColor="@color/textSecondary"
+            android:textColor="@color/brandBlue"
             android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.10"
@@ -215,14 +215,14 @@
             android:layout_height="54dp"
             android:layout_marginTop="28dp"
             android:text="Try Frames On"
-            android:textColor="@color/bgCard"
+            android:textColor="@color/heroCardBtnText"
             android:textSize="15sp"
             android:textStyle="bold"
             android:letterSpacing="0.01"
-            app:backgroundTint="@color/accentGold"
+            app:backgroundTint="@color/heroCardBtnBg"
             app:cornerRadius="14dp"
             app:icon="@drawable/ic_eyeglasses"
-            app:iconTint="@color/bgCard"
+            app:iconTint="@color/heroCardBtnText"
             app:iconGravity="textStart"
             app:iconPadding="10dp" />
 

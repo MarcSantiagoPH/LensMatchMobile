@@ -1,10 +1,12 @@
 package com.lensmatch.mobile.ui.home;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -25,6 +27,7 @@ import java.util.List;
 public class HomeFragment extends Fragment {
     private TextView tvLastResultSubtitle;
     private TextView tvReservationsCount;
+    private ImageView ivHomeLogo;
 
     @Nullable
     @Override
@@ -36,6 +39,7 @@ public class HomeFragment extends Fragment {
         MaterialCardView cardReservations = root.findViewById(R.id.card_my_reservations);
         tvLastResultSubtitle = root.findViewById(R.id.tv_last_result_subtitle);
         tvReservationsCount = root.findViewById(R.id.tv_reservations_count);
+        ivHomeLogo = root.findViewById(R.id.iv_home_logo);
 
         btnScanFace.setOnClickListener(v -> {
             if (getActivity() instanceof MainActivity) {
@@ -54,6 +58,7 @@ public class HomeFragment extends Fragment {
             startActivity(intent);
         });
 
+        updateLogoForTheme();
         updateQuickLinks();
         return root;
     }
@@ -61,7 +66,23 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        updateLogoForTheme();
         updateQuickLinks();
+    }
+
+    private void updateLogoForTheme() {
+        if (ivHomeLogo == null || getContext() == null) return;
+        boolean isNight = "dark".equalsIgnoreCase(AppState.getInstance().getThemeMode()) ||
+                (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+
+        // If a separate logo_lensmatch_dark drawable is provided, use it for dark mode.
+        // Otherwise, Android automatically resolves R.drawable.logo_lensmatch from res/drawable or res/drawable-night.
+        int darkLogoRes = getResources().getIdentifier("logo_lensmatch_dark", "drawable", requireContext().getPackageName());
+        if (isNight && darkLogoRes != 0) {
+            ivHomeLogo.setImageResource(darkLogoRes);
+        } else {
+            ivHomeLogo.setImageResource(R.drawable.logo_lensmatch);
+        }
     }
 
     private void updateQuickLinks() {

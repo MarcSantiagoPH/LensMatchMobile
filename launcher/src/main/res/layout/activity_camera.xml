@@ -30,14 +30,14 @@
         android:src="@drawable/ic_close"
         android:contentDescription="Close" />
 
-    <!-- Instruction Pill (center top) with glowing border -->
+    <!-- Instruction Pill — bottom area above scanning indicator -->
     <LinearLayout
         android:id="@+id/layout_instruction_pill"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="56dp"
-        android:background="@drawable/bg_instruction_pill_green"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="100dp"
+        android:background="@drawable/bg_instruction_pill"
         android:paddingHorizontal="24dp"
         android:paddingVertical="12dp">
 
@@ -45,40 +45,43 @@
             android:id="@+id/tv_instruction"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Face Aligned! Ready to scan."
+            android:text="Keep face visible"
             android:textColor="@color/white"
             android:textSize="15sp"
             android:textStyle="bold"
             android:fontFamily="sans-serif-medium" />
     </LinearLayout>
 
-    <!-- Bottom Capture Button (Gold "Capture & Scan" button) -->
-    <FrameLayout
-        android:layout_width="match_parent"
+    <!-- Bottom Scanning Indicator (Subtle pill shown only during multi-frame scan) -->
+    <LinearLayout
+        android:id="@+id/layout_scanning_indicator"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:paddingHorizontal="24dp"
-        android:paddingBottom="42dp"
-        android:paddingTop="16dp">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_capture"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="Capture &amp; Scan"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:backgroundTint="@color/accentGold"
-            app:cornerRadius="16dp" />
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_scanning_pill"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="12dp"
+        android:visibility="gone">
 
         <ProgressBar
-            android:id="@+id/progress_capture"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:layout_gravity="center"
-            android:indeterminateTint="@color/black"
-            android:visibility="gone" />
-    </FrameLayout>
+            android:id="@+id/progress_scanning"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:indeterminateTint="@color/brandOrange"
+            android:layout_marginEnd="12dp" />
+
+        <TextView
+            android:id="@+id/tv_scanning_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scanning face contours..."
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
 
 </FrameLayout>

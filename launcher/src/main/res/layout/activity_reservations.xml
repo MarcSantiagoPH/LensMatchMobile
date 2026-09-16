@@ -13,7 +13,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/bgPrimary"
         app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="@color/white"
+        app:navigationIconTint="@color/toolbarIconTint"
         app:title="My Reservations"
         app:titleTextColor="@color/textPrimary" />
 

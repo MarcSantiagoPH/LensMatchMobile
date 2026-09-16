@@ -24,6 +24,7 @@ public class AppState {
     private String userAddress = "";
     private String userPhotoUrl = null;
     private boolean isLoggedIn = false;
+    private String themeMode = "dark";
 
     private AppState() {}
 
@@ -50,6 +51,34 @@ public class AppState {
         state.userAddress = prefs.getString("userAddress", "");
         state.userPhotoUrl = prefs.getString("userPhotoUrl", null);
         state.isLoggedIn = prefs.getBoolean("isLoggedIn", false);
+        state.themeMode = prefs.getString("themeMode", "dark");
+        state.applyThemeMode();
+    }
+
+    public String getThemeMode() {
+        return themeMode;
+    }
+
+    public boolean isDarkMode() {
+        return "dark".equalsIgnoreCase(themeMode);
+    }
+
+    public void setThemeMode(String mode) {
+        this.themeMode = mode;
+        if (prefs != null) {
+            prefs.edit().putString("themeMode", mode).apply();
+        }
+        applyThemeMode();
+    }
+
+    public void applyThemeMode() {
+        if ("light".equalsIgnoreCase(themeMode)) {
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
+                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
+        } else {
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
+                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES);
+        }
     }
 
     public List<FrameModel> getReservedFrames() {

@@ -17,34 +17,69 @@
         android:paddingBottom="100dp">
 
         <!-- Header -->
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Welcome to"
-            android:textColor="@color/textSecondary"
-            android:textSize="15sp"
-            android:letterSpacing="0.04"
-            android:fontFamily="sans-serif" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="LensMatch"
-            android:textColor="@color/accentGold"
-            android:textSize="34sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginBottom="24dp" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Welcome to"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.04"
+                    android:fontFamily="sans-serif" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LensMatch"
+                    android:textColor="@color/brandOrange"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_home_logo"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/logoCardBg"
+                app:strokeColor="@color/logoCardStroke"
+                app:strokeWidth="2dp">
+
+                <ImageView
+                    android:id="@+id/iv_home_logo"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="4dp"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="LensMatch Logo"
+                    android:src="@drawable/logo_lensmatch" />
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
         <!-- Hero Scan Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="#121212"
+            app:cardBackgroundColor="@color/heroCardBg"
             app:cardCornerRadius="20dp"
-            app:strokeColor="@color/borderCard"
-            app:strokeWidth="1dp"
-            app:cardElevation="0dp">
+            app:strokeColor="@color/heroCardStroke"
+            app:strokeWidth="1.5dp"
+            app:cardElevation="3dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -64,7 +99,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Find Your Perfect Frame"
-                    android:textColor="@color/textPrimary"
+                    android:textColor="@color/heroCardTitle"
                     android:textSize="19sp"
                     android:textStyle="bold"
                     android:fontFamily="sans-serif-medium"
@@ -75,7 +110,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="Scan your face for AI-powered recommendations tailored to your face shape."
-                    android:textColor="@color/textSecondary"
+                    android:textColor="@color/heroCardSubtitle"
                     android:textSize="13sp"
                     android:gravity="center"
                     android:lineSpacingExtra="3dp" />
@@ -86,11 +121,11 @@
                     android:layout_height="52dp"
                     android:layout_marginTop="20dp"
                     android:text="Scan Your Face"
-                    android:textColor="@color/bgCard"
+                    android:textColor="@color/heroCardBtnText"
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.01"
-                    app:backgroundTint="@color/accentGold"
+                    app:backgroundTint="@color/heroCardBtnBg"
                     app:cornerRadius="14dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -113,11 +148,11 @@
             android:id="@+id/card_last_result"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="#121212"
+            app:cardBackgroundColor="@color/bgCard"
             app:cardCornerRadius="16dp"
             app:strokeColor="@color/borderCard"
-            app:strokeWidth="1dp"
-            app:cardElevation="0dp">
+            app:strokeWidth="1.5dp"
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -136,7 +171,7 @@
                         android:layout_height="20dp"
                         android:layout_gravity="center"
                         android:src="@drawable/ic_history"
-                        app:tint="@color/accentGold" />
+                        app:tint="@color/avatarIconTint" />
                 </FrameLayout>
 
                 <LinearLayout
@@ -168,7 +203,7 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@drawable/ic_chevron_right"
-                    app:tint="#44FFFFFF" />
+                    app:tint="@color/textSecondary" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -178,11 +213,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            app:cardBackgroundColor="#121212"
+            app:cardBackgroundColor="@color/bgCard"
             app:cardCornerRadius="16dp"
             app:strokeColor="@color/borderCard"
-            app:strokeWidth="1dp"
-            app:cardElevation="0dp">
+            app:strokeWidth="1.5dp"
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -201,7 +236,7 @@
                         android:layout_height="20dp"
                         android:layout_gravity="center"
                         android:src="@drawable/ic_calendar"
-                        app:tint="@color/accentGold" />
+                        app:tint="@color/avatarIconTint" />
                 </FrameLayout>
 
                 <LinearLayout
@@ -233,7 +268,7 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@drawable/ic_chevron_right"
-                    app:tint="#44FFFFFF" />
+                    app:tint="@color/textSecondary" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

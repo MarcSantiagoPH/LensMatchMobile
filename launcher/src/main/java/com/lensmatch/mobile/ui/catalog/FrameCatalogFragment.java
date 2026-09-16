@@ -149,7 +149,7 @@ public class FrameCatalogFragment extends Fragment {
     }
 
     private void updateChipStyles() {
-        if (chipGroupFilter == null) return;
+        if (chipGroupFilter == null || getContext() == null) return;
         int activeCheckedId = chipGroupFilter.getCheckedChipId();
         if (activeCheckedId == View.NO_ID) {
             Chip allChip = chipGroupFilter.findViewById(R.id.chip_filter_all);
@@ -159,20 +159,28 @@ public class FrameCatalogFragment extends Fragment {
             }
         }
 
+        int selBg = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.chipSelectedBg);
+        int selStroke = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.chipStrokeSelected);
+        int selText = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.chipSelectedText);
+
+        int unselBg = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.chipUnselectedBg);
+        int unselStroke = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.chipStrokeUnselected);
+        int unselText = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.chipUnselectedText);
+
         final int targetCheckedId = activeCheckedId;
         for (int i = 0; i < chipGroupFilter.getChildCount(); i++) {
             View child = chipGroupFilter.getChildAt(i);
             if (child instanceof Chip chip) {
                 if (chip.getId() == targetCheckedId) {
-                    chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#221E14")));
-                    chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor("#D4AF37")));
+                    chip.setChipBackgroundColor(ColorStateList.valueOf(selBg));
+                    chip.setChipStrokeColor(ColorStateList.valueOf(selStroke));
                     chip.setChipStrokeWidth(3f);
-                    chip.setTextColor(Color.parseColor("#D4AF37"));
+                    chip.setTextColor(selText);
                 } else {
-                    chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#18181B")));
-                    chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor("#27272A")));
-                    chip.setChipStrokeWidth(1f);
-                    chip.setTextColor(Color.parseColor("#A1A1AA"));
+                    chip.setChipBackgroundColor(ColorStateList.valueOf(unselBg));
+                    chip.setChipStrokeColor(ColorStateList.valueOf(unselStroke));
+                    chip.setChipStrokeWidth(1.5f);
+                    chip.setTextColor(unselText);
                 }
             }
         }

@@ -278,7 +278,7 @@ public class ARTryOnActivity extends AppCompatActivity {
                 chip.setBackgroundResource(R.drawable.bg_confidence_chip);
                 chip.setTextColor(getColor(R.color.accentGold));
             } else {
-                chip.setBackgroundResource(R.color.bgCard);
+                chip.setBackgroundResource(R.drawable.bg_color_chip_unselected);
                 chip.setTextColor(getColor(R.color.textSecondary));
             }
 

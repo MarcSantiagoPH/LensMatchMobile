@@ -47,10 +47,32 @@ public class ProfileFragment extends Fragment {
         itemNotifications.setOnClickListener(v -> startActivity(new Intent(requireContext(), NotificationsActivity.class)));
         itemHelpSupport.setOnClickListener(v -> startActivity(new Intent(requireContext(), HelpSupportActivity.class)));
 
+        com.google.android.material.switchmaterial.SwitchMaterial switchDarkMode = root.findViewById(R.id.switch_dark_mode);
+        TextView tvThemeSubtitle = root.findViewById(R.id.tv_theme_subtitle);
+        View itemThemeMode = root.findViewById(R.id.item_theme_mode);
+
+        boolean isDark = AppState.getInstance().isDarkMode();
+        if (switchDarkMode != null) {
+            switchDarkMode.setChecked(isDark);
+            if (tvThemeSubtitle != null) {
+                tvThemeSubtitle.setText(isDark ? "Dark appearance enabled" : "Light appearance enabled");
+            }
+
+            switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                AppState.getInstance().setThemeMode(isChecked ? "dark" : "light");
+                if (tvThemeSubtitle != null) {
+                    tvThemeSubtitle.setText(isChecked ? "Dark appearance enabled" : "Light appearance enabled");
+                }
+            });
+        }
+        if (itemThemeMode != null && switchDarkMode != null) {
+            itemThemeMode.setOnClickListener(v -> switchDarkMode.toggle());
+        }
+
         btnLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
             AppState.getInstance().logout();
-            Intent intent = new Intent(requireContext(), LoginActivity.class);
+            Intent intent = new Intent(requireContext(), com.lensmatch.mobile.ui.auth.LandingActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });

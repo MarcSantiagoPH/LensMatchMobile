@@ -235,19 +235,19 @@ public class UnityPlayerGameActivity extends GameActivity
     }
 
     private void updateTabs() {
-        int gold = Color.parseColor("#D4AF37");
-        int grey = Color.parseColor("#AFAFAF");
+        int orange = Color.parseColor("#F28B30");
+        int muted = Color.parseColor("#98A9C2");
         if (tvTabRecommended == null || tvTabAllFrames == null) return;
         if (selectedTabIndex == 0) {
-            tvTabRecommended.setTextColor(gold);
-            tvTabAllFrames.setTextColor(grey);
-            if (indicatorRecommended != null) indicatorRecommended.setBackgroundColor(gold);
+            tvTabRecommended.setTextColor(orange);
+            tvTabAllFrames.setTextColor(muted);
+            if (indicatorRecommended != null) indicatorRecommended.setBackgroundColor(orange);
             if (indicatorAllFrames   != null) indicatorAllFrames.setBackgroundColor(Color.TRANSPARENT);
         } else {
-            tvTabRecommended.setTextColor(grey);
-            tvTabAllFrames.setTextColor(gold);
+            tvTabRecommended.setTextColor(muted);
+            tvTabAllFrames.setTextColor(orange);
             if (indicatorRecommended != null) indicatorRecommended.setBackgroundColor(Color.TRANSPARENT);
-            if (indicatorAllFrames   != null) indicatorAllFrames.setBackgroundColor(gold);
+            if (indicatorAllFrames   != null) indicatorAllFrames.setBackgroundColor(orange);
         }
     }
 
@@ -276,7 +276,7 @@ public class UnityPlayerGameActivity extends GameActivity
 
             boolean sel = normalizeShapeName(frame).equalsIgnoreCase(mCurrentShape);
             circleBg.setBackgroundResource(sel ? R.drawable.bg_ar_circle_selected : R.drawable.bg_ar_circle_unselected);
-            label.setTextColor(sel ? Color.parseColor("#D4AF37") : Color.WHITE);
+            label.setTextColor(sel ? Color.parseColor("#F28B30") : Color.WHITE);
 
             item.setOnClickListener(v -> {
                 mCurrentShape = normalizeShapeName(frame);
@@ -299,8 +299,8 @@ public class UnityPlayerGameActivity extends GameActivity
 
             boolean sel = opt.code.equalsIgnoreCase(mCurrentColor);
             chip.setBackgroundResource(sel ? R.drawable.bg_confidence_chip : 0);
-            if (!sel) chip.setBackgroundColor(Color.parseColor("#141414"));
-            chip.setTextColor(sel ? Color.parseColor("#D4AF37") : Color.parseColor("#AFAFAF"));
+            if (!sel) chip.setBackgroundColor(Color.parseColor("#141C2B"));
+            chip.setTextColor(sel ? Color.parseColor("#F28B30") : Color.parseColor("#98A9C2"));
 
             chip.setOnClickListener(v -> {
                 mCurrentColor = opt.code;

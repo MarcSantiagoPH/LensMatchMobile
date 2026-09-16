@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_checked="true" android:color="@color/accentGold" />
-    <item android:color="@color/textSecondary" />
+    <item android:state_checked="true" android:color="@color/bottomNavIconActive" />
+    <item android:color="@color/bottomNavIconInactive" />
 </selector>
+

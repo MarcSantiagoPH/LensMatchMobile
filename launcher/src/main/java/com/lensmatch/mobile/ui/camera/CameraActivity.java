@@ -7,9 +7,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
@@ -46,10 +47,10 @@ import androidx.core.content.ContextCompat;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
+import com.google.mlkit.vision.face.FaceContour;
 import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
-import com.google.android.material.button.MaterialButton;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.ui.FaceMeshOverlayView;
@@ -71,8 +72,8 @@ public class CameraActivity extends AppCompatActivity {
     private FaceMeshOverlayView faceMeshOverlay;
     private View layoutInstructionPill;
     private TextView tvInstruction;
-    private MaterialButton btnCapture;
-    private ProgressBar progressCapture;
+    private View layoutScanningIndicator;
+    private TextView tvScanningStatus;
 
     private ImageCapture imageCapture;
     private FaceDetector faceDetector;
@@ -82,7 +83,7 @@ public class CameraActivity extends AppCompatActivity {
     private Face latestFace = null;
     private boolean isCapturing = false;
 
-    // Auto-capture progress tracking
+    // Auto-capture progress tracking (~1.0s smooth biometric hold)
     private float scanProgress = 0f;
     private static final float SCAN_INCREMENT = 0.042f; // ~24 frames (~1.0s at 24-30fps)
     private static final float SCAN_DECAY = 0.02f;      // Gentle decay on slight movement
@@ -101,18 +102,13 @@ public class CameraActivity extends AppCompatActivity {
         faceMeshOverlay = findViewById(R.id.face_mesh_overlay);
         layoutInstructionPill = findViewById(R.id.layout_instruction_pill);
         tvInstruction = findViewById(R.id.tv_instruction);
-        btnCapture = findViewById(R.id.btn_capture);
-        progressCapture = findViewById(R.id.progress_capture);
+        layoutScanningIndicator = findViewById(R.id.layout_scanning_indicator);
+        tvScanningStatus = findViewById(R.id.tv_scanning_status);
 
         ImageView btnClose = findViewById(R.id.btn_close);
         btnClose.setOnClickListener(v -> finish());
         StatusBarUtils.applyTopMargin(btnClose);
         StatusBarUtils.applyTopMargin(layoutInstructionPill);
-
-        btnCapture.setOnClickListener(v -> {
-            triggerHapticFeedback();
-            captureAndProcessImage();
-        });
 
         FaceDetectorOptions options = new FaceDetectorOptions.Builder()
                 .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
@@ -198,7 +194,11 @@ public class CameraActivity extends AppCompatActivity {
                             temporalFrames.add(orientedBmp);
                             remainingTemporalSamples--;
                             int collected = TARGET_TEMPORAL_SAMPLES - remainingTemporalSamples;
-                            runOnUiThread(() -> tvInstruction.setText("Scanning face contours (" + collected + "/" + TARGET_TEMPORAL_SAMPLES + " frames)..."));
+                            runOnUiThread(() -> {
+                                if (tvScanningStatus != null) {
+                                    tvScanningStatus.setText("Scanning face contours (" + collected + "/" + TARGET_TEMPORAL_SAMPLES + " frames)...");
+                                }
+                            });
                         }
                     }
                 } catch (Throwable t) {
@@ -278,7 +278,7 @@ public class CameraActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(null, FaceMeshOverlayView.GuideState.SEARCHING, scanProgress, matrix, imageWidth, imageHeight);
-                setInstruction("Position face in camera", FaceMeshOverlayView.GuideState.SEARCHING);
+                setInstruction("Position face in center oval", FaceMeshOverlayView.GuideState.SEARCHING);
             });
             return;
         }
@@ -307,9 +307,9 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
 
-        // 2. Size Quality Gate: Face occupies 20%–85% of screen height
+        // 2. Size Quality Gate: Face occupies 18%–88% of screen height
         float faceHeight = bounds.height();
-        if (faceHeight < imageHeight * 0.20f) {
+        if (faceHeight < imageHeight * 0.18f) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
                 Matrix matrix = getScreenTransformMatrix(sourceTransform);
@@ -318,7 +318,7 @@ public class CameraActivity extends AppCompatActivity {
             });
             return;
         }
-        if (faceHeight > imageHeight * 0.85f) {
+        if (faceHeight > imageHeight * 0.88f) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
                 Matrix matrix = getScreenTransformMatrix(sourceTransform);
@@ -328,26 +328,39 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
 
-        // 3. Center Quality Gate: Relaxed 28% tolerance
-        float centerX = bounds.centerX();
-        float centerY = bounds.centerY();
-        if (Math.abs(centerX - (imageWidth / 2f)) > imageWidth * 0.28f ||
-            Math.abs(centerY - (imageHeight / 2f)) > imageHeight * 0.28f) {
+        // 3. Boundary Safe Margins Check (only left/right/bottom — top is skipped because
+        //    hair naturally extends above the bounding box top edge and should not block scanning)
+        float marginX = imageWidth * 0.03f;
+        float marginBottom = imageHeight * 0.03f;
+        if (bounds.left < marginX || bounds.right > (imageWidth - marginX) ||
+            bounds.bottom > (imageHeight - marginBottom)) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
                 Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
-                setInstruction("Center face in camera", FaceMeshOverlayView.GuideState.MISALIGNED);
+                setInstruction("Keep face inside frame", FaceMeshOverlayView.GuideState.MISALIGNED);
             });
             return;
         }
 
-        // 4. 3D Head Pose Orientation Check (Yaw <= 18°, Pitch <= 16°, Roll <= 16°)
+        // 4. Face Contour Completeness Check
+        FaceContour faceContour = face.getContour(FaceContour.FACE);
+        if (faceContour == null || faceContour.getPoints() == null || faceContour.getPoints().size() < 25) {
+            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            runOnUiThread(() -> {
+                Matrix matrix = getScreenTransformMatrix(sourceTransform);
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
+                setInstruction("Keep full face inside frame", FaceMeshOverlayView.GuideState.MISALIGNED);
+            });
+            return;
+        }
+
+        // 5. 3D Head Pose Orientation Check (Yaw <= 20°, Pitch <= 18°, Roll <= 18°)
         float yaw = face.getHeadEulerAngleY();   // Left / Right turn
         float pitch = face.getHeadEulerAngleX(); // Up / Down tilt
         float roll = face.getHeadEulerAngleZ();  // Sideways ear-to-shoulder tilt
 
-        if (Math.abs(yaw) > 18.0f) {
+        if (Math.abs(yaw) > 20.0f) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
                 Matrix matrix = getScreenTransformMatrix(sourceTransform);
@@ -356,7 +369,7 @@ public class CameraActivity extends AppCompatActivity {
             });
             return;
         }
-        if (Math.abs(pitch) > 16.0f) {
+        if (Math.abs(pitch) > 18.0f) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
                 Matrix matrix = getScreenTransformMatrix(sourceTransform);
@@ -365,7 +378,7 @@ public class CameraActivity extends AppCompatActivity {
             });
             return;
         }
-        if (Math.abs(roll) > 16.0f) {
+        if (Math.abs(roll) > 18.0f) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
                 Matrix matrix = getScreenTransformMatrix(sourceTransform);
@@ -375,14 +388,14 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
 
-        // Face is in great scanning position!
+        // All quality & orientation checks passed! Face is ready for biometric capture
         scanProgress = Math.min(1.0f, scanProgress + SCAN_INCREMENT);
 
         if (scanProgress >= 1.0f) {
             runOnUiThread(() -> {
                 Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.SUCCESS, 1.0f, matrix, imageWidth, imageHeight);
-                setInstruction("Face Aligned! Ready to scan.", FaceMeshOverlayView.GuideState.SUCCESS);
+                setInstruction("Face aligned! Scanning...", FaceMeshOverlayView.GuideState.SUCCESS);
                 triggerHapticFeedback();
                 captureAndProcessImage();
             });
@@ -392,62 +405,30 @@ public class CameraActivity extends AppCompatActivity {
                 FaceMeshOverlayView.GuideState state = FaceMeshOverlayView.GuideState.ALIGNED;
                 Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, state, currentProgress, matrix, imageWidth, imageHeight);
-                setInstruction("Face Aligned! Ready to scan.", state);
+                setInstruction("Face centered — Hold still...", state);
             });
         }
     }
 
     private void setInstruction(String text, FaceMeshOverlayView.GuideState state) {
         tvInstruction.setText(text);
-        if (state == FaceMeshOverlayView.GuideState.SUCCESS) {
+        if (state == FaceMeshOverlayView.GuideState.SUCCESS ||
+            state == FaceMeshOverlayView.GuideState.SCANNING ||
+            state == FaceMeshOverlayView.GuideState.ALIGNED) {
             if (layoutInstructionPill != null) {
                 layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill_green);
             }
             tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
-            btnCapture.setText("Processing...");
-            btnCapture.setEnabled(false);
-        } else if (state == FaceMeshOverlayView.GuideState.SCANNING || state == FaceMeshOverlayView.GuideState.ALIGNED) {
-            if (layoutInstructionPill != null) {
-                layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill_green);
-            }
-            tvInstruction.setText("Face Aligned! Ready to scan.");
-            tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
-            btnCapture.setText("Capture & Scan");
-            btnCapture.setEnabled(true);
-            btnCapture.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.accentGold));
-            btnCapture.setTextColor(Color.BLACK);
         } else if (state == FaceMeshOverlayView.GuideState.TILTED) {
             if (layoutInstructionPill != null) {
                 layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill_amber);
             }
             tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
-            btnCapture.setText("Capture & Scan");
-            btnCapture.setEnabled(latestFace != null);
-            btnCapture.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.accentGold));
-            btnCapture.setTextColor(Color.BLACK);
-        } else if (state == FaceMeshOverlayView.GuideState.MISALIGNED) {
-            if (layoutInstructionPill != null) {
-                layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill);
-            }
-            tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
-            btnCapture.setText("Capture & Scan");
-            btnCapture.setEnabled(latestFace != null);
-            if (latestFace != null) {
-                btnCapture.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.accentGold));
-                btnCapture.setTextColor(Color.BLACK);
-            } else {
-                btnCapture.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#40E0A96D")));
-                btnCapture.setTextColor(Color.parseColor("#80000000"));
-            }
         } else {
             if (layoutInstructionPill != null) {
                 layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill);
             }
             tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
-            btnCapture.setText("Capture & Scan");
-            btnCapture.setEnabled(false);
-            btnCapture.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#40E0A96D")));
-            btnCapture.setTextColor(Color.parseColor("#80000000"));
         }
     }
 
@@ -472,9 +453,16 @@ public class CameraActivity extends AppCompatActivity {
             temporalFrames.clear();
             remainingTemporalSamples = TARGET_TEMPORAL_SAMPLES;
         }
-        btnCapture.setVisibility(View.INVISIBLE);
-        progressCapture.setVisibility(View.VISIBLE);
-        tvInstruction.setText("Analyzing facial structure (multi-frame sampling)...");
+        if (layoutScanningIndicator != null) {
+            layoutScanningIndicator.setVisibility(View.VISIBLE);
+        }
+        if (tvScanningStatus != null) {
+            tvScanningStatus.setText("Scanning face contours (1/" + TARGET_TEMPORAL_SAMPLES + " frames)...");
+        }
+        tvInstruction.setText("Full face detected! Scanning...");
+        if (layoutInstructionPill != null) {
+            layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill_green);
+        }
 
         File photoFile = new File(getCacheDir(), "captured_face_" + System.currentTimeMillis() + ".jpg");
         ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
@@ -519,14 +507,20 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onError(@NonNull ImageCaptureException exception) {
                 isCapturing = false;
-                btnCapture.setVisibility(View.VISIBLE);
-                progressCapture.setVisibility(View.GONE);
+                scanProgress = 0f;
+                if (layoutScanningIndicator != null) {
+                    layoutScanningIndicator.setVisibility(View.GONE);
+                }
                 Toast.makeText(CameraActivity.this, "Capture failed: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void processFinalResult(String photoPath, List<Bitmap> allFrames, Rect bounds) {
+        if (layoutScanningIndicator != null) {
+            layoutScanningIndicator.setVisibility(View.GONE);
+        }
+
         TFLiteFaceDetector.FaceShapeResult result = tfliteDetector.processMultiFrame(allFrames, bounds);
 
         // Recycle the intermediate preview frames to free native memory immediately

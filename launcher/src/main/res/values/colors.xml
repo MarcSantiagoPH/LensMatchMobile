@@ -1,20 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bgPrimary">#0A0A0A</color>
-    <color name="bgCard">#141414</color>
-    <color name="bgCardSelected">#1A1A24</color>
-    <color name="textPrimary">#F9F6EE</color>
-    <color name="textSecondary">#AFAFAF</color>
-    <color name="accentGold">#D4AF37</color>
-    <color name="borderCard">#2A2A35</color>
+    <!-- Brand Colors -->
+    <color name="brandOrange">#F28B30</color>
+    <color name="brandOrangeDark">#D97218</color>
+    <color name="brandOrangeLight">#FFA556</color>
+    <color name="brandBlue">#3B5B8A</color>
+    <color name="brandBlueDark">#273D5E</color>
+    <color name="brandBlueLight">#597DB3</color>
+
+    <!-- UI Canvas & General Surfaces (Light Mode: Blue Surf Landing Page Style) -->
+    <color name="bgPrimary">#3B5B8A</color>
+    <color name="bgCard">#2C4770</color>
+    <color name="bgCardSelected">#3A5B8A</color>
+    <color name="borderCard">#5274A2</color>
+    <color name="borderCardSubtle">#416089</color>
+
+    <!-- Two-Tone Bottom Navigation Bar & FAB -->
+    <color name="bottomBarBackground">#213757</color>
+    <color name="bottomNavIconActive">#F28B30</color>
+    <color name="bottomNavIconInactive">#D1DFEF</color>
+    <color name="fabBackground">#F28B30</color>
+    <color name="fabIconTint">#3B5B8A</color>
+
+    <!-- Standout Hero Cards & Banners (Landing Page Style) -->
+    <color name="heroCardBg">#273E62</color>
+    <color name="heroCardStroke">#F28B30</color>
+    <color name="heroCardTitle">#FFFFFF</color>
+    <color name="heroCardSubtitle">#D5E2F1</color>
+    <color name="heroCardBtnBg">#F28B30</color>
+    <color name="heroCardBtnText">#3B5B8A</color>
+
+    <!-- Avatar & Icon Circle Container -->
+    <color name="avatarBg">#213757</color>
+    <color name="avatarStroke">#F28B30</color>
+    <color name="avatarIconTint">#F28B30</color>
+
+    <!-- Logo Card Surface (Light Mode: Matches Light Mode background #3B5B8A) -->
+    <color name="logoCardBg">#3B5B8A</color>
+    <color name="logoCardStroke">#F28B30</color>
+
+    <!-- Category Filter Chips -->
+    <color name="chipSelectedBg">#F28B30</color>
+    <color name="chipSelectedText">#3B5B8A</color>
+    <color name="chipUnselectedBg">#2C4770</color>
+    <color name="chipUnselectedText">#D5E2F1</color>
+    <color name="chipStrokeSelected">#F28B30</color>
+    <color name="chipStrokeUnselected">#5274A2</color>
+
+    <!-- Badges & Chips -->
+    <color name="badgeBg">#213757</color>
+    <color name="badgeText">#F28B30</color>
+
+    <!-- Typography -->
+    <color name="textPrimary">#FFFFFF</color>
+    <color name="textSecondary">#D5E2F1</color>
+    <color name="textBrand">#F28B30</color>
+    <color name="toolbarIconTint">#FFFFFF</color>
+
+    <!-- Brand Accent Aliases -->
+    <color name="accentGold">#F28B30</color>
+    <color name="accentOrange">#F28B30</color>
+    <color name="accentBlue">#3B5B8A</color>
+
+    <!-- Utility Colors -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
-    <color name="greenSuccess">#4CAF50</color>
-    <color name="redError">#F44336</color>
+    <color name="greenSuccess">#10B981</color>
+    <color name="redError">#EF4444</color>
     <color name="transparent">#00000000</color>
 
     <!-- Splash Screen Colors -->
-    <color name="staticSplashScreenBackgroundColor">#FF231F20</color>
+    <color name="staticSplashScreenBackgroundColor">#3B5B8A</color>
     <color name="windowSplashScreenIconBackgroundColor">@android:color/transparent</color>
     <color name="windowSplashScreenAnimatedIconColor">@android:color/transparent</color>
+
+    <!-- AR Try-On Dynamic Theming (Light Mode) -->
+    <color name="arBtnContinueBg">#F28B30</color>
+    <color name="arBtnContinueStroke">#F28B30</color>
+    <color name="arBtnContinueText">#3B5B8A</color>
+    <color name="arBackBtnBg">#80213757</color>
+    <color name="arBackBtnStroke">#40FFFFFF</color>
+    <color name="arBottomGradientCenter">#CC213757</color>
+    <color name="arBottomGradientEnd">#F5213757</color>
+    <color name="arCircleUnselectedBg">#802C4770</color>
+    <color name="arCircleUnselectedStroke">#5274A2</color>
 </resources>

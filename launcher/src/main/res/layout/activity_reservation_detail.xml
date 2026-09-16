@@ -14,7 +14,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/bgPrimary"
         app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="@color/white"
+        app:navigationIconTint="@color/toolbarIconTint"
         app:title="Reservation Details"
         app:titleTextColor="@color/textPrimary" />
 
@@ -47,7 +47,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#121212"
+                app:cardBackgroundColor="@color/bgCard"
                 app:cardCornerRadius="16dp"
                 app:strokeColor="@color/borderCard"
                 app:strokeWidth="1dp"
@@ -124,7 +124,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#121212"
+                app:cardBackgroundColor="@color/bgCard"
                 app:cardCornerRadius="16dp"
                 app:strokeColor="@color/borderCard"
                 app:strokeWidth="1dp"
@@ -249,7 +249,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#121212"
+                app:cardBackgroundColor="@color/bgCard"
                 app:cardCornerRadius="16dp"
                 app:strokeColor="@color/borderCard"
                 app:strokeWidth="1dp"

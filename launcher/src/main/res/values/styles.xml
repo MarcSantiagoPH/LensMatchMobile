@@ -17,21 +17,42 @@
   </style>
 
   <style name="Theme.LensMatch" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-    <item name="colorPrimary">@color/accentGold</item>
-    <item name="colorPrimaryVariant">@color/accentGold</item>
-    <item name="colorOnPrimary">@color/bgCard</item>
-    <item name="colorSecondary">@color/accentGold</item>
-    <item name="colorSecondaryVariant">@color/accentGold</item>
-    <item name="colorOnSecondary">@color/bgCard</item>
+    <item name="colorPrimary">@color/brandOrange</item>
+    <item name="colorPrimaryVariant">@color/brandOrangeDark</item>
+    <item name="colorOnPrimary">@color/brandBlue</item>
+    <item name="colorSecondary">@color/brandBlue</item>
+    <item name="colorSecondaryVariant">@color/brandBlueDark</item>
+    <item name="colorOnSecondary">@color/white</item>
     <item name="android:statusBarColor">@color/bgPrimary</item>
+    <item name="android:navigationBarColor">@color/bottomBarBackground</item>
+    <item name="android:windowLightNavigationBar">false</item>
     <item name="android:windowBackground">@color/bgPrimary</item>
     <item name="android:textColorPrimary">@color/textPrimary</item>
     <item name="android:textColorSecondary">@color/textSecondary</item>
+    <item name="android:textColorHint">#FFFFFF</item>
+    <item name="bottomNavigationStyle">@style/Widget.LensMatch.BottomNavigationView</item>
+  </style>
+
+  <style name="Theme.LensMatch.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <item name="colorPrimary">@color/brandOrange</item>
+    <item name="colorPrimaryVariant">@color/brandOrangeDark</item>
+    <item name="colorOnPrimary">@color/brandBlue</item>
+    <item name="colorSecondary">@color/brandBlue</item>
+    <item name="colorSecondaryVariant">@color/brandBlueDark</item>
+    <item name="colorOnSecondary">@color/white</item>
+    <item name="android:statusBarColor">@color/bgPrimary</item>
+    <item name="android:navigationBarColor">@color/bottomBarBackground</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:windowBackground">@color/bgPrimary</item>
+    <item name="android:textColorPrimary">@color/textPrimary</item>
+    <item name="android:textColorSecondary">@color/textSecondary</item>
+    <item name="android:textColorHint">#FFFFFF</item>
     <item name="bottomNavigationStyle">@style/Widget.LensMatch.BottomNavigationView</item>
   </style>
 
   <style name="Widget.LensMatch.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
-    <item name="backgroundTint">@color/bgCard</item>
+    <item name="backgroundTint">@color/bottomBarBackground</item>
     <item name="itemIconTint">@color/bottom_nav_color</item>
     <item name="itemTextColor">@color/bottom_nav_color</item>
     <item name="elevation">8dp</item>

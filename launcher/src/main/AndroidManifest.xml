@@ -35,8 +35,9 @@
         <meta-data android:name="com.google.ar.core" android:value="optional" tools:replace="android:value" />
 
         <activity
-            android:name="com.lensmatch.mobile.ui.auth.LoginActivity"
+            android:name="com.lensmatch.mobile.ui.auth.LandingActivity"
             android:exported="true"
+            android:theme="@style/Theme.LensMatch.Light"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,7 +46,14 @@
         </activity>
 
         <activity
+            android:name="com.lensmatch.mobile.ui.auth.LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LensMatch.Light"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name="com.lensmatch.mobile.ui.auth.SignupActivity"
+            android:theme="@style/Theme.LensMatch.Light"
             android:screenOrientation="portrait" />
 
         <activity

@@ -47,6 +47,13 @@ public class FaceMeshOverlayView extends View {
     private final Paint dotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint dotHaloPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
+    // Center Biometric Guide Reticle Paints
+    private final RectF guideBoundaryRect = new RectF();
+    private final Paint ovalPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint ovalGlowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint progressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint bracketPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
     private float dotRadius;
     private float haloRadius;
 
@@ -74,6 +81,24 @@ public class FaceMeshOverlayView extends View {
 
         dotHaloPaint.setStyle(Paint.Style.FILL);
         dotHaloPaint.setColor(Color.parseColor("#4500E676"));
+
+        ovalPaint.setStyle(Paint.Style.STROKE);
+        ovalPaint.setStrokeWidth(dpToPx(2.2f));
+        ovalPaint.setColor(Color.parseColor("#70FFFFFF"));
+
+        ovalGlowPaint.setStyle(Paint.Style.STROKE);
+        ovalGlowPaint.setStrokeWidth(dpToPx(6.5f));
+        ovalGlowPaint.setColor(Color.parseColor("#20FFFFFF"));
+
+        progressPaint.setStyle(Paint.Style.STROKE);
+        progressPaint.setStrokeWidth(dpToPx(4.5f));
+        progressPaint.setStrokeCap(Paint.Cap.ROUND);
+        progressPaint.setColor(Color.parseColor("#00E676"));
+
+        bracketPaint.setStyle(Paint.Style.STROKE);
+        bracketPaint.setStrokeWidth(dpToPx(2.5f));
+        bracketPaint.setStrokeCap(Paint.Cap.ROUND);
+        bracketPaint.setColor(Color.parseColor("#70FFFFFF"));
     }
 
     public void updateState(List<Face> faces, GuideState state, int imgW, int imgH) {
@@ -128,31 +153,49 @@ public class FaceMeshOverlayView extends View {
     private void applyColorsForState(GuideState state) {
         int color;
         int halo;
+        int ovalColor;
+        int glowColor;
 
         switch (state) {
             case SUCCESS:
+                color = Color.parseColor("#00E676"); // Vibrant Green
+                halo = Color.parseColor("#4500E676");
+                ovalColor = Color.parseColor("#00E676");
+                glowColor = Color.parseColor("#6000E676");
+                break;
             case SCANNING:
             case ALIGNED:
                 color = Color.parseColor("#00E676"); // Vibrant Green
                 halo = Color.parseColor("#4500E676");
+                ovalColor = Color.parseColor("#00E676");
+                glowColor = Color.parseColor("#3500E676");
                 break;
             case TILTED:
                 color = Color.parseColor("#FFB300"); // Amber
                 halo = Color.parseColor("#45FFB300");
+                ovalColor = Color.parseColor("#FFB300");
+                glowColor = Color.parseColor("#35FFB300");
                 break;
             case MISALIGNED:
                 color = Color.parseColor("#FF5252"); // Red
                 halo = Color.parseColor("#45FF5252");
+                ovalColor = Color.parseColor("#FF5252");
+                glowColor = Color.parseColor("#35FF5252");
                 break;
             case SEARCHING:
             default:
                 color = Color.parseColor("#8000E676");
                 halo = Color.parseColor("#2500E676");
+                ovalColor = Color.parseColor("#70FFFFFF");
+                glowColor = Color.parseColor("#20FFFFFF");
                 break;
         }
 
         dotPaint.setColor(color);
         dotHaloPaint.setColor(halo);
+        ovalPaint.setColor(ovalColor);
+        ovalGlowPaint.setColor(glowColor);
+        bracketPaint.setColor(ovalColor);
     }
 
     /**
@@ -368,25 +411,75 @@ public class FaceMeshOverlayView extends View {
     }
 
     @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        calculateGuideBoundary(w, h);
+    }
+
+    private void calculateGuideBoundary(int viewW, int viewH) {
+        if (viewW <= 0 || viewH <= 0) return;
+        float ovalH = viewH * 0.52f;  // Tall enough to frame full face
+        float ovalW = ovalH * 0.76f;  // Wide for face width
+        float centerX = viewW / 2.0f;
+        float centerY = viewH * 0.35f; // Upper portion — face sits at top in selfie view
+
+        guideBoundaryRect.set(
+                centerX - (ovalW / 2.0f),
+                centerY - (ovalH / 2.0f),
+                centerX + (ovalW / 2.0f),
+                centerY + (ovalH / 2.0f)
+        );
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (dots.isEmpty()) return;
+        if (guideBoundaryRect.isEmpty() && getWidth() > 0 && getHeight() > 0) {
+            calculateGuideBoundary(getWidth(), getHeight());
+        }
 
-        for (MeshDot dot : dots) {
-            if (!dot.active) continue;
-            // Draw crisp green face mesh dot with soft radiant aura
-            canvas.drawCircle(dot.x, dot.y, haloRadius, dotHaloPaint);
-            canvas.drawCircle(dot.x, dot.y, dotRadius, dotPaint);
+        if (!guideBoundaryRect.isEmpty()) {
+            // Draw 4 subtle corner reticle brackets (no oval)
+            float bSize = dpToPx(20f);
+            float pad = dpToPx(6f);
+            float left = guideBoundaryRect.left - pad;
+            float top = guideBoundaryRect.top - pad;
+            float right = guideBoundaryRect.right + pad;
+            float bottom = guideBoundaryRect.bottom + pad;
+
+            // Top-Left corner bracket
+            canvas.drawLine(left, top + bSize, left, top, bracketPaint);
+            canvas.drawLine(left, top, left + bSize, top, bracketPaint);
+
+            // Top-Right corner bracket
+            canvas.drawLine(right - bSize, top, right, top, bracketPaint);
+            canvas.drawLine(right, top, right, top + bSize, bracketPaint);
+
+            // Bottom-Left corner bracket
+            canvas.drawLine(left, bottom - bSize, left, bottom, bracketPaint);
+            canvas.drawLine(left, bottom, left + bSize, bottom, bracketPaint);
+
+            // Bottom-Right corner bracket
+            canvas.drawLine(right - bSize, bottom, right, bottom, bracketPaint);
+            canvas.drawLine(right, bottom, right, bottom - bSize, bracketPaint);
+        }
+
+        // Draw face mesh dots tracking facial contours
+        if (!dots.isEmpty()) {
+            for (MeshDot dot : dots) {
+                if (!dot.active) continue;
+                canvas.drawCircle(dot.x, dot.y, haloRadius, dotHaloPaint);
+                canvas.drawCircle(dot.x, dot.y, dotRadius, dotPaint);
+            }
         }
     }
 
     public RectF getGuideOvalRect() {
-        float ovalH = getHeight() * 0.52f;
-        float ovalW = ovalH * 0.72f;
-        float cx = getWidth() / 2.0f;
-        float cy = getHeight() * 0.44f;
-        return new RectF(cx - ovalW / 2f, cy - ovalH / 2f, cx + ovalW / 2f, cy + ovalH / 2f);
+        if (guideBoundaryRect.isEmpty() && getWidth() > 0 && getHeight() > 0) {
+            calculateGuideBoundary(getWidth(), getHeight());
+        }
+        return guideBoundaryRect;
     }
 
     private float dpToPx(float dp) {

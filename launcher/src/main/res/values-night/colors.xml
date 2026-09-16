@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand Colors -->
+    <color name="brandOrange">#F28B30</color>
+    <color name="brandOrangeDark">#D97218</color>
+    <color name="brandOrangeLight">#FFA556</color>
+    <color name="brandBlue">#3B5B8A</color>
+    <color name="brandBlueDark">#273D5E</color>
+    <color name="brandBlueLight">#597DB3</color>
+
+    <!-- UI Canvas & General Surfaces (Dark Mode) -->
+    <color name="bgPrimary">#0B0F17</color>
+    <color name="bgCard">#141C2B</color>
+    <color name="bgCardSelected">#1E2B42</color>
+    <color name="borderCard">#2A3C56</color>
+    <color name="borderCardSubtle">#1A2536</color>
+
+    <!-- Two-Tone Bottom Navigation Bar & FAB (Dark Mode) -->
+    <color name="bottomBarBackground">#141C2B</color>
+    <color name="bottomNavIconActive">#F28B30</color>
+    <color name="bottomNavIconInactive">#98A9C2</color>
+    <color name="fabBackground">#F28B30</color>
+    <color name="fabIconTint">#0B0F17</color>
+
+    <!-- Standout Hero Cards & Banners (Dark Mode) -->
+    <color name="heroCardBg">#1A2438</color>
+    <color name="heroCardStroke">#F28B30</color>
+    <color name="heroCardTitle">#FDFDFD</color>
+    <color name="heroCardSubtitle">#98A9C2</color>
+    <color name="heroCardBtnBg">#F28B30</color>
+    <color name="heroCardBtnText">#141C2B</color>
+
+    <!-- Avatar & Icon Circle Container (Dark Mode) -->
+    <color name="avatarBg">#1E2C42</color>
+    <color name="avatarStroke">#F28B30</color>
+    <color name="avatarIconTint">#F28B30</color>
+
+    <!-- Logo Card Surface (Dark Mode: Matches Dark Mode background #0B0F17) -->
+    <color name="logoCardBg">#0B0F17</color>
+    <color name="logoCardStroke">#F28B30</color>
+
+    <!-- Category Filter Chips (Dark Mode) -->
+    <color name="chipSelectedBg">#2E2014</color>
+    <color name="chipSelectedText">#F28B30</color>
+    <color name="chipUnselectedBg">#141C2B</color>
+    <color name="chipUnselectedText">#98A9C2</color>
+    <color name="chipStrokeSelected">#F28B30</color>
+    <color name="chipStrokeUnselected">#2A3C56</color>
+
+    <!-- Badges & Chips -->
+    <color name="badgeBg">#1E2C42</color>
+    <color name="badgeText">#F28B30</color>
+
+    <!-- Typography (Dark Mode) -->
+    <color name="textPrimary">#FDFDFD</color>
+    <color name="textSecondary">#98A9C2</color>
+    <color name="textBrand">#F28B30</color>
+    <color name="toolbarIconTint">#FDFDFD</color>
+
+    <!-- Brand Accent Aliases -->
+    <color name="accentGold">#F28B30</color>
+    <color name="accentOrange">#F28B30</color>
+    <color name="accentBlue">#3B5B8A</color>
+
+    <!-- Utility Colors -->
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="greenSuccess">#4CAF50</color>
+    <color name="redError">#F44336</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- Splash Screen Colors -->
+    <color name="staticSplashScreenBackgroundColor">#0B0F17</color>
+    <color name="windowSplashScreenIconBackgroundColor">@android:color/transparent</color>
+    <color name="windowSplashScreenAnimatedIconColor">@android:color/transparent</color>
+
+    <!-- AR Try-On Dynamic Theming (Dark Mode) -->
+    <color name="arBtnContinueBg">#CC141C2B</color>
+    <color name="arBtnContinueStroke">#F28B30</color>
+    <color name="arBtnContinueText">#F28B30</color>
+    <color name="arBackBtnBg">#80141C2B</color>
+    <color name="arBackBtnStroke">#33FFFFFF</color>
+    <color name="arBottomGradientCenter">#CC0B0F17</color>
+    <color name="arBottomGradientEnd">#FA0B0F17</color>
+    <color name="arCircleUnselectedBg">#80141C2B</color>
+    <color name="arCircleUnselectedStroke">#2A3C56</color>
+</resources>
