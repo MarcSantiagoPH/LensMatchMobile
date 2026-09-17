@@ -3,13 +3,23 @@ package com.lensmatch.mobile.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.lensmatch.mobile.utils.FaceShapeDetector;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class AppState {
     private static AppState instance;
     private static SharedPreferences prefs;
     private final List<FrameModel> reservedFrames = new ArrayList<>();
+    private final List<ScanModel> scanHistory = new ArrayList<>();
     private String lastImagePath;
     private String lastDetectedShape = "Oval";
     private float lastConfidence = 0.94f;
@@ -53,6 +63,7 @@ public class AppState {
         state.isLoggedIn = prefs.getBoolean("isLoggedIn", false);
         state.themeMode = prefs.getString("themeMode", "dark");
         state.applyThemeMode();
+        state.loadScanHistoryFromPrefs();
     }
 
     public String getThemeMode() {
@@ -64,21 +75,16 @@ public class AppState {
     }
 
     public void setThemeMode(String mode) {
-        this.themeMode = mode;
+        this.themeMode = "light";
         if (prefs != null) {
-            prefs.edit().putString("themeMode", mode).apply();
+            prefs.edit().putString("themeMode", "light").apply();
         }
         applyThemeMode();
     }
 
     public void applyThemeMode() {
-        if ("light".equalsIgnoreCase(themeMode)) {
-            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
-        } else {
-            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
-                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES);
-        }
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
+                androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
     }
 
     public List<FrameModel> getReservedFrames() {
@@ -220,6 +226,117 @@ public class AppState {
                     .remove("userPhotoUrl")
                     .remove("lastActiveTab")
                     .apply();
+        }
+    }
+
+    public synchronized List<ScanModel> getScanHistory() {
+        return new ArrayList<>(scanHistory);
+    }
+
+    public synchronized void addScan(ScanModel scan) {
+        if (scan == null) return;
+        // If scan already exists by id, update it
+        for (int i = 0; i < scanHistory.size(); i++) {
+            ScanModel existing = scanHistory.get(i);
+            if (scan.getId() != null && scan.getId().equals(existing.getId())) {
+                scanHistory.set(i, scan);
+                saveScanHistoryToPrefs();
+                return;
+            }
+        }
+        // Add new scan at top (newest first)
+        scanHistory.add(0, scan);
+        saveScanHistoryToPrefs();
+    }
+
+    public synchronized void removeScan(String scanId) {
+        if (scanId == null) return;
+        scanHistory.removeIf(s -> scanId.equals(s.getId()));
+        saveScanHistoryToPrefs();
+    }
+
+    public synchronized void syncScanHistory(List<ScanModel> cloudScans) {
+        if (cloudScans == null || cloudScans.isEmpty()) return;
+        for (ScanModel cloudScan : cloudScans) {
+            boolean exists = false;
+            for (ScanModel local : scanHistory) {
+                if ((cloudScan.getId() != null && cloudScan.getId().equals(local.getId())) ||
+                    (cloudScan.getTimestamp() != null && local.getTimestamp() != null &&
+                     Math.abs(cloudScan.getTimestamp().getTime() - local.getTimestamp().getTime()) < 5000 &&
+                     cloudScan.getFaceShape().equals(local.getFaceShape()))) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                scanHistory.add(cloudScan);
+            }
+        }
+        Collections.sort(scanHistory, (a, b) -> {
+            if (a.getTimestamp() == null && b.getTimestamp() == null) return 0;
+            if (a.getTimestamp() == null) return 1;
+            if (b.getTimestamp() == null) return -1;
+            return b.getTimestamp().compareTo(a.getTimestamp());
+        });
+        saveScanHistoryToPrefs();
+    }
+
+    private synchronized void saveScanHistoryToPrefs() {
+        if (prefs == null) return;
+        JSONArray array = new JSONArray();
+        for (ScanModel scan : scanHistory) {
+            array.put(scan.toJson());
+        }
+        prefs.edit().putString("scanHistoryList", array.toString()).apply();
+    }
+
+    private synchronized void loadScanHistoryFromPrefs() {
+        scanHistory.clear();
+        if (prefs == null) return;
+        String jsonStr = prefs.getString("scanHistoryList", null);
+        if (jsonStr != null && !jsonStr.trim().isEmpty()) {
+            try {
+                JSONArray array = new JSONArray(jsonStr);
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject obj = array.getJSONObject(i);
+                    ScanModel scan = ScanModel.fromJson(obj);
+                    if (scan != null) {
+                        scanHistory.add(scan);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        // If scan history was empty but we have a last detected shape, add it as initial scan
+        if (scanHistory.isEmpty() && lastDetectedShape != null && !lastDetectedShape.isEmpty() && !"Unknown".equalsIgnoreCase(lastDetectedShape)) {
+            FaceShapeDetector.ShapeRecommendation rec = FaceShapeDetector.getRecommendationForShape(lastDetectedShape);
+            List<String> recStyles = new ArrayList<>();
+            List<String> avoidStyles = new ArrayList<>();
+            if (rec != null) {
+                if (rec.recommended != null) recStyles.addAll(Arrays.asList(rec.recommended));
+                if (rec.avoided != null) avoidStyles.addAll(Arrays.asList(rec.avoided));
+            }
+            ScanModel initialScan = new ScanModel(
+                    "scan_initial",
+                    "local",
+                    userName,
+                    lastDetectedShape,
+                    lastConfidence,
+                    lastIsBorderline,
+                    lastRunnerUpShape,
+                    lastNotes,
+                    recStyles,
+                    avoidStyles,
+                    rec != null ? rec.recommendedReason : "",
+                    rec != null ? rec.avoidedReason : "",
+                    new Date()
+            );
+            if (lastImagePath != null) {
+                initialScan.setImagePath(lastImagePath);
+            }
+            scanHistory.add(initialScan);
+            saveScanHistoryToPrefs();
         }
     }
 }

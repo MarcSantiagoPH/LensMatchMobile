@@ -30,7 +30,16 @@ public class ReservationDetailActivity extends AppCompatActivity {
 
         View root = findViewById(R.id.reservation_detail_root);
         if (root != null) {
-            StatusBarUtils.applyTopWindowInsets(root);
+            StatusBarUtils.applyWindowInsets(root);
+        }
+
+        getWindow().setStatusBarColor(android.graphics.Color.WHITE);
+        getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
+        androidx.core.view.WindowInsetsControllerCompat insetsController =
+                androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (insetsController != null) {
+            insetsController.setAppearanceLightStatusBars(true);
+            insetsController.setAppearanceLightNavigationBars(true);
         }
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar_reservation_detail);

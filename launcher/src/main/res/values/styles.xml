@@ -16,39 +16,42 @@
     <item name="android:windowBackground">@android:color/transparent</item>
   </style>
 
+  <!-- Orange + White Primary Theme -->
   <style name="Theme.LensMatch" parent="Theme.MaterialComponents.DayNight.NoActionBar">
     <item name="colorPrimary">@color/brandOrange</item>
     <item name="colorPrimaryVariant">@color/brandOrangeDark</item>
-    <item name="colorOnPrimary">@color/brandBlue</item>
-    <item name="colorSecondary">@color/brandBlue</item>
-    <item name="colorSecondaryVariant">@color/brandBlueDark</item>
+    <item name="colorOnPrimary">@color/white</item>
+    <item name="colorSecondary">@color/brandOrangeDark</item>
+    <item name="colorSecondaryVariant">@color/brandOrangeDark</item>
     <item name="colorOnSecondary">@color/white</item>
-    <item name="android:statusBarColor">@color/bgPrimary</item>
-    <item name="android:navigationBarColor">@color/bottomBarBackground</item>
-    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:statusBarColor">@color/brandOrange</item>
+    <item name="android:navigationBarColor">@color/bgPrimary</item>
+    <item name="android:windowLightNavigationBar">true</item>
     <item name="android:windowBackground">@color/bgPrimary</item>
     <item name="android:textColorPrimary">@color/textPrimary</item>
     <item name="android:textColorSecondary">@color/textSecondary</item>
-    <item name="android:textColorHint">#FFFFFF</item>
+    <item name="android:textColorHint">#FFCC88</item>
     <item name="bottomNavigationStyle">@style/Widget.LensMatch.BottomNavigationView</item>
+    <item name="chipStyle">@style/Widget.LensMatch.Chip.Choice</item>
   </style>
 
   <style name="Theme.LensMatch.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
     <item name="colorPrimary">@color/brandOrange</item>
     <item name="colorPrimaryVariant">@color/brandOrangeDark</item>
-    <item name="colorOnPrimary">@color/brandBlue</item>
-    <item name="colorSecondary">@color/brandBlue</item>
-    <item name="colorSecondaryVariant">@color/brandBlueDark</item>
+    <item name="colorOnPrimary">@color/white</item>
+    <item name="colorSecondary">@color/brandOrangeDark</item>
+    <item name="colorSecondaryVariant">@color/brandOrangeDark</item>
     <item name="colorOnSecondary">@color/white</item>
-    <item name="android:statusBarColor">@color/bgPrimary</item>
-    <item name="android:navigationBarColor">@color/bottomBarBackground</item>
-    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:statusBarColor">@color/brandOrange</item>
+    <item name="android:navigationBarColor">@color/bgPrimary</item>
+    <item name="android:windowLightNavigationBar">true</item>
     <item name="android:windowLightStatusBar">false</item>
     <item name="android:windowBackground">@color/bgPrimary</item>
     <item name="android:textColorPrimary">@color/textPrimary</item>
     <item name="android:textColorSecondary">@color/textSecondary</item>
-    <item name="android:textColorHint">#FFFFFF</item>
+    <item name="android:textColorHint">#FFCC88</item>
     <item name="bottomNavigationStyle">@style/Widget.LensMatch.BottomNavigationView</item>
+    <item name="chipStyle">@style/Widget.LensMatch.Chip.Choice</item>
   </style>
 
   <style name="Widget.LensMatch.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
@@ -56,5 +59,13 @@
     <item name="itemIconTint">@color/bottom_nav_color</item>
     <item name="itemTextColor">@color/bottom_nav_color</item>
     <item name="elevation">8dp</item>
+  </style>
+
+  <style name="Widget.LensMatch.Chip.Choice" parent="Widget.MaterialComponents.Chip.Choice">
+    <item name="chipBackgroundColor">@color/chip_choice_bg</item>
+    <item name="android:textColor">@color/chip_choice_text</item>
+    <item name="chipStrokeColor">@color/chip_choice_stroke</item>
+    <item name="chipStrokeWidth">1.5dp</item>
+    <item name="chipCornerRadius">16dp</item>
   </style>
 </resources>

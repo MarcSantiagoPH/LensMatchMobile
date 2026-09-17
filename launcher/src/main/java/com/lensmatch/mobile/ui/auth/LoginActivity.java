@@ -46,12 +46,14 @@ public class LoginActivity extends AppCompatActivity {
 
         androidx.core.view.WindowInsetsControllerCompat controller = 
                 androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
         if (controller != null) {
-            controller.setAppearanceLightStatusBars(true);
+            controller.setAppearanceLightStatusBars(false);
+            controller.setAppearanceLightNavigationBars(true);
         }
 
         View root = findViewById(R.id.login_root);
-        StatusBarUtils.applyTopWindowInsets(root);
+        StatusBarUtils.applyWindowInsets(root);
 
         etEmail = findViewById(R.id.et_login_email);
         etPassword = findViewById(R.id.et_login_password);
@@ -185,7 +187,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void handleLogin() {
+        AppState.getInstance().setLastActiveTab(R.id.nav_home);
         Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("open_tab", R.id.nav_home);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

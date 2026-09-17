@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bgPrimary"
+    android:background="#FFFFFF"
     android:orientation="vertical"
     android:paddingHorizontal="16dp"
     android:paddingTop="16dp"
@@ -33,6 +33,16 @@
                 android:textSize="22sp"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-medium" />
+
+            <ImageButton
+                android:id="@+id/btn_sort_catalog"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Sort Frames"
+                android:src="@drawable/ic_sort"
+                app:tint="@color/accentGold" />
 
             <ImageButton
                 android:id="@+id/btn_open_search"
@@ -198,6 +208,6 @@
         android:layout_height="match_parent"
         android:layout_marginTop="8dp"
         android:clipToPadding="false"
-        android:paddingBottom="100dp" />
+        android:paddingBottom="160dp" />
 
 </LinearLayout>

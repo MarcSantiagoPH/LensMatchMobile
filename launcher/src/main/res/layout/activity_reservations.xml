@@ -4,18 +4,18 @@
     android:id="@+id/reservations_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bgPrimary"
+    android:background="#FFFFFF"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar_reservations"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/bgPrimary"
+        android:background="#FF8C00"
         app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="@color/toolbarIconTint"
+        app:navigationIconTint="#FFFFFF"
         app:title="My Reservations"
-        app:titleTextColor="@color/textPrimary" />
+        app:titleTextColor="#FFFFFF" />
 
     <ProgressBar
         android:id="@+id/progress_reservations"
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="32dp"
-        android:indeterminateTint="@color/accentGold"
+        android:indeterminateTint="#FF8C00"
         android:visibility="visible" />
 
     <TextView

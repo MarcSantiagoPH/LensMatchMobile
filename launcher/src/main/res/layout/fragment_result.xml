@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bgPrimary"
+    android:background="#FFFFFF"
     android:fillViewport="true"
     android:clipToPadding="false"
     android:scrollbars="none">
@@ -13,8 +13,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="24dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="100dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="200dp"
         android:gravity="center_horizontal">
 
         <!-- Page title -->
@@ -22,21 +22,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Analysis Result"
-            android:textColor="@color/textPrimary"
-            android:textSize="22sp"
+            android:textColor="#1A1A1A"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:fontFamily="sans-serif-medium"
             android:layout_marginBottom="24dp" />
 
         <!-- Face Photo Card -->
         <com.google.android.material.card.MaterialCardView
-            android:layout_width="130dp"
-            android:layout_height="160dp"
-            app:cardBackgroundColor="@color/bgCard"
-            app:cardCornerRadius="16dp"
-            app:strokeColor="@color/borderCard"
-            app:strokeWidth="1dp"
-            app:cardElevation="0dp">
+            android:layout_width="140dp"
+            android:layout_height="170dp"
+            app:cardBackgroundColor="#FFF8F0"
+            app:cardCornerRadius="20dp"
+            app:strokeColor="#FFD199"
+            app:strokeWidth="1.5dp"
+            app:cardElevation="4dp">
 
             <ImageView
                 android:id="@+id/iv_face_crop"
@@ -59,7 +59,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Oval"
-                android:textColor="@color/accentGold"
+                android:textColor="#FF8C00"
                 android:textSize="30sp"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-medium" />
@@ -73,7 +73,7 @@
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="6dp"
                 android:text="94% Match"
-                android:textColor="@color/accentGold"
+                android:textColor="#FF8C00"
                 android:textSize="13sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -85,24 +85,24 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:visibility="gone"
-            app:cardBackgroundColor="#1AFFB300"
-            app:cardCornerRadius="14dp"
-            app:strokeColor="#66FFB300"
-            app:strokeWidth="1dp"
-            app:cardElevation="0dp">
+            app:cardBackgroundColor="#FFF3E0"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="#FFD199"
+            app:strokeWidth="1.5dp"
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="14dp"
+                android:padding="16dp"
                 android:gravity="center_vertical">
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:src="@drawable/ic_help"
-                    app:tint="#FFB300"
+                    app:tint="#FF8C00"
                     android:layout_marginEnd="12dp" />
 
                 <TextView
@@ -111,7 +111,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Borderline Result: Your facial features sit between Oval and Round."
-                    android:textColor="@color/textPrimary"
+                    android:textColor="#1A1A1A"
                     android:textSize="13sp"
                     android:lineSpacingExtra="3dp" />
             </LinearLayout>
@@ -123,9 +123,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/heroCardBg"
+            app:cardBackgroundColor="#FFFFFF"
             app:cardCornerRadius="16dp"
-            app:strokeColor="@color/heroCardStroke"
+            app:strokeColor="#FFD199"
             app:strokeWidth="1.5dp"
             app:cardElevation="2dp">
 
@@ -133,7 +133,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="18dp">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -143,18 +143,18 @@
                     android:layout_marginBottom="8dp">
 
                     <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
                         android:src="@drawable/ic_eyeglasses"
-                        app:tint="@color/brandOrange"
+                        app:tint="#FF8C00"
                         android:layout_marginEnd="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="AI Eyewear Stylist"
-                        android:textColor="@color/brandOrange"
-                        android:textSize="13sp"
+                        android:textColor="#FF8C00"
+                        android:textSize="14sp"
                         android:textStyle="bold"
                         android:letterSpacing="0.04" />
                 </LinearLayout>
@@ -164,65 +164,215 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Based on your face shape, these frames will complement your features perfectly."
-                    android:textColor="@color/heroCardTitle"
+                    android:textColor="#555555"
                     android:textSize="13sp"
                     android:lineSpacingExtra="4dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Recommended Frames -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="10dp"
-            android:text="RECOMMENDED"
-            android:textColor="@color/brandBlue"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.10"
-            android:fontFamily="sans-serif-medium" />
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chip_group_recommended"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:chipSpacing="6dp" />
-
-        <!-- Frames to avoid -->
-        <TextView
+        <!-- 1. RECOMMENDED FRAMES CARD -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:layout_marginBottom="10dp"
-            android:text="AVOID"
-            android:textColor="@color/brandBlue"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.10"
-            android:fontFamily="sans-serif-medium" />
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="18dp"
+            app:strokeColor="#FFD199"
+            app:strokeWidth="1.5dp"
+            app:cardElevation="2dp">
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chip_group_avoided"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:background="@drawable/bg_avatar_circle">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_check"
+                            app:tint="#FF8C00" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Recommended Frame Shapes"
+                            android:textColor="#1A1A1A"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Flattering styles that naturally balance your features"
+                            android:textColor="#CC7700"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="12dp"
+                    android:background="#FFD199" />
+
+                <TextView
+                    android:id="@+id/tv_recommended_reason"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="Flattering frame silhouettes that balance your unique facial geometry."
+                    android:textColor="#444444"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="2dp" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chip_group_recommended"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:chipSpacing="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="💡 Tap any recommended shape above to preview in live 3D AR."
+                    android:textColor="#888888"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 2. NOT RECOMMENDED FRAMES CARD -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:chipSpacing="6dp" />
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="#FFF8F0"
+            app:cardCornerRadius="18dp"
+            app:strokeColor="#FFD199"
+            app:strokeWidth="1.5dp"
+            app:cardElevation="2dp">
 
-        <!-- CTA Button -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:background="@drawable/bg_avatar_circle">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_close"
+                            app:tint="#EF4444" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Shapes Not Recommended"
+                            android:textColor="#1A1A1A"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Styles that may conflict with your natural proportions"
+                            android:textColor="#888888"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="12dp"
+                    android:background="#FFD199" />
+
+                <TextView
+                    android:id="@+id/tv_avoided_reason"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="Styles that may visually conflict with or overpower your natural facial symmetry."
+                    android:textColor="#555555"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="2dp" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chip_group_avoided"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:chipSpacing="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Frames with opposing or extreme geometry may overpower your facial symmetry."
+                    android:textColor="#888888"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- CTA Button: Solid Orange -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_try_frames_on"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
+            android:layout_height="56dp"
             android:layout_marginTop="28dp"
-            android:text="Try Frames On"
-            android:textColor="@color/heroCardBtnText"
+            android:text="Preview Frames"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
             android:textSize="15sp"
             android:textStyle="bold"
             android:letterSpacing="0.01"
-            app:backgroundTint="@color/heroCardBtnBg"
-            app:cornerRadius="14dp"
+            app:backgroundTint="#FF8C00"
+            app:cornerRadius="16dp"
+            app:elevation="4dp"
             app:icon="@drawable/ic_eyeglasses"
-            app:iconTint="@color/heroCardBtnText"
+            app:iconTint="#FFFFFF"
             app:iconGravity="textStart"
             app:iconPadding="10dp" />
 

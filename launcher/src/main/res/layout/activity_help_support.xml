@@ -4,7 +4,7 @@
     android:id="@+id/help_support_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bgPrimary"
+    android:background="#FFFFFF"
     android:orientation="vertical">
 
     <!-- Top Toolbar -->
@@ -12,11 +12,11 @@
         android:id="@+id/toolbar_help_support"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/bgPrimary"
+        android:background="#FF8C00"
         app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="@color/toolbarIconTint"
+        app:navigationIconTint="#FFFFFF"
         app:title="Help &amp; Support"
-        app:titleTextColor="@color/textPrimary" />
+        app:titleTextColor="#FFFFFF" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -37,10 +37,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="@color/bgCard"
+                app:cardBackgroundColor="#FFF8F0"
                 app:cardCornerRadius="18dp"
-                app:strokeColor="@color/borderCard"
-                app:strokeWidth="1dp"
+                app:strokeColor="#FFD199"
+                app:strokeWidth="1.5dp"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -83,10 +83,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/bgCard"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="@color/borderCard"
-                app:strokeWidth="1dp"
+                app:strokeColor="#FFD199"
+                app:strokeWidth="1.5dp"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -119,10 +119,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/bgCard"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="@color/borderCard"
-                app:strokeWidth="1dp"
+                app:strokeColor="#FFD199"
+                app:strokeWidth="1.5dp"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -134,7 +134,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="How do I use Virtual AR Try-On?"
+                        android:text="How do I use Virtual Frame Preview?"
                         android:textColor="@color/textPrimary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -143,7 +143,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Tap 'Try in AR' from any frame detail page or the bottom tab to see real-time 3D glasses rendered directly onto your camera feed."
+                        android:text="Tap 'Preview Frame' from any frame detail page or the bottom tab to see real-time 3D glasses rendered directly onto your camera feed."
                         android:textColor="@color/textSecondary"
                         android:textSize="13sp"
                         android:lineSpacingExtra="3dp" />
@@ -155,10 +155,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="@color/bgCard"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="@color/borderCard"
-                app:strokeWidth="1dp"
+                app:strokeColor="#FFD199"
+                app:strokeWidth="1.5dp"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -200,10 +200,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bgCard"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="@color/borderCard"
-                app:strokeWidth="1dp"
+                app:strokeColor="#FFD199"
+                app:strokeWidth="1.5dp"
                 app:cardElevation="0dp">
 
                 <LinearLayout

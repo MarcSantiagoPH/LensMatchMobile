@@ -164,12 +164,13 @@ public class UnityPlayerGameActivity extends GameActivity
         }
 
         String targetStyle = toCatalogStyleName(rawStyle);
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("open_tab", R.id.nav_frame);
-        intent.putExtra("selectedStyle", targetStyle);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        Intent intent = new Intent(this, com.lensmatch.mobile.ui.catalog.FrameReservationNoticeActivity.class);
+        intent.putExtra("frameStyle", targetStyle);
+        intent.putExtra("colorVariant", mCurrentColor);
+        if (recommendedFrames != null) {
+            intent.putStringArrayListExtra("recommendedFrames", recommendedFrames);
+        }
         startActivity(intent);
-        finish();
     }
 
     private String toCatalogStyleName(String raw) {
@@ -235,8 +236,8 @@ public class UnityPlayerGameActivity extends GameActivity
     }
 
     private void updateTabs() {
-        int orange = Color.parseColor("#F28B30");
-        int muted = Color.parseColor("#98A9C2");
+        int orange = Color.parseColor("#FF8C00");
+        int muted = Color.parseColor("#CCAA80");
         if (tvTabRecommended == null || tvTabAllFrames == null) return;
         if (selectedTabIndex == 0) {
             tvTabRecommended.setTextColor(orange);
@@ -276,7 +277,7 @@ public class UnityPlayerGameActivity extends GameActivity
 
             boolean sel = normalizeShapeName(frame).equalsIgnoreCase(mCurrentShape);
             circleBg.setBackgroundResource(sel ? R.drawable.bg_ar_circle_selected : R.drawable.bg_ar_circle_unselected);
-            label.setTextColor(sel ? Color.parseColor("#F28B30") : Color.WHITE);
+            label.setTextColor(sel ? Color.parseColor("#FF8C00") : Color.WHITE);
 
             item.setOnClickListener(v -> {
                 mCurrentShape = normalizeShapeName(frame);
@@ -298,9 +299,8 @@ public class UnityPlayerGameActivity extends GameActivity
             chip.setTextSize(13);
 
             boolean sel = opt.code.equalsIgnoreCase(mCurrentColor);
-            chip.setBackgroundResource(sel ? R.drawable.bg_confidence_chip : 0);
-            if (!sel) chip.setBackgroundColor(Color.parseColor("#141C2B"));
-            chip.setTextColor(sel ? Color.parseColor("#F28B30") : Color.parseColor("#98A9C2"));
+            chip.setBackgroundResource(sel ? R.drawable.bg_confidence_chip : R.drawable.bg_color_chip_unselected);
+            chip.setTextColor(sel ? Color.parseColor("#FF8C00") : Color.parseColor("#CC7700"));
 
             chip.setOnClickListener(v -> {
                 mCurrentColor = opt.code;

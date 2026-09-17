@@ -4,10 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="240dp"
     android:layout_margin="8dp"
-    app:cardBackgroundColor="@color/bgCard"
+    app:cardBackgroundColor="#FFFFFF"
     app:cardCornerRadius="16dp"
-    app:strokeColor="@color/borderCard"
-    app:strokeWidth="1.5dp">
+    app:strokeColor="#FFD199"
+    app:strokeWidth="1.5dp"
+    app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/bgPrimary">
+            android:background="#FFF8F0">
 
             <ImageView
                 android:id="@+id/iv_frame"
@@ -27,6 +28,21 @@
                 android:layout_height="64dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_eyeglasses" />
+
+            <TextView
+                android:id="@+id/tv_new_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_margin="6dp"
+                android:background="@drawable/bg_new_badge"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:text="✨ NEW"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
         </FrameLayout>
 
         <TextView
@@ -38,7 +54,7 @@
             android:paddingHorizontal="8dp"
             android:paddingVertical="2dp"
             android:text="Aviator"
-            android:textColor="@color/accentGold"
+            android:textColor="#FF8C00"
             android:textSize="11sp" />
 
         <TextView
@@ -49,7 +65,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="Classic Aviator"
-            android:textColor="@color/textPrimary"
+            android:textColor="#1A1A1A"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -58,7 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Metal"
-            android:textColor="@color/textSecondary"
+            android:textColor="#CC7700"
             android:textSize="12sp" />
 
         <TextView
@@ -67,7 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="₱9,500.00"
-            android:textColor="@color/accentGold"
+            android:textColor="#FF8C00"
             android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>

@@ -18,6 +18,8 @@ public class FrameModel implements Serializable {
     private String arModelUrl;
     private boolean availability = true;
 
+    private boolean isNew = false;
+
     public static final List<String> APPROVED_FRAME_STYLES = Arrays.asList(
             "Round", "Cat-Eye", "Rectangle", "Wayfarer", "Square", "Aviator", "Geometric", "Browline", "Oval"
     );
@@ -26,6 +28,11 @@ public class FrameModel implements Serializable {
 
     public FrameModel(String id, String frameName, String brand, String frameStyle, double price,
                       String material, String description, String imageUrl, String arModelUrl, boolean availability) {
+        this(id, frameName, brand, frameStyle, price, material, description, imageUrl, arModelUrl, availability, false);
+    }
+
+    public FrameModel(String id, String frameName, String brand, String frameStyle, double price,
+                      String material, String description, String imageUrl, String arModelUrl, boolean availability, boolean isNew) {
         this.id = id;
         this.frameName = frameName;
         this.brand = brand;
@@ -36,9 +43,14 @@ public class FrameModel implements Serializable {
         this.imageUrl = imageUrl;
         this.arModelUrl = arModelUrl;
         this.availability = availability;
+        this.isNew = isNew;
     }
 
     public FrameModel(String id, String name, String shape, String material, String price) {
+        this(id, name, shape, material, price, false);
+    }
+
+    public FrameModel(String id, String name, String shape, String material, String price, boolean isNew) {
         this.id = id;
         this.frameName = name;
         this.brand = "LensMatch";
@@ -49,6 +61,7 @@ public class FrameModel implements Serializable {
         this.imageUrl = "";
         this.arModelUrl = "";
         this.availability = true;
+        this.isNew = isNew;
     }
 
     public static FrameModel fromMap(Map<String, Object> data, String docId) {
@@ -70,7 +83,14 @@ public class FrameModel implements Serializable {
         double priceVal = parsePriceDouble(rawPrice);
         boolean isAvailable = parseAvailability(data.get("availability"));
 
-        return new FrameModel(id, name, brand, style, priceVal, mat, desc, img, arUrl, isAvailable);
+        boolean isNewVal = false;
+        if (data.containsKey("isNew")) {
+            isNewVal = Boolean.parseBoolean(String.valueOf(data.get("isNew")));
+        } else if (data.containsKey("new")) {
+            isNewVal = Boolean.parseBoolean(String.valueOf(data.get("new")));
+        }
+
+        return new FrameModel(id, name, brand, style, priceVal, mat, desc, img, arUrl, isAvailable, isNewVal);
     }
 
     private static double parsePriceDouble(Object raw) {
@@ -113,6 +133,8 @@ public class FrameModel implements Serializable {
     public String getArModelUrl() { return arModelUrl != null ? arModelUrl : ""; }
     public boolean isAvailability() { return availability; }
     public boolean isAvailable() { return availability; }
+    public boolean isNew() { return isNew; }
+    public void setNew(boolean isNew) { this.isNew = isNew; }
 
     public String getDisplayFrameStyle() {
         if (frameStyle == null || frameStyle.trim().isEmpty()) return "Standard";

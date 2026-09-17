@@ -129,6 +129,19 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
             btnBack.setOnClickListener(v -> finish());
         }
 
+        View btnContinue = overlay.findViewById(R.id.btn_continue_unity_ar);
+        if (btnContinue != null) {
+            btnContinue.setOnClickListener(v -> {
+                Intent intent = new Intent(this, com.lensmatch.mobile.ui.catalog.FrameReservationNoticeActivity.class);
+                intent.putExtra("frameStyle", selectedFrameStyle);
+                intent.putExtra("colorVariant", selectedColorVariant);
+                if (recommendedFrames != null) {
+                    intent.putStringArrayListExtra("recommendedFrames", recommendedFrames);
+                }
+                startActivity(intent);
+            });
+        }
+
         LinearLayout tabRec = overlay.findViewById(R.id.tab_recommended_unity);
         LinearLayout tabAll = overlay.findViewById(R.id.tab_all_frames_unity);
         tvTabRecommended    = overlay.findViewById(R.id.tv_tab_recommended_unity);
@@ -168,8 +181,8 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
     }
 
     private void updateTabs() {
-        int orange = Color.parseColor("#F28B30");
-        int muted = Color.parseColor("#98A9C2");
+        int orange = Color.parseColor("#FF8C00");
+        int muted = Color.parseColor("#CCAA80");
         if (tvTabRecommended == null || tvTabAllFrames == null) return;
         if (selectedTabIndex == 0) {
             tvTabRecommended.setTextColor(orange);
@@ -209,7 +222,7 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
 
             boolean sel = frame.equalsIgnoreCase(selectedFrameStyle);
             circleBg.setBackgroundResource(sel ? R.drawable.bg_ar_circle_selected : R.drawable.bg_ar_circle_unselected);
-            label.setTextColor(sel ? Color.parseColor("#F28B30") : Color.WHITE);
+            label.setTextColor(sel ? Color.parseColor("#FF8C00") : Color.WHITE);
 
             item.setOnClickListener(v -> {
                 selectedFrameStyle = frame;
@@ -231,9 +244,8 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
             chip.setTextSize(13);
 
             boolean sel = opt.label.equalsIgnoreCase(selectedColorVariant);
-            chip.setBackgroundResource(sel ? R.drawable.bg_confidence_chip : 0);
-            if (!sel) chip.setBackgroundColor(Color.parseColor("#141C2B"));
-            chip.setTextColor(sel ? Color.parseColor("#F28B30") : Color.parseColor("#98A9C2"));
+            chip.setBackgroundResource(sel ? R.drawable.bg_confidence_chip : R.drawable.bg_color_chip_unselected);
+            chip.setTextColor(sel ? Color.parseColor("#FF8C00") : Color.parseColor("#CC7700"));
 
             chip.setOnClickListener(v -> {
                 selectedColorVariant = opt.label;

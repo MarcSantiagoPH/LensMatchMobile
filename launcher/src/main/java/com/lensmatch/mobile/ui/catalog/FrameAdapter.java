@@ -68,6 +68,10 @@ public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.ViewHolder> 
             holder.ivFrame.setImageResource(R.drawable.ic_eyeglasses);
         }
 
+        if (holder.tvNewBadge != null) {
+            holder.tvNewBadge.setVisibility(frame.isNew() ? View.VISIBLE : View.GONE);
+        }
+
         holder.itemView.setOnClickListener(v -> listener.onItemClick(frame));
     }
 
@@ -78,7 +82,7 @@ public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.ViewHolder> 
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivFrame;
-        TextView tvName, tvShapeBadge, tvMaterial, tvPrice;
+        TextView tvName, tvShapeBadge, tvMaterial, tvPrice, tvNewBadge;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -87,6 +91,7 @@ public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.ViewHolder> 
             tvShapeBadge = itemView.findViewById(R.id.tv_shape_badge);
             tvMaterial = itemView.findViewById(R.id.tv_frame_material);
             tvPrice = itemView.findViewById(R.id.tv_frame_price);
+            tvNewBadge = itemView.findViewById(R.id.tv_new_badge);
         }
     }
 }

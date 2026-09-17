@@ -4,17 +4,27 @@
     android:id="@+id/landing_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#3B5B8A"
+    android:background="#FF8C00"
     android:clickable="true"
     android:focusable="true">
 
-    <!-- Top Architectural Ambient Disc matching mockup -->
+    <!-- Top Ambient Disc (light orange blended circle) -->
     <View
         android:layout_width="420dp"
         android:layout_height="420dp"
         android:layout_gravity="top|center_horizontal"
         android:layout_marginTop="-150dp"
         android:background="@drawable/bg_landing_top_disc" />
+
+    <!-- Bottom ambient glow disc -->
+    <View
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="-80dp"
+        android:layout_marginEnd="-60dp"
+        android:background="@drawable/bg_landing_top_disc"
+        android:alpha="0.35" />
 
     <LinearLayout
         android:id="@+id/landing_content"
@@ -34,48 +44,48 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <!-- Official LensMatch Logo Seamless Container -->
+            <!-- Official LensMatch Logo on White Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_logo_container"
-                android:layout_width="160dp"
-                android:layout_height="160dp"
-                app:cardCornerRadius="36dp"
-                app:cardElevation="10dp"
-                app:cardBackgroundColor="#3B5B8A"
-                app:strokeColor="#F28B30"
-                app:strokeWidth="2.5dp">
+                android:layout_width="170dp"
+                android:layout_height="170dp"
+                app:cardCornerRadius="40dp"
+                app:cardElevation="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:strokeColor="#FFB347"
+                app:strokeWidth="0dp">
 
                 <ImageView
                     android:id="@+id/iv_landing_logo"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:padding="16dp"
+                    android:padding="20dp"
                     android:scaleType="fitCenter"
                     android:contentDescription="LensMatch Logo"
                     android:src="@drawable/logo_lensmatch" />
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Brand Title in Sunkissed Orange -->
+            <!-- Brand Title in White -->
             <TextView
                 android:id="@+id/tv_landing_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="28dp"
                 android:text="LensMatch"
-                android:textColor="#F28B30"
-                android:textSize="38sp"
+                android:textColor="#FFFFFF"
+                android:textSize="42sp"
                 android:textStyle="bold"
-                android:letterSpacing="0.03"
+                android:letterSpacing="0.02"
                 android:fontFamily="sans-serif-medium" />
 
-            <!-- Tagline in Crisp White -->
+            <!-- Tagline in semi-transparent white -->
             <TextView
                 android:id="@+id/tv_landing_tagline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text="Find Your Perfect Frame"
-                android:textColor="#FFFFFF"
+                android:textColor="#FFE5C0"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.04"
@@ -85,20 +95,20 @@
                 android:id="@+id/tv_landing_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="AI-powered face analysis &amp; real-time 3D AR virtual try-on tailored to you."
-                android:textColor="#D5E2F1"
+                android:layout_marginTop="14dp"
+                android:text="AI-powered face analysis &amp; real-time 3D AR frame preview tailored to you."
+                android:textColor="#FFEBCC"
                 android:textSize="14sp"
                 android:gravity="center"
-                android:lineSpacingExtra="3dp"
+                android:lineSpacingExtra="4dp"
                 android:paddingHorizontal="16dp" />
 
-            <!-- Highlight Feature Badges with rounded corners -->
+            <!-- Highlight Feature Badges -->
             <LinearLayout
                 android:id="@+id/layout_feature_badges"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="26dp"
+                android:layout_marginTop="28dp"
                 android:orientation="horizontal"
                 android:gravity="center">
 
@@ -106,7 +116,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="AI Analysis"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#FF8C00"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:background="@drawable/bg_landing_pill"
@@ -117,11 +127,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="3D AR Try-On"
-                    android:textColor="#FFFFFF"
+                    android:text="3D Frame Preview"
+                    android:textColor="#FF8C00"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    android:background="@drawable/bg_landing_pill_active"
+                    android:background="@drawable/bg_landing_pill"
                     android:paddingHorizontal="14dp"
                     android:paddingVertical="7dp" />
 
@@ -130,7 +140,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="Virtual Catalog"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#FF8C00"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:background="@drawable/bg_landing_pill"
@@ -162,10 +172,10 @@
 
                 <ImageView
                     android:id="@+id/iv_swipe_chevron"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/ic_chevron_up"
-                    app:tint="#F28B30" />
+                    app:tint="#FFFFFF" />
 
                 <TextView
                     android:id="@+id/tv_swipe_hint"

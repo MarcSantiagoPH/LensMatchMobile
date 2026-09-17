@@ -1,8 +1,11 @@
 package com.lensmatch.mobile.ui.result;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +33,8 @@ public class ResultFragment extends Fragment {
     private TextView tvDetectedShape;
     private TextView tvConfidenceMatch;
     private TextView tvAiDescription;
+    private TextView tvRecommendedReason;
+    private TextView tvAvoidedReason;
     private ChipGroup chipGroupRecommended;
     private ChipGroup chipGroupAvoided;
     private MaterialButton btnTryFramesOn;
@@ -54,6 +59,8 @@ public class ResultFragment extends Fragment {
         cardBorderlineNotice = root.findViewById(R.id.card_borderline_notice);
         tvBorderlineNotes = root.findViewById(R.id.tv_borderline_notes);
         tvAiDescription = root.findViewById(R.id.tv_ai_description);
+        tvRecommendedReason = root.findViewById(R.id.tv_recommended_reason);
+        tvAvoidedReason = root.findViewById(R.id.tv_avoided_reason);
         chipGroupRecommended = root.findViewById(R.id.chip_group_recommended);
         chipGroupAvoided = root.findViewById(R.id.chip_group_avoided);
         btnTryFramesOn = root.findViewById(R.id.btn_try_frames_on);
@@ -73,7 +80,7 @@ public class ResultFragment extends Fragment {
         AppState.getInstance().setLastActiveTab(R.id.nav_result);
         if (btnTryFramesOn != null) {
             btnTryFramesOn.setEnabled(false);
-            btnTryFramesOn.setText("Opening 3D AR...");
+            btnTryFramesOn.setText("Opening Frame Preview...");
         }
         Intent intent = new Intent(requireContext(), com.unity3d.player.UnityPlayerGameActivity.class);
         intent.putExtra("frameStyle", frameStyle);
@@ -86,7 +93,7 @@ public class ResultFragment extends Fragment {
         super.onResume();
         if (btnTryFramesOn != null) {
             btnTryFramesOn.setEnabled(true);
-            btnTryFramesOn.setText("Try Frames On");
+            btnTryFramesOn.setText("Preview Frames");
         }
         updateUI();
     }
@@ -172,7 +179,23 @@ public class ResultFragment extends Fragment {
 
     private void displayRecommendations(FaceShapeDetector.ShapeRecommendation rec) {
         if (rec == null || !isAdded() || getContext() == null) return;
-        tvAiDescription.setText(rec.description);
+        if (tvAiDescription != null) {
+            tvAiDescription.setText(rec.description);
+        }
+
+        if (tvRecommendedReason != null) {
+            String rReason = (rec.recommendedReason != null && !rec.recommendedReason.isEmpty())
+                    ? rec.recommendedReason
+                    : "Flattering frame silhouettes that balance your unique facial geometry.";
+            tvRecommendedReason.setText(rReason);
+        }
+
+        if (tvAvoidedReason != null) {
+            String aReason = (rec.avoidedReason != null && !rec.avoidedReason.isEmpty())
+                    ? rec.avoidedReason
+                    : "Styles that may visually conflict with or overpower your natural facial symmetry.";
+            tvAvoidedReason.setText(aReason);
+        }
 
         chipGroupRecommended.removeAllViews();
         chipGroupAvoided.removeAllViews();
@@ -182,10 +205,17 @@ public class ResultFragment extends Fragment {
             recommendedList.add(item);
             Chip chip = new Chip(requireContext());
             chip.setText(item);
+            chip.setChipIconResource(R.drawable.ic_check);
+            chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#FF8C00")));
+            chip.setChipIconSize(36f);
+            chip.setIconStartPadding(12f);
             chip.setChipBackgroundColorResource(R.color.bgCardSelected);
-            chip.setTextColor(getResources().getColor(R.color.textPrimary, null));
-            chip.setChipStrokeColorResource(R.color.accentGold);
-            chip.setChipStrokeWidth(1f);
+            chip.setTextColor(Color.parseColor("#1A1A1A"));
+            chip.setTextSize(13f);
+            chip.setTypeface(null, Typeface.BOLD);
+            chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor("#FF8C00")));
+            chip.setChipStrokeWidth(3f);
+            chip.setChipCornerRadius(32f);
             chip.setOnClickListener(v -> startUnityAR(item, recommendedList));
             chipGroupRecommended.addView(chip);
         }
@@ -193,16 +223,27 @@ public class ResultFragment extends Fragment {
         for (String item : rec.avoided) {
             Chip chip = new Chip(requireContext());
             chip.setText(item);
-            chip.setChipBackgroundColorResource(R.color.bgCard);
-            chip.setTextColor(getResources().getColor(R.color.textSecondary, null));
+            chip.setChipIconResource(R.drawable.ic_close);
+            chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#EF4444")));
+            chip.setChipIconSize(32f);
+            chip.setIconStartPadding(12f);
+            chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
+            chip.setTextColor(Color.parseColor("#777777"));
+            chip.setTextSize(13f);
+            chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor("#FFD199")));
+            chip.setChipStrokeWidth(2f);
+            chip.setChipCornerRadius(32f);
             chipGroupAvoided.addView(chip);
         }
     }
 
     private void fetchRecommendations(String shape) {
-        if (tvAiDescription != null) {
-            tvAiDescription.setText("Contacting Gemini AI for " + shape + " recommendations...");
+        // Immediately display built-in optical recommendations so screen is NEVER empty
+        FaceShapeDetector.ShapeRecommendation immediateFallback = FaceShapeDetector.getRecommendationForShape(shape);
+        if (immediateFallback != null) {
+            displayRecommendations(immediateFallback);
         }
+
         GeminiService.fetchRecommendations(shape, new GeminiService.Callback() {
             @Override
             public void onSuccess(FaceShapeDetector.ShapeRecommendation rec) {
@@ -214,10 +255,10 @@ public class ResultFragment extends Fragment {
 
             @Override
             public void onError(String message) {
+                // If Gemini encounters network failure or rate limit, keep the reliable built-in recommendation
                 if (!isAdded() || getContext() == null) return;
-                if (tvAiDescription != null) {
-                    tvAiDescription.setText("⚠️ " + message);
-                    tvAiDescription.setTextIsSelectable(true);
+                if (cachedRecommendation == null && immediateFallback != null) {
+                    displayRecommendations(immediateFallback);
                 }
             }
         });

@@ -168,7 +168,7 @@
             android:layout_margin="16dp"
             android:padding="8dp"
             android:src="@drawable/ic_scan"
-            app:tint="@android:color/white" />
+            app:tint="@color/brandOrange" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -189,7 +189,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:letterSpacing="0.02"
-                android:text="Preparing 3D AR Try-On"
+                android:text="Preparing 3D Frame Preview"
                 android:textColor="@color/textPrimary"
                 android:textSize="17sp"
                 android:textStyle="bold" />

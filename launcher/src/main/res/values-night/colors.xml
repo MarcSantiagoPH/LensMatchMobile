@@ -1,66 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Brand Colors -->
-    <color name="brandOrange">#F28B30</color>
-    <color name="brandOrangeDark">#D97218</color>
-    <color name="brandOrangeLight">#FFA556</color>
-    <color name="brandBlue">#3B5B8A</color>
-    <color name="brandBlueDark">#273D5E</color>
-    <color name="brandBlueLight">#597DB3</color>
+    <color name="brandOrange">#FF8C00</color>
+    <color name="brandOrangeDark">#E07000</color>
+    <color name="brandOrangeLight">#FFB347</color>
+    <color name="brandBlue">#FF8C00</color>
+    <color name="brandBlueDark">#E07000</color>
+    <color name="brandBlueLight">#FFB347</color>
 
-    <!-- UI Canvas & General Surfaces (Dark Mode) -->
-    <color name="bgPrimary">#0B0F17</color>
-    <color name="bgCard">#141C2B</color>
-    <color name="bgCardSelected">#1E2B42</color>
-    <color name="borderCard">#2A3C56</color>
-    <color name="borderCardSubtle">#1A2536</color>
+    <!-- UI Canvas & General Surfaces (Night Mode: Deep Orange) -->
+    <color name="bgPrimary">#1A0A00</color>
+    <color name="bgCard">#2B1500</color>
+    <color name="bgCardSelected">#3D2000</color>
+    <color name="borderCard">#5C3300</color>
+    <color name="borderCardSubtle">#3D2200</color>
 
-    <!-- Two-Tone Bottom Navigation Bar & FAB (Dark Mode) -->
-    <color name="bottomBarBackground">#141C2B</color>
-    <color name="bottomNavIconActive">#F28B30</color>
-    <color name="bottomNavIconInactive">#98A9C2</color>
-    <color name="fabBackground">#F28B30</color>
-    <color name="fabIconTint">#0B0F17</color>
+    <!-- Two-Tone Bottom Navigation Bar & FAB (Night) -->
+    <color name="bottomBarBackground">#1A0A00</color>
+    <color name="bottomNavIconActive">#FF8C00</color>
+    <color name="bottomNavIconInactive">#9E6020</color>
+    <color name="fabBackground">#FF8C00</color>
+    <color name="fabIconTint">#1A0A00</color>
 
-    <!-- Standout Hero Cards & Banners (Dark Mode) -->
-    <color name="heroCardBg">#1A2438</color>
-    <color name="heroCardStroke">#F28B30</color>
-    <color name="heroCardTitle">#FDFDFD</color>
-    <color name="heroCardSubtitle">#98A9C2</color>
-    <color name="heroCardBtnBg">#F28B30</color>
-    <color name="heroCardBtnText">#141C2B</color>
+    <!-- Standout Hero Cards & Banners (Night) -->
+    <color name="heroCardBg">#2B1500</color>
+    <color name="heroCardStroke">#FF8C00</color>
+    <color name="heroCardTitle">#FFFFFF</color>
+    <color name="heroCardSubtitle">#FFCC88</color>
+    <color name="heroCardBtnBg">#FF8C00</color>
+    <color name="heroCardBtnText">#FFFFFF</color>
 
-    <!-- Avatar & Icon Circle Container (Dark Mode) -->
-    <color name="avatarBg">#1E2C42</color>
-    <color name="avatarStroke">#F28B30</color>
-    <color name="avatarIconTint">#F28B30</color>
+    <!-- Avatar & Icon Circle Container (Night) -->
+    <color name="avatarBg">#3D2200</color>
+    <color name="avatarStroke">#FF8C00</color>
+    <color name="avatarIconTint">#FF8C00</color>
 
-    <!-- Logo Card Surface (Dark Mode: Matches Dark Mode background #0B0F17) -->
-    <color name="logoCardBg">#0B0F17</color>
-    <color name="logoCardStroke">#F28B30</color>
+    <!-- Logo Card Surface (Night) -->
+    <color name="logoCardBg">#1A0A00</color>
+    <color name="logoCardStroke">#FF8C00</color>
 
-    <!-- Category Filter Chips (Dark Mode) -->
-    <color name="chipSelectedBg">#2E2014</color>
-    <color name="chipSelectedText">#F28B30</color>
-    <color name="chipUnselectedBg">#141C2B</color>
-    <color name="chipUnselectedText">#98A9C2</color>
-    <color name="chipStrokeSelected">#F28B30</color>
-    <color name="chipStrokeUnselected">#2A3C56</color>
+    <!-- Category Filter Chips (Night) -->
+    <color name="chipSelectedBg">#FF8C00</color>
+    <color name="chipSelectedText">#FFFFFF</color>
+    <color name="chipUnselectedBg">#2B1500</color>
+    <color name="chipUnselectedText">#FFCC88</color>
+    <color name="chipStrokeSelected">#FF8C00</color>
+    <color name="chipStrokeUnselected">#5C3300</color>
 
-    <!-- Badges & Chips -->
-    <color name="badgeBg">#1E2C42</color>
-    <color name="badgeText">#F28B30</color>
+    <!-- Badges & Chips (Night) -->
+    <color name="badgeBg">#3D2200</color>
+    <color name="badgeText">#FF8C00</color>
 
-    <!-- Typography (Dark Mode) -->
-    <color name="textPrimary">#FDFDFD</color>
-    <color name="textSecondary">#98A9C2</color>
-    <color name="textBrand">#F28B30</color>
-    <color name="toolbarIconTint">#FDFDFD</color>
+    <!-- Typography (Night) -->
+    <color name="textPrimary">#FFFFFF</color>
+    <color name="textSecondary">#FFCC88</color>
+    <color name="textBrand">#FF8C00</color>
+    <color name="toolbarIconTint">#FF8C00</color>
 
     <!-- Brand Accent Aliases -->
-    <color name="accentGold">#F28B30</color>
-    <color name="accentOrange">#F28B30</color>
-    <color name="accentBlue">#3B5B8A</color>
+    <color name="accentGold">#FF8C00</color>
+    <color name="accentOrange">#FF8C00</color>
+    <color name="accentBlue">#FF8C00</color>
 
     <!-- Utility Colors -->
     <color name="black">#000000</color>
@@ -69,19 +69,19 @@
     <color name="redError">#F44336</color>
     <color name="transparent">#00000000</color>
 
-    <!-- Splash Screen Colors -->
-    <color name="staticSplashScreenBackgroundColor">#0B0F17</color>
+    <!-- Splash Screen Colors (Night) -->
+    <color name="staticSplashScreenBackgroundColor">#1A0A00</color>
     <color name="windowSplashScreenIconBackgroundColor">@android:color/transparent</color>
     <color name="windowSplashScreenAnimatedIconColor">@android:color/transparent</color>
 
-    <!-- AR Try-On Dynamic Theming (Dark Mode) -->
-    <color name="arBtnContinueBg">#CC141C2B</color>
-    <color name="arBtnContinueStroke">#F28B30</color>
-    <color name="arBtnContinueText">#F28B30</color>
-    <color name="arBackBtnBg">#80141C2B</color>
-    <color name="arBackBtnStroke">#33FFFFFF</color>
-    <color name="arBottomGradientCenter">#CC0B0F17</color>
-    <color name="arBottomGradientEnd">#FA0B0F17</color>
-    <color name="arCircleUnselectedBg">#80141C2B</color>
-    <color name="arCircleUnselectedStroke">#2A3C56</color>
+    <!-- AR Try-On Dynamic Theming (Night) -->
+    <color name="arBtnContinueBg">#CC1A0A00</color>
+    <color name="arBtnContinueStroke">#FF8C00</color>
+    <color name="arBtnContinueText">#FF8C00</color>
+    <color name="arBackBtnBg">#801A0A00</color>
+    <color name="arBackBtnStroke">#33FF8C00</color>
+    <color name="arBottomGradientCenter">#CC1A0A00</color>
+    <color name="arBottomGradientEnd">#FA1A0A00</color>
+    <color name="arCircleUnselectedBg">#802B1500</color>
+    <color name="arCircleUnselectedStroke">#5C3300</color>
 </resources>

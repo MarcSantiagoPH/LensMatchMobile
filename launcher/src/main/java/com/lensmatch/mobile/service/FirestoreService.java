@@ -11,6 +11,7 @@ import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.data.ClinicModel;
 import com.lensmatch.mobile.data.FrameModel;
 import com.lensmatch.mobile.data.ReservationModel;
+import com.lensmatch.mobile.data.ScanModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +25,7 @@ public class FirestoreService {
     public static final String COLLECTION_RESERVATIONS = "RESERVATIONS";
     public static final String COLLECTION_CLINIC_INFORMATION = "CLINIC_INFORMATION";
     public static final String COLLECTION_CUSTOMERS = "CUSTOMERS";
+    public static final String COLLECTION_SCAN_HISTORY = "SCAN_HISTORY";
     public static final String DOC_CLINIC_GENERAL = "general";
 
     public interface Callback<T> {
@@ -283,6 +285,77 @@ public class FirestoreService {
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error checking active reservation for frame: " + e.getMessage(), e);
                     if (callback != null) callback.onSuccess(false);
+                });
+    }
+
+    public static void saveScanResult(ScanModel scan, Callback<String> callback) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String customerId = user != null ? user.getUid() : "guest";
+        String customerName = user != null && user.getDisplayName() != null && !user.getDisplayName().isEmpty()
+                ? user.getDisplayName() : AppState.getInstance().getUserName();
+
+        Map<String, Object> map = scan.toMap();
+        map.put("customerId", customerId);
+        map.put("customerName", customerName != null ? customerName : "Customer");
+
+        getDb().collection(COLLECTION_SCAN_HISTORY)
+                .add(map)
+                .addOnSuccessListener(documentReference -> {
+                    scan.setId(documentReference.getId());
+                    if (callback != null) callback.onSuccess(documentReference.getId());
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to save scan history: " + e.getMessage(), e);
+                    if (callback != null) callback.onError(e.getMessage());
+                });
+    }
+
+    public static void getUserScanHistory(Callback<List<ScanModel>> callback) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String customerId = user != null ? user.getUid() : "guest";
+
+        getDb().collection(COLLECTION_SCAN_HISTORY)
+                .whereEqualTo("customerId", customerId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<ScanModel> list = new ArrayList<>();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Map<String, Object> data = doc.getData();
+                        if (data != null) {
+                            list.add(ScanModel.fromMap(data, doc.getId()));
+                        }
+                    }
+
+                    Collections.sort(list, (a, b) -> {
+                        if (a.getTimestamp() == null && b.getTimestamp() == null) return 0;
+                        if (a.getTimestamp() == null) return 1;
+                        if (b.getTimestamp() == null) return -1;
+                        return b.getTimestamp().compareTo(a.getTimestamp());
+                    });
+
+                    if (callback != null) callback.onSuccess(list);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error fetching user scan history: " + e.getMessage(), e);
+                    if (callback != null) callback.onError(e.getMessage());
+                });
+    }
+
+    public static void deleteScanHistoryItem(String scanId, Callback<Void> callback) {
+        if (scanId == null || scanId.trim().isEmpty()) {
+            if (callback != null) callback.onSuccess(null);
+            return;
+        }
+
+        getDb().collection(COLLECTION_SCAN_HISTORY)
+                .document(scanId)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    if (callback != null) callback.onSuccess(null);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to delete scan: " + e.getMessage(), e);
+                    if (callback != null) callback.onError(e.getMessage());
                 });
     }
 }

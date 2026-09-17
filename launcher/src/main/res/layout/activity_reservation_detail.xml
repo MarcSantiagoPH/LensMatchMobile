@@ -4,7 +4,7 @@
     android:id="@+id/reservation_detail_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bgPrimary"
+    android:background="#FFFFFF"
     android:orientation="vertical">
 
     <!-- Toolbar -->
@@ -12,11 +12,11 @@
         android:id="@+id/toolbar_reservation_detail"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/bgPrimary"
+        android:background="#FF8C00"
         app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="@color/toolbarIconTint"
+        app:navigationIconTint="#FFFFFF"
         app:title="Reservation Details"
-        app:titleTextColor="@color/textPrimary" />
+        app:titleTextColor="#FFFFFF" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="20dp"
-            android:paddingTop="12dp"
+            android:paddingTop="16dp"
             android:paddingBottom="40dp">
 
             <!-- SECTION 1: FRAME -->
@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:text="FRAME"
-                android:textColor="@color/textSecondary"
+                android:textColor="#CC7700"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.10"
@@ -47,11 +47,11 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bgCard"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="@color/borderCard"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp">
+                app:strokeColor="#FFD199"
+                app:strokeWidth="1.5dp"
+                app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -59,16 +59,24 @@
                     android:orientation="horizontal"
                     android:padding="16dp">
 
-                    <ImageView
-                        android:id="@+id/iv_detail_frame_image"
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
                         android:layout_gravity="center_vertical"
-                        android:background="@drawable/bg_ar_bottom_panel"
-                        android:contentDescription="Frame Image"
-                        android:padding="6dp"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_eyeglasses" />
+                        app:cardCornerRadius="12dp"
+                        app:cardBackgroundColor="#FFF8F0"
+                        app:strokeWidth="0dp"
+                        app:cardElevation="0dp">
+
+                        <ImageView
+                            android:id="@+id/iv_detail_frame_image"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="Frame Image"
+                            android:padding="8dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_eyeglasses" />
+                    </com.google.android.material.card.MaterialCardView>
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -82,7 +90,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Classic Aviator"
-                            android:textColor="@color/textPrimary"
+                            android:textColor="#1A1A1A"
                             android:textSize="17sp"
                             android:textStyle="bold" />
 
@@ -92,7 +100,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="LensMatch · Aviator"
-                            android:textColor="@color/textSecondary"
+                            android:textColor="#CC7700"
                             android:textSize="13sp" />
 
                         <TextView
@@ -101,7 +109,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:text="₱9,500.00"
-                            android:textColor="@color/accentGold"
+                            android:textColor="#FF8C00"
                             android:textSize="16sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -115,7 +123,7 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="8dp"
                 android:text="STATUS"
-                android:textColor="@color/textSecondary"
+                android:textColor="#CC7700"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.10"
@@ -124,11 +132,11 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bgCard"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="@color/borderCard"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp">
+                app:strokeColor="#FFD199"
+                app:strokeWidth="1.5dp"
+                app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -149,7 +157,7 @@
                             android:paddingHorizontal="12dp"
                             android:paddingVertical="5dp"
                             android:text="Pending"
-                            android:textColor="@color/accentGold"
+                            android:textColor="#FF8C00"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -160,7 +168,7 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:text="#A1B2C3D4"
-                            android:textColor="@color/textSecondary"
+                            android:textColor="#CC7700"
                             android:textSize="13sp"
                             android:fontFamily="monospace"
                             android:textStyle="bold" />
@@ -177,7 +185,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Requested Date"
-                            android:textColor="@color/textSecondary"
+                            android:textColor="#CC7700"
                             android:textSize="13sp" />
 
                         <TextView
@@ -185,7 +193,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Recent"
-                            android:textColor="@color/textPrimary"
+                            android:textColor="#1A1A1A"
                             android:textSize="13sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -203,7 +211,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Last Updated"
-                            android:textColor="@color/textSecondary"
+                            android:textColor="#CC7700"
                             android:textSize="13sp" />
 
                         <TextView
@@ -211,7 +219,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Recent"
-                            android:textColor="@color/textPrimary"
+                            android:textColor="#1A1A1A"
                             android:textSize="13sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -220,7 +228,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginVertical="14dp"
-                        android:background="@color/borderCard" />
+                        android:background="#FFD199" />
 
                     <TextView
                         android:id="@+id/tv_detail_status_message"
@@ -228,7 +236,7 @@
                         android:layout_height="wrap_content"
                         android:lineSpacingExtra="3dp"
                         android:text="Your reservation request has been received. Our staff is currently reviewing your request."
-                        android:textColor="@color/textPrimary"
+                        android:textColor="#555555"
                         android:textSize="13sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -240,7 +248,7 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="8dp"
                 android:text="CLINIC INFORMATION"
-                android:textColor="@color/textSecondary"
+                android:textColor="#CC7700"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.10"
@@ -249,11 +257,11 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bgCard"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="@color/borderCard"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp">
+                app:strokeColor="#FFD199"
+                app:strokeWidth="1.5dp"
+                app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -266,7 +274,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Franselle Optical Clinic"
-                        android:textColor="@color/accentGold"
+                        android:textColor="#FF8C00"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
@@ -283,14 +291,14 @@
                             android:layout_width="70dp"
                             android:layout_height="wrap_content"
                             android:text="Phone"
-                            android:textColor="@color/textSecondary"
+                            android:textColor="#CC7700"
                             android:textSize="13sp" />
 
                         <TextView
                             android:id="@+id/tv_clinic_phone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/accentGold"
+                            android:textColor="#FF8C00"
                             android:textSize="13sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -308,14 +316,14 @@
                             android:layout_width="70dp"
                             android:layout_height="wrap_content"
                             android:text="Email"
-                            android:textColor="@color/textSecondary"
+                            android:textColor="#CC7700"
                             android:textSize="13sp" />
 
                         <TextView
                             android:id="@+id/tv_clinic_email"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/accentGold"
+                            android:textColor="#FF8C00"
                             android:textSize="13sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -333,14 +341,14 @@
                             android:layout_width="70dp"
                             android:layout_height="wrap_content"
                             android:text="Address"
-                            android:textColor="@color/textSecondary"
+                            android:textColor="#CC7700"
                             android:textSize="13sp" />
 
                         <TextView
                             android:id="@+id/tv_clinic_address"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/accentGold"
+                            android:textColor="#FF8C00"
                             android:textSize="13sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -358,14 +366,14 @@
                             android:layout_width="70dp"
                             android:layout_height="wrap_content"
                             android:text="Hours"
-                            android:textColor="@color/textSecondary"
+                            android:textColor="#CC7700"
                             android:textSize="13sp" />
 
                         <TextView
                             android:id="@+id/tv_clinic_hours"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/textPrimary"
+                            android:textColor="#1A1A1A"
                             android:textSize="13sp" />
                     </LinearLayout>
 
@@ -373,13 +381,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginVertical="12dp"
-                        android:background="@color/borderCard" />
+                        android:background="#FFD199" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Special Instructions"
-                        android:textColor="@color/accentGold"
+                        android:textColor="#FF8C00"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
@@ -390,7 +398,7 @@
                         android:layout_marginTop="4dp"
                         android:lineSpacingExtra="2dp"
                         android:text="@string/instruction_pending"
-                        android:textColor="@color/textSecondary"
+                        android:textColor="#555555"
                         android:textSize="12sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

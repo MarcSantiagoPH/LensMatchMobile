@@ -53,12 +53,17 @@ import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
+import com.lensmatch.mobile.data.ScanModel;
+import com.lensmatch.mobile.service.FirestoreService;
 import com.lensmatch.mobile.ui.FaceMeshOverlayView;
+import com.lensmatch.mobile.utils.FaceShapeDetector;
 import com.lensmatch.mobile.utils.StatusBarUtils;
 import com.lensmatch.mobile.utils.TFLiteFaceDetector;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -464,7 +469,11 @@ public class CameraActivity extends AppCompatActivity {
             layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill_green);
         }
 
-        File photoFile = new File(getCacheDir(), "captured_face_" + System.currentTimeMillis() + ".jpg");
+        File scansDir = new File(getFilesDir(), "scans");
+        if (!scansDir.exists()) {
+            scansDir.mkdirs();
+        }
+        File photoFile = new File(scansDir, "captured_face_" + System.currentTimeMillis() + ".jpg");
         ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
 
         imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(this), new ImageCapture.OnImageSavedCallback() {
@@ -540,6 +549,62 @@ public class CameraActivity extends AppCompatActivity {
         AppState.getInstance().setLastIsBorderline(result.isBorderline());
         AppState.getInstance().setLastRunnerUpShape(result.getRunnerUpShape());
         AppState.getInstance().setLastNotes(result.getNotes());
+
+        FaceShapeDetector.ShapeRecommendation rec = FaceShapeDetector.getRecommendationForShape(result.getShape());
+        List<String> recStyles = new ArrayList<>();
+        List<String> avoidStyles = new ArrayList<>();
+        String recReason = "";
+        String avoidReason = "";
+        if (rec != null) {
+            if (rec.recommended != null) recStyles.addAll(Arrays.asList(rec.recommended));
+            if (rec.avoided != null) avoidStyles.addAll(Arrays.asList(rec.avoided));
+            recReason = rec.recommendedReason != null ? rec.recommendedReason : "";
+            avoidReason = rec.avoidedReason != null ? rec.avoidedReason : "";
+        }
+
+        String scanId = "scan_" + System.currentTimeMillis();
+        String customerId = "local";
+        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.getUid() != null) {
+            customerId = user.getUid();
+        }
+        String customerName = AppState.getInstance().getUserName();
+
+        ScanModel scan = new ScanModel(
+                scanId,
+                customerId,
+                customerName,
+                result.getShape(),
+                result.getConfidence(),
+                result.isBorderline(),
+                result.getRunnerUpShape(),
+                result.getNotes(),
+                recStyles,
+                avoidStyles,
+                recReason,
+                avoidReason,
+                photoPath,
+                new Date()
+        );
+
+        // ALWAYS SAVE TO LOCAL HISTORY IMMEDIATELY! EVERY SCAN ACCUMULATES ("SAVE AND SAVE SAVE SAVE")
+        AppState.getInstance().addScan(scan);
+
+        FirestoreService.saveScanResult(scan, new FirestoreService.Callback<String>() {
+            @Override
+            public void onSuccess(String resultId) {
+                Log.d(TAG, "Scan record saved to Firebase Firestore: " + resultId);
+                if (resultId != null) {
+                    scan.setId(resultId);
+                    AppState.getInstance().addScan(scan);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Log.w(TAG, "Failed saving scan to Firebase Firestore (saved locally): " + errorMessage);
+            }
+        });
 
         Intent intent = new Intent();
         intent.putExtra("imagePath", photoPath);

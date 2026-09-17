@@ -32,12 +32,10 @@ public class AccountDetailsActivity extends AppCompatActivity {
 
     private TextInputLayout tilName;
     private TextInputLayout tilPhone;
-    private TextInputLayout tilAddress;
     private TextInputLayout tilEmail;
 
     private TextInputEditText etName;
     private TextInputEditText etPhone;
-    private TextInputEditText etAddress;
     private TextInputEditText etEmail;
 
     private MaterialButton btnSave;
@@ -57,7 +55,16 @@ public class AccountDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_account_details);
 
         View root = findViewById(R.id.account_details_root);
-        StatusBarUtils.applyTopWindowInsets(root);
+        StatusBarUtils.applyWindowInsets(root);
+
+        getWindow().setStatusBarColor(android.graphics.Color.WHITE);
+        getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
+        androidx.core.view.WindowInsetsControllerCompat insetsController =
+                androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (insetsController != null) {
+            insetsController.setAppearanceLightStatusBars(true);
+            insetsController.setAppearanceLightNavigationBars(true);
+        }
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar_account_details);
         toolbar.setNavigationOnClickListener(v -> finish());
@@ -68,12 +75,10 @@ public class AccountDetailsActivity extends AppCompatActivity {
 
         tilName = findViewById(R.id.til_account_name);
         tilPhone = findViewById(R.id.til_account_phone);
-        tilAddress = findViewById(R.id.til_account_address);
         tilEmail = findViewById(R.id.til_account_email);
 
         etName = findViewById(R.id.et_account_name);
         etPhone = findViewById(R.id.et_account_phone);
-        etAddress = findViewById(R.id.et_account_address);
         etEmail = findViewById(R.id.et_account_email);
 
         btnSave = findViewById(R.id.btn_save_account);
@@ -98,12 +103,10 @@ public class AccountDetailsActivity extends AppCompatActivity {
         AppState state = AppState.getInstance();
         String name = state.getUserName();
         String phone = state.getUserPhone();
-        String address = state.getUserAddress();
         String email = state.getUserEmail();
 
         etName.setText(name);
         etPhone.setText(phone);
-        etAddress.setText(address);
         etEmail.setText(email);
 
         updateHeader(name, email);
@@ -269,7 +272,6 @@ public class AccountDetailsActivity extends AppCompatActivity {
     private void saveAccountDetails() {
         String name = etName.getText() != null ? etName.getText().toString().trim() : "";
         String phone = etPhone.getText() != null ? etPhone.getText().toString().trim() : "";
-        String address = etAddress.getText() != null ? etAddress.getText().toString().trim() : "";
         String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
 
         boolean hasError = false;
@@ -287,7 +289,7 @@ public class AccountDetailsActivity extends AppCompatActivity {
         if (hasError) return;
 
         // Update local SharedPreferences & AppState memory first
-        AppState.getInstance().updateAccountDetails(name, phone, address, email);
+        AppState.getInstance().updateAccountDetails(name, phone, "", email);
 
         if (btnSave != null) {
             btnSave.setEnabled(false);
@@ -295,7 +297,7 @@ public class AccountDetailsActivity extends AppCompatActivity {
         }
 
         // Update CUSTOMERS/{uid} in Firestore with partial merge
-        FirestoreService.updateCustomerProfile(name, phone, address, new FirestoreService.Callback<Void>() {
+        FirestoreService.updateCustomerProfile(name, phone, null, new FirestoreService.Callback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 if (isFinishing() || isDestroyed()) return;

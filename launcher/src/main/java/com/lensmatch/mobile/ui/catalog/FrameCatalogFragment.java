@@ -22,10 +22,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.FrameModel;
 import com.lensmatch.mobile.service.FirestoreService;
+import com.lensmatch.mobile.ui.catalog.FrameDetailActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,7 @@ public class FrameCatalogFragment extends Fragment {
 
     private LinearLayout layoutTitleRow;
     private LinearLayout layoutSearchRow;
+    private ImageButton btnSortCatalog;
     private ImageButton btnOpenSearch;
     private ImageButton btnCloseSearch;
     private TextInputEditText etCatalogSearch;
@@ -45,6 +48,14 @@ public class FrameCatalogFragment extends Fragment {
     private final List<FrameModel> allLoadedFrames = new ArrayList<>();
     private String selectedStyle = "All";
     private String searchQuery = "";
+    private int selectedSortIndex = 0;
+    private final String[] sortOptions = {
+            "Default",
+            "✨ New Arrivals First",
+            "Price: Low to High",
+            "Price: High to Low",
+            "Name: A to Z"
+    };
 
     @Nullable
     @Override
@@ -58,9 +69,14 @@ public class FrameCatalogFragment extends Fragment {
 
         layoutTitleRow = root.findViewById(R.id.layout_title_row);
         layoutSearchRow = root.findViewById(R.id.layout_search_row);
+        btnSortCatalog = root.findViewById(R.id.btn_sort_catalog);
         btnOpenSearch = root.findViewById(R.id.btn_open_search);
         btnCloseSearch = root.findViewById(R.id.btn_close_search);
         etCatalogSearch = root.findViewById(R.id.et_catalog_search);
+
+        if (btnSortCatalog != null) {
+            btnSortCatalog.setOnClickListener(v -> showSortDialog());
+        }
 
         rvFrames.setLayoutManager(new GridLayoutManager(requireContext(), 2));
 
@@ -186,6 +202,19 @@ public class FrameCatalogFragment extends Fragment {
         }
     }
 
+    private void showSortDialog() {
+        if (getContext() == null) return;
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Sort Frames")
+                .setSingleChoiceItems(sortOptions, selectedSortIndex, (dialog, which) -> {
+                    selectedSortIndex = which;
+                    applyLocalFilters();
+                    dialog.dismiss();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
     private void loadCatalogFrames() {
         if (progressCatalog != null) progressCatalog.setVisibility(View.VISIBLE);
         if (tvEmptyCatalog != null) tvEmptyCatalog.setVisibility(View.GONE);
@@ -210,10 +239,10 @@ public class FrameCatalogFragment extends Fragment {
 
                 // Offline fallback frames
                 allLoadedFrames.clear();
-                allLoadedFrames.add(new FrameModel("1", "Classic Aviator", "Aviator", "Metal", "₱129.00"));
-                allLoadedFrames.add(new FrameModel("2", "Retro Square", "Square", "Acetate", "₱145.00"));
-                allLoadedFrames.add(new FrameModel("3", "Minimalist Wire", "Round", "Titanium", "₱189.00"));
-                allLoadedFrames.add(new FrameModel("4", "Bold Rectangle", "Rectangle", "Acetate", "₱115.00"));
+                allLoadedFrames.add(new FrameModel("1", "Classic Aviator", "Aviator", "Metal", "₱9,500.00", true));
+                allLoadedFrames.add(new FrameModel("2", "Retro Square", "Square", "Acetate", "₱7,800.00", false));
+                allLoadedFrames.add(new FrameModel("3", "Minimalist Wire", "Round", "Titanium", "₱11,200.00", true));
+                allLoadedFrames.add(new FrameModel("4", "Bold Rectangle", "Rectangle", "Acetate", "₱6,500.00", false));
 
                 applyLocalFilters();
             }
@@ -246,6 +275,24 @@ public class FrameCatalogFragment extends Fragment {
             if (styleMatches && searchMatches) {
                 filtered.add(frame);
             }
+        }
+
+        switch (selectedSortIndex) {
+            case 1: // ✨ New Arrivals First
+                filtered.sort((a, b) -> Boolean.compare(b.isNew(), a.isNew()));
+                break;
+            case 2: // Price: Low to High
+                filtered.sort((a, b) -> Double.compare(a.getPriceValue(), b.getPriceValue()));
+                break;
+            case 3: // Price: High to Low
+                filtered.sort((a, b) -> Double.compare(b.getPriceValue(), a.getPriceValue()));
+                break;
+            case 4: // Name: A to Z
+                filtered.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+                break;
+            case 0:
+            default:
+                break;
         }
 
         if (rvFrames != null) {

@@ -32,12 +32,14 @@ public class SignupActivity extends AppCompatActivity {
 
         androidx.core.view.WindowInsetsControllerCompat controller = 
                 androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
         if (controller != null) {
-            controller.setAppearanceLightStatusBars(true);
+            controller.setAppearanceLightStatusBars(false);
+            controller.setAppearanceLightNavigationBars(true);
         }
 
         android.view.View root = findViewById(R.id.signup_root);
-        StatusBarUtils.applyTopWindowInsets(root);
+        StatusBarUtils.applyWindowInsets(root);
 
         TextInputEditText etName = findViewById(R.id.et_signup_name);
         TextInputEditText etEmail = findViewById(R.id.et_signup_email);
@@ -133,7 +135,9 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private void proceedToMain() {
+        AppState.getInstance().setLastActiveTab(R.id.nav_home);
         Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("open_tab", R.id.nav_home);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

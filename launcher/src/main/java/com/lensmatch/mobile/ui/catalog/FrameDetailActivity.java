@@ -8,6 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import android.view.View;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
@@ -36,6 +37,15 @@ public class FrameDetailActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btn_back_detail);
         btnBack.setOnClickListener(v -> finish());
         StatusBarUtils.applyTopMargin(btnBack);
+
+        View bottomBar = findViewById(R.id.bottom_bar);
+        StatusBarUtils.applyBottomWindowInsets(bottomBar);
+        getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
+        androidx.core.view.WindowInsetsControllerCompat insetsController =
+                androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (insetsController != null) {
+            insetsController.setAppearanceLightNavigationBars(true);
+        }
 
         ivDetailImage = findViewById(R.id.iv_detail_image);
         TextView tvName = findViewById(R.id.tv_detail_name);
@@ -96,23 +106,32 @@ public class FrameDetailActivity extends AppCompatActivity {
 
         btnReserveNow.setOnClickListener(v -> {
             if (frame == null) return;
-            btnReserveNow.setEnabled(false);
-            btnReserveNow.setText("Reserving...");
 
-            FirestoreService.createReservation(frame, new FirestoreService.Callback<String>() {
-                @Override
-                public void onSuccess(String reservationId) {
-                    Toast.makeText(FrameDetailActivity.this, frame.getName() + " reserved successfully!", Toast.LENGTH_LONG).show();
-                    updateReserveButtonState();
-                    finish();
-                }
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                    .setTitle("Confirm Frame Reservation")
+                    .setIcon(R.drawable.ic_eyeglasses)
+                    .setMessage("You are reserving the \"" + frame.getName() + "\" eyeglass frame only.\n\nPrescription lens options, lens fitting, and custom physical adjustments will be finalized and paid during your visit at Franselle Optical Clinic.")
+                    .setPositiveButton("Confirm Reservation", (dialog, which) -> {
+                        btnReserveNow.setEnabled(false);
+                        btnReserveNow.setText("Reserving...");
 
-                @Override
-                public void onError(String errorMessage) {
-                    Toast.makeText(FrameDetailActivity.this, errorMessage != null ? errorMessage : "Reservation failed.", Toast.LENGTH_LONG).show();
-                    updateReserveButtonState();
-                }
-            });
+                        FirestoreService.createReservation(frame, new FirestoreService.Callback<String>() {
+                            @Override
+                            public void onSuccess(String reservationId) {
+                                Toast.makeText(FrameDetailActivity.this, frame.getName() + " reserved successfully!", Toast.LENGTH_LONG).show();
+                                updateReserveButtonState();
+                                finish();
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                Toast.makeText(FrameDetailActivity.this, errorMessage != null ? errorMessage : "Reservation failed.", Toast.LENGTH_LONG).show();
+                                updateReserveButtonState();
+                            }
+                        });
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                    .show();
         });
     }
 

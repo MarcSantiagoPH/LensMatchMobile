@@ -25,7 +25,16 @@ public class HelpSupportActivity extends AppCompatActivity {
         setContentView(R.layout.activity_help_support);
 
         View root = findViewById(R.id.help_support_root);
-        StatusBarUtils.applyTopWindowInsets(root);
+        StatusBarUtils.applyWindowInsets(root);
+
+        getWindow().setStatusBarColor(android.graphics.Color.WHITE);
+        getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
+        androidx.core.view.WindowInsetsControllerCompat insetsController =
+                androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (insetsController != null) {
+            insetsController.setAppearanceLightStatusBars(true);
+            insetsController.setAppearanceLightNavigationBars(true);
+        }
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar_help_support);
         toolbar.setNavigationOnClickListener(v -> finish());

@@ -4,7 +4,7 @@
     android:id="@+id/notifications_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bgPrimary"
+    android:background="#FFFFFF"
     android:orientation="vertical">
 
     <!-- Top Toolbar -->
@@ -12,11 +12,11 @@
         android:id="@+id/toolbar_notifications"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/bgPrimary"
+        android:background="#FF8C00"
         app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="@color/toolbarIconTint"
+        app:navigationIconTint="#FFFFFF"
         app:title="Notifications"
-        app:titleTextColor="@color/textPrimary" />
+        app:titleTextColor="#FFFFFF" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -47,10 +47,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="14dp"
-                app:cardBackgroundColor="@color/bgCard"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="@color/borderCard"
-                app:strokeWidth="1dp"
+                app:strokeColor="#FFD199"
+                app:strokeWidth="1.5dp"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -114,10 +114,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="14dp"
-                app:cardBackgroundColor="@color/bgCard"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="@color/borderCard"
-                app:strokeWidth="1dp"
+                app:strokeColor="#FFD199"
+                app:strokeWidth="1.5dp"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -149,7 +149,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Virtual AR Try-On Available"
+                                android:text="Virtual Frame Preview Available"
                                 android:textColor="@color/textPrimary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -169,7 +169,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Try on our newest eyewear styles in real-time AR using your front camera."
+                        android:text="Preview our newest eyewear styles in real-time AR using your front camera."
                         android:textColor="@color/textSecondary"
                         android:textSize="13sp"
                         android:lineSpacingExtra="3dp" />
@@ -181,10 +181,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="14dp"
-                app:cardBackgroundColor="@color/bgCard"
+                app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="@color/borderCard"
-                app:strokeWidth="1dp"
+                app:strokeColor="#FFD199"
+                app:strokeWidth="1.5dp"
                 app:cardElevation="0dp">
 
                 <LinearLayout

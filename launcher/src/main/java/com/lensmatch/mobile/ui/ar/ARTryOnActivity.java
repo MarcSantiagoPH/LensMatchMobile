@@ -320,13 +320,21 @@ public class ARTryOnActivity extends AppCompatActivity {
             return;
         }
 
-        String targetStyle = normalizeCatalogStyle(rawStyle);
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("open_tab", R.id.nav_frame);
-        intent.putExtra("selectedStyle", targetStyle);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
-        finish();
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle("Frame Reservation Notice")
+                .setIcon(R.drawable.ic_eyeglasses)
+                .setMessage("Please note: You are selecting and reserving the eyeglass frame only.\n\nPrescription lens options, lens fitting, and custom physical adjustments will be finalized and paid during your visit at Franselle Optical Clinic.")
+                .setPositiveButton("Proceed to Catalog", (dialog, which) -> {
+                    String targetStyle = normalizeCatalogStyle(rawStyle);
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.putExtra("open_tab", R.id.nav_frame);
+                    intent.putExtra("selectedStyle", targetStyle);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    finish();
+                })
+                .setNegativeButton("Keep Previewing", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
     private String normalizeCatalogStyle(String raw) {

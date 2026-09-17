@@ -54,14 +54,15 @@ public class LandingActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_landing);
 
-        // Configure Status Bar for Blue Surf background (white icons)
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        getWindow().setNavigationBarColor(androidx.core.content.ContextCompat.getColor(this, R.color.brandOrange));
         if (controller != null) {
             controller.setAppearanceLightStatusBars(false);
+            controller.setAppearanceLightNavigationBars(false);
         }
 
         View root = findViewById(R.id.landing_root);
-        StatusBarUtils.applyTopWindowInsets(root);
+        StatusBarUtils.applyWindowInsets(root);
 
         bindViews();
         setupGestures(root);
@@ -266,14 +267,18 @@ public class LandingActivity extends AppCompatActivity {
         if (isNavigating) return;
         isNavigating = true;
 
-        // If user is already authenticated in Firebase, go straight to MainActivity
+        // If user is already authenticated in Firebase, go straight to MainActivity (Homepage)
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             String name = currentUser.getDisplayName() != null && !currentUser.getDisplayName().isEmpty()
                     ? currentUser.getDisplayName() : "User";
             AppState.getInstance().setUserProfile(name, currentUser.getEmail(), null);
 
+            // Reopening and swiping up must always return cleanly to the Homepage
+            AppState.getInstance().setLastActiveTab(R.id.nav_home);
+
             Intent intent = new Intent(this, MainActivity.class);
+            intent.putExtra("open_tab", R.id.nav_home);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
