@@ -38,7 +38,7 @@
                 android:background="@drawable/bg_new_badge"
                 android:paddingHorizontal="6dp"
                 android:paddingVertical="2dp"
-                android:text="âœ¨ NEW"
+                android:text="✨ NEW"
                 android:textColor="@color/surface_white"
                 android:textSize="10sp"
                 android:textStyle="bold"
@@ -82,7 +82,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="â‚±9,500.00"
+            android:text="₱9,500.00"
             android:textColor="@color/primary_orange"
             android:textSize="14sp"
             android:textStyle="bold" />

@@ -718,5 +718,6 @@ public class CameraActivity extends AppCompatActivity {
         super.onDestroy();
         if (tfliteDetector != null) tfliteDetector.close();
         if (cameraExecutor != null) cameraExecutor.shutdown();
+        if (faceDetector != null) faceDetector.close();
     }
 }
