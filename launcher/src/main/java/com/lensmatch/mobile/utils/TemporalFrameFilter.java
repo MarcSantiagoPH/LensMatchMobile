@@ -6,146 +6,115 @@ import java.util.List;
 
 /**
  * Multi-frame temporal buffer and outlier filter using Median Absolute Deviation (MAD).
- * Collects 15-30 frames over ~1.5s, filters jitter and micro-movement, drops statistical
- * outliers (>2 standard deviations from median), and averages inliers for optimal stability.
  */
 public class TemporalFrameFilter {
     public static final float MIN_LANDMARK_CONFIDENCE = 0.50f;
     public static final float MAD_OUTLIER_THRESHOLD = 2.0f; // Max std dev deviation from median
 
     public static FaceMetrics filterAndAverage(List<FaceMetrics> frameSamples) {
-        if (frameSamples == null || frameSamples.isEmpty()) {
-            return null;
-        }
+        if (frameSamples == null || frameSamples.isEmpty()) return null;
 
-        // 1. Confidence filter
         List<FaceMetrics> confidentSamples = new ArrayList<>();
         for (FaceMetrics m : frameSamples) {
-            if (m != null && m.jawConfidence >= MIN_LANDMARK_CONFIDENCE) {
-                confidentSamples.add(m);
-            }
+            if (m != null && m.jawConfidence >= MIN_LANDMARK_CONFIDENCE) confidentSamples.add(m);
         }
 
-        if (confidentSamples.isEmpty()) {
-            confidentSamples.addAll(frameSamples);
-        }
-        if (confidentSamples.size() <= 2) {
-            return confidentSamples.get(0);
-        }
+        if (confidentSamples.isEmpty()) confidentSamples.addAll(frameSamples);
+        if (confidentSamples.size() <= 2) return confidentSamples.get(0);
 
         int n = confidentSamples.size();
 
-        // 2. Extract series for MAD calculation
-        float[] wToH = new float[n];
-        float[] jawToCheek = new float[n];
-        float[] foreToJaw = new float[n];
-        float[] jawAngle = new float[n];
+        float[] lenW = new float[n];
+        float[] foreCheek = new float[n];
+        float[] jawCheek = new float[n];
+        float[] chinJaw = new float[n];
+        float[] jawAng = new float[n];
+        float[] jawTap = new float[n];
         float[] chinCurv = new float[n];
 
         for (int i = 0; i < n; i++) {
             FaceMetrics m = confidentSamples.get(i);
-            wToH[i] = m.widthToHeightRatio;
-            jawToCheek[i] = m.jawToCheekboneRatio;
-            foreToJaw[i] = m.foreheadToJawRatio;
-            jawAngle[i] = m.jawAngleScore;
+            lenW[i] = m.faceLengthToWidthRatio;
+            foreCheek[i] = m.foreheadToCheekRatio;
+            jawCheek[i] = m.jawToCheekRatio;
+            chinJaw[i] = m.chinToJawRatio;
+            jawAng[i] = m.jawAngle;
+            jawTap[i] = m.jawTaper;
             chinCurv[i] = m.chinCurvatureScore;
         }
 
-        // 3. Compute Medians and Median Absolute Deviations (MAD)
-        float medWToH = median(wToH);
-        float madWToH = mad(wToH, medWToH);
-        float stdWToH = Math.max(0.012f, 1.4826f * madWToH);
+        float medLenW = median(lenW); float stdLenW = Math.max(0.012f, 1.4826f * mad(lenW, medLenW));
+        float medForeCheek = median(foreCheek); float stdForeCheek = Math.max(0.015f, 1.4826f * mad(foreCheek, medForeCheek));
+        float medJawCheek = median(jawCheek); float stdJawCheek = Math.max(0.012f, 1.4826f * mad(jawCheek, medJawCheek));
+        float medChinJaw = median(chinJaw); float stdChinJaw = Math.max(0.012f, 1.4826f * mad(chinJaw, medChinJaw));
+        float medJawAng = median(jawAng); float stdJawAng = Math.max(2.0f, 1.4826f * mad(jawAng, medJawAng));
+        float medJawTap = median(jawTap); float stdJawTap = Math.max(0.015f, 1.4826f * mad(jawTap, medJawTap));
+        float medChinCurv = median(chinCurv); float stdChinCurv = Math.max(0.020f, 1.4826f * mad(chinCurv, medChinCurv));
 
-        float medJawCheek = median(jawToCheek);
-        float madJawCheek = mad(jawToCheek, medJawCheek);
-        float stdJawCheek = Math.max(0.012f, 1.4826f * madJawCheek);
-
-        float medForeJaw = median(foreToJaw);
-        float madForeJaw = mad(foreToJaw, medForeJaw);
-        float stdForeJaw = Math.max(0.015f, 1.4826f * madForeJaw);
-
-        float medAngle = median(jawAngle);
-        float madAngle = mad(jawAngle, medAngle);
-        float stdAngle = Math.max(2.0f, 1.4826f * madAngle);
-
-        float medCurv = median(chinCurv);
-        float madCurv = mad(chinCurv, medCurv);
-        float stdCurv = Math.max(0.020f, 1.4826f * madCurv);
-
-        // 4. Inlier selection: discard any frame where any metric deviates > 2 sigma from median
         List<FaceMetrics> inliers = new ArrayList<>();
         for (FaceMetrics m : confidentSamples) {
-            boolean isOutlier = Math.abs(m.widthToHeightRatio - medWToH) > (MAD_OUTLIER_THRESHOLD * stdWToH)
-                    || Math.abs(m.jawToCheekboneRatio - medJawCheek) > (MAD_OUTLIER_THRESHOLD * stdJawCheek)
-                    || (!m.isForeheadOccluded && Math.abs(m.foreheadToJawRatio - medForeJaw) > (MAD_OUTLIER_THRESHOLD * stdForeJaw))
-                    || Math.abs(m.jawAngleScore - medAngle) > (MAD_OUTLIER_THRESHOLD * stdAngle)
-                    || Math.abs(m.chinCurvatureScore - medCurv) > (MAD_OUTLIER_THRESHOLD * stdCurv);
-
-            if (!isOutlier) {
-                inliers.add(m);
-            }
+            boolean isOutlier = Math.abs(m.faceLengthToWidthRatio - medLenW) > (MAD_OUTLIER_THRESHOLD * stdLenW)
+                    || (!m.isForeheadOccluded && Math.abs(m.foreheadToCheekRatio - medForeCheek) > (MAD_OUTLIER_THRESHOLD * stdForeCheek))
+                    || Math.abs(m.jawToCheekRatio - medJawCheek) > (MAD_OUTLIER_THRESHOLD * stdJawCheek)
+                    || Math.abs(m.chinToJawRatio - medChinJaw) > (MAD_OUTLIER_THRESHOLD * stdChinJaw)
+                    || Math.abs(m.jawAngle - medJawAng) > (MAD_OUTLIER_THRESHOLD * stdJawAng)
+                    || Math.abs(m.jawTaper - medJawTap) > (MAD_OUTLIER_THRESHOLD * stdJawTap)
+                    || Math.abs(m.chinCurvatureScore - medChinCurv) > (MAD_OUTLIER_THRESHOLD * stdChinCurv);
+            if (!isOutlier) inliers.add(m);
         }
 
-        if (inliers.isEmpty()) {
-            inliers = confidentSamples; // Safe fallback
-        }
+        if (inliers.isEmpty()) inliers = confidentSamples;
 
-        // 5. Average remaining inliers
-        float sumWToH = 0, sumJawCheek = 0, sumForeJaw = 0, sumForeCheek = 0;
-        float sumJawAngle = 0, sumChinCurv = 0;
+        float sumLenW = 0, sumForeCheek = 0, sumJawCheek = 0, sumChinJaw = 0;
+        float sumJawAng = 0, sumJawTap = 0, sumChinCurv = 0;
+        float sumYaw = 0, sumPitch = 0, sumRoll = 0;
         float sumForeConf = 0, sumJawConf = 0;
-        float sumLenIpd = 0, sumCheekIpd = 0, sumForeIpd = 0, sumJawIpd = 0;
         int occludedCount = 0;
 
         for (FaceMetrics m : inliers) {
-            sumWToH += m.widthToHeightRatio;
-            sumJawCheek += m.jawToCheekboneRatio;
-            sumForeJaw += m.foreheadToJawRatio;
+            sumLenW += m.faceLengthToWidthRatio;
             sumForeCheek += m.foreheadToCheekRatio;
-            sumJawAngle += m.jawAngleScore;
+            sumJawCheek += m.jawToCheekRatio;
+            sumChinJaw += m.chinToJawRatio;
+            sumJawAng += m.jawAngle;
+            sumJawTap += m.jawTaper;
             sumChinCurv += m.chinCurvatureScore;
+            sumYaw += m.yaw;
+            sumPitch += m.pitch;
+            sumRoll += m.roll;
             sumForeConf += m.foreheadConfidence;
             sumJawConf += m.jawConfidence;
-            sumLenIpd += m.faceLengthIpd;
-            sumCheekIpd += m.cheekWidthIpd;
-            sumForeIpd += m.foreheadWidthIpd;
-            sumJawIpd += m.jawWidthIpd;
             if (m.isForeheadOccluded) occludedCount++;
         }
 
         int count = inliers.size();
         return new FaceMetrics(
-                sumWToH / count,
-                sumJawCheek / count,
-                sumForeJaw / count,
+                sumLenW / count,
                 sumForeCheek / count,
-                sumJawAngle / count,
+                sumJawCheek / count,
+                sumChinJaw / count,
+                sumJawAng / count,
+                sumJawTap / count,
                 sumChinCurv / count,
+                sumYaw / count,
+                sumPitch / count,
+                sumRoll / count,
                 sumForeConf / count,
                 occludedCount > (count / 2),
-                sumJawConf / count,
-                sumLenIpd / count,
-                sumCheekIpd / count,
-                sumForeIpd / count,
-                sumJawIpd / count
+                sumJawConf / count
         );
     }
 
     private static float median(float[] arr) {
         float[] copy = Arrays.copyOf(arr, arr.length);
         Arrays.sort(copy);
-        if (copy.length % 2 == 1) {
-            return copy[copy.length / 2];
-        } else {
-            return (copy[(copy.length / 2) - 1] + copy[copy.length / 2]) / 2.0f;
-        }
+        if (copy.length % 2 == 1) return copy[copy.length / 2];
+        else return (copy[(copy.length / 2) - 1] + copy[copy.length / 2]) / 2.0f;
     }
 
     private static float mad(float[] arr, float medianVal) {
         float[] deviations = new float[arr.length];
-        for (int i = 0; i < arr.length; i++) {
-            deviations[i] = Math.abs(arr[i] - medianVal);
-        }
+        for (int i = 0; i < arr.length; i++) deviations[i] = Math.abs(arr[i] - medianVal);
         return median(deviations);
     }
 }

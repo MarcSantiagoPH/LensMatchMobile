@@ -38,11 +38,11 @@ public class FaceShapeCalibrator {
         public static FaceSample fromFaceMetrics(String shape, FaceMetrics m) {
             return new FaceSample(
                     shape,
-                    m.widthToHeightRatio,
-                    m.jawToCheekboneRatio,
-                    m.foreheadToJawRatio,
+                    m.faceLengthToWidthRatio,
+                    m.jawToCheekRatio,
+                    m.chinToJawRatio, // Using chinToJawRatio instead of foreheadToJawRatio
                     m.foreheadToCheekRatio,
-                    m.jawAngleScore,
+                    m.jawAngle,
                     m.chinCurvatureScore
             );
         }

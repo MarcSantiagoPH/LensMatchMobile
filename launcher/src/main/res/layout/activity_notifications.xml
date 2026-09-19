@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/notifications_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/surface_white"
     android:orientation="vertical">
 
     <!-- Top Toolbar -->
@@ -12,11 +12,11 @@
         android:id="@+id/toolbar_notifications"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FF8C00"
+        android:background="@color/primary_orange"
         app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="#FFFFFF"
+        app:navigationIconTint="@color/surface_white"
         app:title="Notifications"
-        app:titleTextColor="#FFFFFF" />
+        app:titleTextColor="@color/surface_white" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -47,9 +47,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="14dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="#FFD199"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1.5dp"
                 app:cardElevation="0dp">
 
@@ -114,9 +114,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="14dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="#FFD199"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1.5dp"
                 app:cardElevation="0dp">
 
@@ -181,9 +181,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="14dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="#FFD199"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1.5dp"
                 app:cardElevation="0dp">
 
@@ -233,3 +233,4 @@
     </ScrollView>
 
 </LinearLayout>
+

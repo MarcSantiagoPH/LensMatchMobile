@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="12dp"
     android:layout_marginVertical="6dp"
-    app:cardBackgroundColor="#FFFFFF"
+    app:cardBackgroundColor="@color/surface_white"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
-    app:strokeColor="#FFD199"
+    app:strokeColor="@color/border_light"
     app:strokeWidth="1.5dp">
 
     <LinearLayout
@@ -22,7 +22,7 @@
             android:layout_height="72dp"
             android:layout_gravity="center_vertical"
             app:cardCornerRadius="12dp"
-            app:cardBackgroundColor="#FFF8F0"
+            app:cardBackgroundColor="@color/surface_white"
             app:strokeWidth="0dp"
             app:cardElevation="0dp">
 
@@ -55,7 +55,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Classic Aviator"
-                    android:textColor="#1A1A1A"
+                    android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -67,7 +67,7 @@
                     android:paddingHorizontal="8dp"
                     android:paddingVertical="3dp"
                     android:text="Pending"
-                    android:textColor="#FF8C00"
+                    android:textColor="@color/primary_orange"
                     android:textSize="11sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -77,8 +77,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="LensMatch · Aviator"
-                android:textColor="#CC7700"
+                android:text="LensMatch Â· Aviator"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
 
             <LinearLayout
@@ -93,8 +93,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="₱9,500.00"
-                    android:textColor="#FF8C00"
+                    android:text="â‚±9,500.00"
+                    android:textColor="@color/primary_orange"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -103,9 +103,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Oct 24, 2024"
-                    android:textColor="#CC7700"
+                    android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
+

@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/notice_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/surface_white"
     android:orientation="vertical">
 
     <!-- Top Toolbar -->
@@ -12,11 +12,11 @@
         android:id="@+id/toolbar_notice"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FFFFFF"
+        android:background="@color/surface_white"
         app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="#1A1A1A"
+        app:navigationIconTint="@color/text_primary"
         app:title="Reservation Information"
-        app:titleTextColor="#1A1A1A" />
+        app:titleTextColor="@color/text_primary" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -37,9 +37,9 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFF8F0"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="20dp"
-                app:strokeColor="#FFD199"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1.5dp"
                 app:cardElevation="2dp">
 
@@ -60,7 +60,7 @@
                             android:layout_height="28dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_eyeglasses"
-                            app:tint="#FF8C00" />
+                            app:tint="@color/secondary_teal" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -74,7 +74,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="SELECTED AR STYLE"
-                            android:textColor="#CC7700"
+                            android:textColor="@color/text_secondary"
                             android:textSize="11sp"
                             android:textStyle="bold"
                             android:letterSpacing="0.08"
@@ -86,7 +86,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="Wayfarer Frame"
-                            android:textColor="#1A1A1A"
+                            android:textColor="@color/text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:fontFamily="sans-serif-medium" />
@@ -108,9 +108,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="20dp"
-                app:strokeColor="#FF8C00"
+                app:strokeColor="@color/primary_orange"
                 app:strokeWidth="1.5dp"
                 app:cardElevation="3dp">
 
@@ -137,7 +137,7 @@
                                 android:layout_height="20dp"
                                 android:layout_gravity="center"
                                 android:src="@drawable/ic_lightbulb"
-                                app:tint="#FF8C00" />
+                                app:tint="@color/secondary_teal" />
                         </FrameLayout>
 
                         <TextView
@@ -145,7 +145,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
                             android:text="Frame-Only Reservation Notice"
-                            android:textColor="#FF8C00"
+                            android:textColor="@color/primary_orange"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:fontFamily="sans-serif-medium" />
@@ -157,7 +157,7 @@
                         android:layout_marginTop="14dp"
                         android:lineSpacingMultiplier="1.25"
                         android:text="Please note that you will only be reserving the eyeglass frame that you select."
-                        android:textColor="#1A1A1A"
+                        android:textColor="@color/text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
@@ -167,14 +167,14 @@
                         android:layout_marginTop="6dp"
                         android:lineSpacingMultiplier="1.25"
                         android:text="Prescription lenses are not included in the mobile reservation. Your actual lens prescription, lens options, and customized physical adjustments will be finalized and paid during your visit at Franselle Optical Clinic."
-                        android:textColor="#555555"
+                        android:textColor="@color/text_secondary"
                         android:textSize="13sp" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginVertical="16dp"
-                        android:background="#FFD199" />
+                        android:background="@color/border_light" />
 
                     <!-- Key Points Checklist -->
                     <LinearLayout
@@ -188,7 +188,7 @@
                             android:layout_height="18dp"
                             android:layout_marginTop="2dp"
                             android:src="@drawable/ic_check"
-                            app:tint="#FF8C00" />
+                            app:tint="@color/secondary_teal" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -201,7 +201,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Frame Holding Guaranteed"
-                                android:textColor="#1A1A1A"
+                                android:textColor="@color/text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -227,7 +227,7 @@
                             android:layout_height="18dp"
                             android:layout_marginTop="2dp"
                             android:src="@drawable/ic_check"
-                            app:tint="#FF8C00" />
+                            app:tint="@color/secondary_teal" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -240,7 +240,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="In-Clinic Eye Examination"
-                                android:textColor="#1A1A1A"
+                                android:textColor="@color/text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -266,7 +266,7 @@
                             android:layout_height="18dp"
                             android:layout_marginTop="2dp"
                             android:src="@drawable/ic_check"
-                            app:tint="#FF8C00" />
+                            app:tint="@color/secondary_teal" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -279,7 +279,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Lens Options &amp; Fitting"
-                                android:textColor="#1A1A1A"
+                                android:textColor="@color/text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -301,9 +301,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardBackgroundColor="#FFF8F0"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="16dp"
-                app:strokeColor="#FFD199"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1dp"
                 app:cardElevation="0dp">
 
@@ -319,7 +319,7 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_calendar"
-                        app:tint="#FF8C00" />
+                        app:tint="@color/secondary_teal" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -332,7 +332,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Franselle Optical Clinic"
-                            android:textColor="#1A1A1A"
+                            android:textColor="@color/text_primary"
                             android:textSize="13sp"
                             android:textStyle="bold" />
 
@@ -340,8 +340,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="1dp"
-                            android:text="Open Mon – Sat • 9:00 AM – 6:00 PM"
-                            android:textColor="#CC7700"
+                            android:text="Open Mon â€“ Sat â€¢ 9:00 AM â€“ 6:00 PM"
+                            android:textColor="@color/text_secondary"
                             android:textSize="11sp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -355,7 +355,7 @@
         android:id="@+id/layout_notice_bottom_actions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
+        android:background="@color/surface_white"
         android:elevation="8dp"
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
@@ -368,10 +368,10 @@
             android:layout_height="52dp"
             android:text="Proceed to Frame Catalog"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/surface_white"
             android:textSize="15sp"
             android:textStyle="bold"
-            app:backgroundTint="#FF8C00"
+            app:backgroundTint="@color/primary_orange"
             app:cornerRadius="14dp"
             app:elevation="2dp" />
 
@@ -383,13 +383,14 @@
             android:layout_marginTop="10dp"
             android:text="Keep Previewing in 3D AR"
             android:textAllCaps="false"
-            android:textColor="#FF8C00"
+            android:textColor="@color/primary_orange"
             android:textSize="14sp"
             android:textStyle="bold"
-            app:backgroundTint="#FFFFFF"
-            app:strokeColor="#FF8C00"
+            app:backgroundTint="@color/surface_white"
+            app:strokeColor="@color/primary_orange"
             app:strokeWidth="1.5dp"
             app:cornerRadius="14dp" />
     </LinearLayout>
 
 </LinearLayout>
+

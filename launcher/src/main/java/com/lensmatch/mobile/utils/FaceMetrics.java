@@ -1,46 +1,48 @@
 package com.lensmatch.mobile.utils;
 
 /**
- * Immutable container representing the 5 key normalized anthropometric ratios
- * plus occlusion confidence and scale-invariant IPD measurements.
+ * Immutable container representing normalized anthropometric ratios
+ * and pose measurements derived from MediaPipe landmarks.
  */
 public class FaceMetrics {
-    public final float widthToHeightRatio;     // Cheekbone width / Face length
-    public final float jawToCheekboneRatio;    // Jaw width / Cheekbone width
-    public final float foreheadToJawRatio;     // Forehead width / Jaw width
-    public final float foreheadToCheekRatio;   // Forehead width / Cheekbone width
-    public final float jawAngleScore;          // Jaw angle in degrees at chin apex
-    public final float chinCurvatureScore;     // [0.0 = sharp V-line, 1.0 = broad/square]
+    // Relative ratios (Normalized primarily against cheekbone width)
+    public final float faceLengthToWidthRatio;   // Face length / Cheekbone width
+    public final float foreheadToCheekRatio;     // Forehead width / Cheekbone width
+    public final float jawToCheekRatio;          // Jaw width / Cheekbone width
+    public final float chinToJawRatio;           // Chin width / Jaw width
+    
+    // Geometric shape angles and scores
+    public final float jawAngle;                 // Gonial angle estimate
+    public final float jawTaper;                 // Rate of narrowing from jaw to chin
+    public final float chinCurvatureScore;       // [0.0 = sharp V-line, 1.0 = broad/square]
 
-    // Occlusion metadata
+    // 3D Head Pose
+    public final float yaw;
+    public final float pitch;
+    public final float roll;
+
+    // Occlusion & Confidence
     public final float foreheadConfidence;
     public final boolean isForeheadOccluded;
     public final float jawConfidence;
 
-    // IPD-normalized dimensions
-    public final float faceLengthIpd;
-    public final float cheekWidthIpd;
-    public final float foreheadWidthIpd;
-    public final float jawWidthIpd;
-
-    public FaceMetrics(float widthToHeightRatio, float jawToCheekboneRatio,
-                       float foreheadToJawRatio, float foreheadToCheekRatio,
-                       float jawAngleScore, float chinCurvatureScore,
-                       float foreheadConfidence, boolean isForeheadOccluded, float jawConfidence,
-                       float faceLengthIpd, float cheekWidthIpd,
-                       float foreheadWidthIpd, float jawWidthIpd) {
-        this.widthToHeightRatio = widthToHeightRatio;
-        this.jawToCheekboneRatio = jawToCheekboneRatio;
-        this.foreheadToJawRatio = foreheadToJawRatio;
+    public FaceMetrics(float faceLengthToWidthRatio, float foreheadToCheekRatio,
+                       float jawToCheekRatio, float chinToJawRatio,
+                       float jawAngle, float jawTaper, float chinCurvatureScore,
+                       float yaw, float pitch, float roll,
+                       float foreheadConfidence, boolean isForeheadOccluded, float jawConfidence) {
+        this.faceLengthToWidthRatio = faceLengthToWidthRatio;
         this.foreheadToCheekRatio = foreheadToCheekRatio;
-        this.jawAngleScore = jawAngleScore;
+        this.jawToCheekRatio = jawToCheekRatio;
+        this.chinToJawRatio = chinToJawRatio;
+        this.jawAngle = jawAngle;
+        this.jawTaper = jawTaper;
         this.chinCurvatureScore = chinCurvatureScore;
+        this.yaw = yaw;
+        this.pitch = pitch;
+        this.roll = roll;
         this.foreheadConfidence = foreheadConfidence;
         this.isForeheadOccluded = isForeheadOccluded;
         this.jawConfidence = jawConfidence;
-        this.faceLengthIpd = faceLengthIpd;
-        this.cheekWidthIpd = cheekWidthIpd;
-        this.foreheadWidthIpd = foreheadWidthIpd;
-        this.jawWidthIpd = jawWidthIpd;
     }
 }

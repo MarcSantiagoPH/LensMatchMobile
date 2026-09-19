@@ -51,7 +51,7 @@ public class FrameCatalogFragment extends Fragment {
     private int selectedSortIndex = 0;
     private final String[] sortOptions = {
             "Default",
-            "✨ New Arrivals First",
+            "New Arrivals First",
             "Price: Low to High",
             "Price: High to Low",
             "Name: A to Z"

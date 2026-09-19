@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="20dp"
     android:layout_marginVertical="8dp"
-    app:cardBackgroundColor="#FFFFFF"
+    app:cardBackgroundColor="@color/surface_white"
     app:cardCornerRadius="16dp"
-    app:strokeColor="#FFD199"
+    app:strokeColor="@color/border_light"
     app:strokeWidth="1.5dp"
     app:cardElevation="2dp">
 
@@ -29,8 +29,8 @@
                 android:layout_height="44dp"
                 app:cardCornerRadius="22dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="#FFF8F0"
-                app:strokeColor="#FFD199"
+                app:cardBackgroundColor="@color/surface_white"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1dp">
 
                 <ImageView
@@ -40,7 +40,7 @@
                     android:padding="8dp"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_scan"
-                    app:tint="#FF8C00" />
+                    app:tint="@color/secondary_teal" />
             </com.google.android.material.card.MaterialCardView>
 
             <LinearLayout
@@ -55,7 +55,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Oval Face Shape"
-                    android:textColor="#1A1A1A"
+                    android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -64,8 +64,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="Oct 24, 2024 · 3:45 PM"
-                    android:textColor="#888888"
+                    android:text="Oct 24, 2024 Â· 3:45 PM"
+                    android:textColor="@color/text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -77,7 +77,7 @@
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="3dp"
                 android:text="94% Match"
-                android:textColor="#FF8C00"
+                android:textColor="@color/primary_orange"
                 android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -87,14 +87,14 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginVertical="12dp"
-            android:background="#FFD199" />
+            android:background="@color/border_light" />
 
         <!-- Recommendation summary -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="RECOMMENDED FRAMES"
-            android:textColor="#CC7700"
+            android:textColor="@color/text_secondary"
             android:textSize="10sp"
             android:textStyle="bold"
             android:letterSpacing="0.08" />
@@ -105,7 +105,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
             android:text="Aviator, Wayfarer, Cat-Eye"
-            android:textColor="#333333"
+            android:textColor="@color/text_primary"
             android:textSize="13sp"
             android:lineSpacingExtra="1dp" />
 
@@ -124,11 +124,11 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:text="View Recommendations"
-                android:textColor="#FF8C00"
+                android:textColor="@color/primary_orange"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 app:cornerRadius="10dp"
-                app:strokeColor="#FF8C00"
+                app:strokeColor="@color/primary_orange"
                 app:strokeWidth="1dp" />
 
             <ImageButton
@@ -139,7 +139,8 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Delete Scan"
                 android:src="@drawable/ic_delete"
-                app:tint="#EF4444" />
+                app:tint="@color/error" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
+

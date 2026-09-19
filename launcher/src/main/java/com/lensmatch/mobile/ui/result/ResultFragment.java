@@ -34,7 +34,6 @@ public class ResultFragment extends Fragment {
     private TextView tvConfidenceMatch;
     private TextView tvAiDescription;
     private TextView tvRecommendedReason;
-    private TextView tvAvoidedReason;
     private ChipGroup chipGroupRecommended;
     private ChipGroup chipGroupAvoided;
     private MaterialButton btnTryFramesOn;
@@ -60,7 +59,6 @@ public class ResultFragment extends Fragment {
         tvBorderlineNotes = root.findViewById(R.id.tv_borderline_notes);
         tvAiDescription = root.findViewById(R.id.tv_ai_description);
         tvRecommendedReason = root.findViewById(R.id.tv_recommended_reason);
-        tvAvoidedReason = root.findViewById(R.id.tv_avoided_reason);
         chipGroupRecommended = root.findViewById(R.id.chip_group_recommended);
         chipGroupAvoided = root.findViewById(R.id.chip_group_avoided);
         btnTryFramesOn = root.findViewById(R.id.btn_try_frames_on);
@@ -180,51 +178,43 @@ public class ResultFragment extends Fragment {
     private void displayRecommendations(FaceShapeDetector.ShapeRecommendation rec) {
         if (rec == null || !isAdded() || getContext() == null) return;
         if (tvAiDescription != null) {
-            tvAiDescription.setText(rec.description);
+            tvAiDescription.setText(rec.explanation);
         }
 
         if (tvRecommendedReason != null) {
-            String rReason = (rec.recommendedReason != null && !rec.recommendedReason.isEmpty())
-                    ? rec.recommendedReason
-                    : "Flattering frame silhouettes that balance your unique facial geometry.";
-            tvRecommendedReason.setText(rReason);
+            tvRecommendedReason.setText("Flattering frame silhouettes that balance your unique facial geometry.");
         }
 
-        if (tvAvoidedReason != null) {
-            String aReason = (rec.avoidedReason != null && !rec.avoidedReason.isEmpty())
-                    ? rec.avoidedReason
-                    : "Styles that may visually conflict with or overpower your natural facial symmetry.";
-            tvAvoidedReason.setText(aReason);
-        }
+        // tvAvoidedReason has been removed from the layout, so we no longer try to set it.
 
         chipGroupRecommended.removeAllViews();
         chipGroupAvoided.removeAllViews();
         recommendedList.clear();
 
-        for (String item : rec.recommended) {
+        for (String item : rec.primary) {
             recommendedList.add(item);
             Chip chip = new Chip(requireContext());
             chip.setText(item);
             chip.setChipIconResource(R.drawable.ic_check);
-            chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#FF8C00")));
+            chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#D97745")));
             chip.setChipIconSize(36f);
             chip.setIconStartPadding(12f);
             chip.setChipBackgroundColorResource(R.color.bgCardSelected);
             chip.setTextColor(Color.parseColor("#1A1A1A"));
             chip.setTextSize(13f);
             chip.setTypeface(null, Typeface.BOLD);
-            chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor("#FF8C00")));
+            chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor("#D97745")));
             chip.setChipStrokeWidth(3f);
             chip.setChipCornerRadius(32f);
             chip.setOnClickListener(v -> startUnityAR(item, recommendedList));
             chipGroupRecommended.addView(chip);
         }
 
-        for (String item : rec.avoided) {
+        for (String item : rec.secondary) {
             Chip chip = new Chip(requireContext());
             chip.setText(item);
-            chip.setChipIconResource(R.drawable.ic_close);
-            chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#EF4444")));
+            chip.setChipIconResource(R.drawable.ic_check);
+            chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#D97745")));
             chip.setChipIconSize(32f);
             chip.setIconStartPadding(12f);
             chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
@@ -239,7 +229,7 @@ public class ResultFragment extends Fragment {
 
     private void fetchRecommendations(String shape) {
         // Immediately display built-in optical recommendations so screen is NEVER empty
-        FaceShapeDetector.ShapeRecommendation immediateFallback = FaceShapeDetector.getRecommendationForShape(shape);
+        FaceShapeDetector.ShapeRecommendation immediateFallback = FaceShapeDetector.getRecommendation(shape);
         if (immediateFallback != null) {
             displayRecommendations(immediateFallback);
         }

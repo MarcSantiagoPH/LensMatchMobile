@@ -11,6 +11,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.view.View;
+import android.widget.CheckBox;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -43,15 +49,47 @@ public class SignupActivity extends AppCompatActivity {
 
         TextInputEditText etName = findViewById(R.id.et_signup_name);
         TextInputEditText etEmail = findViewById(R.id.et_signup_email);
+        TextInputEditText etPhone = findViewById(R.id.et_signup_phone);
         TextInputEditText etPassword = findViewById(R.id.et_signup_password);
         MaterialButton btnSignup = findViewById(R.id.btn_signup);
         MaterialButton btnGoogleSignup = findViewById(R.id.btn_google_signup);
         TextView btnGotoLogin = findViewById(R.id.btn_goto_login);
 
+        CheckBox cbTermsPrivacy = findViewById(R.id.cb_terms_privacy);
+        TextView tvTermsPrivacy = findViewById(R.id.tv_terms_privacy);
+
+        String agreementText = "I have read and agree to the Terms of Use and Privacy Policy.";
+        SpannableString ss = new SpannableString(agreementText);
+
+        ClickableSpan termsSpan = new ClickableSpan() {
+            @Override
+            public void onClick(View widget) {
+                Intent intent = new Intent(SignupActivity.this, LegalActivity.class);
+                intent.putExtra("type", "terms");
+                startActivity(intent);
+            }
+        };
+
+        ClickableSpan privacySpan = new ClickableSpan() {
+            @Override
+            public void onClick(View widget) {
+                Intent intent = new Intent(SignupActivity.this, LegalActivity.class);
+                intent.putExtra("type", "privacy");
+                startActivity(intent);
+            }
+        };
+
+        ss.setSpan(termsSpan, 29, 41, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        ss.setSpan(privacySpan, 46, 60, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        tvTermsPrivacy.setText(ss);
+        tvTermsPrivacy.setMovementMethod(LinkMovementMethod.getInstance());
+
         // Initialize Google Auth Helper
         googleAuthHelper = new GoogleAuthHelper(this, new GoogleAuthHelper.AuthCallback() {
             @Override
             public void onAuthSuccess(String name, String email, String photoUrl) {
+                AppState.getInstance().setEulaAccepted(true);
                 Toast.makeText(SignupActivity.this, "Signed up with Google as " + name + "!", Toast.LENGTH_SHORT).show();
                 proceedToMain();
             }
@@ -73,11 +111,18 @@ public class SignupActivity extends AppCompatActivity {
                 }
         );
 
-        btnGoogleSignup.setOnClickListener(v -> googleAuthHelper.launchSignIn(googleSignInLauncher));
+        btnGoogleSignup.setOnClickListener(v -> {
+            if (!cbTermsPrivacy.isChecked()) {
+                Toast.makeText(SignupActivity.this, "You must agree to the Terms of Use and Privacy Policy before creating an account.", Toast.LENGTH_LONG).show();
+                return;
+            }
+            googleAuthHelper.launchSignIn(googleSignInLauncher);
+        });
 
         btnSignup.setOnClickListener(v -> {
             String name = etName.getText() != null ? etName.getText().toString().trim() : "";
             String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
+            String phone = etPhone.getText() != null ? etPhone.getText().toString().trim() : "";
             String password = etPassword != null && etPassword.getText() != null ? etPassword.getText().toString().trim() : "";
 
             if (name.isEmpty()) {
@@ -92,6 +137,12 @@ public class SignupActivity extends AppCompatActivity {
                 return;
             }
 
+            if (phone.isEmpty()) {
+                etPhone.setError("Phone number is required");
+                etPhone.requestFocus();
+                return;
+            }
+
             if (password.length() < 6) {
                 if (etPassword != null) {
                     etPassword.setError("Password must be at least 6 characters");
@@ -102,11 +153,17 @@ public class SignupActivity extends AppCompatActivity {
                 return;
             }
 
+            if (!cbTermsPrivacy.isChecked()) {
+                Toast.makeText(this, "You must agree to the Terms of Use and Privacy Policy before creating an account.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
             btnSignup.setEnabled(false);
             btnSignup.setText("Creating account...");
 
             final String finalName = name;
             final String finalEmail = email;
+            final String finalPhone = phone;
 
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
@@ -121,6 +178,8 @@ public class SignupActivity extends AppCompatActivity {
                                         .build();
                                 user.updateProfile(profileUpdates);
                             }
+                            AppState.getInstance().setEulaAccepted(true);
+                            AppState.getInstance().updateAccountDetails(finalName, finalPhone, "", finalEmail);
                             AppState.getInstance().setUserProfile(finalName, finalEmail, null);
                             Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show();
                             proceedToMain();

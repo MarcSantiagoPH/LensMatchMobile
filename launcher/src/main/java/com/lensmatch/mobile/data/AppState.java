@@ -35,6 +35,8 @@ public class AppState {
     private String userPhotoUrl = null;
     private boolean isLoggedIn = false;
     private String themeMode = "dark";
+    private boolean hasAcceptedEula = false;
+    private long eulaAcceptanceTimestamp = 0;
 
     private AppState() {}
 
@@ -62,6 +64,8 @@ public class AppState {
         state.userPhotoUrl = prefs.getString("userPhotoUrl", null);
         state.isLoggedIn = prefs.getBoolean("isLoggedIn", false);
         state.themeMode = prefs.getString("themeMode", "dark");
+        state.hasAcceptedEula = prefs.getBoolean("hasAcceptedEula", false);
+        state.eulaAcceptanceTimestamp = prefs.getLong("eulaAcceptanceTimestamp", 0);
         state.applyThemeMode();
         state.loadScanHistoryFromPrefs();
     }
@@ -80,6 +84,20 @@ public class AppState {
             prefs.edit().putString("themeMode", "light").apply();
         }
         applyThemeMode();
+    }
+
+    public boolean hasAcceptedEula() { return hasAcceptedEula; }
+    public long getEulaAcceptanceTimestamp() { return eulaAcceptanceTimestamp; }
+
+    public void setEulaAccepted(boolean accepted) {
+        this.hasAcceptedEula = accepted;
+        this.eulaAcceptanceTimestamp = accepted ? System.currentTimeMillis() : 0;
+        if (prefs != null) {
+            prefs.edit()
+                .putBoolean("hasAcceptedEula", this.hasAcceptedEula)
+                .putLong("eulaAcceptanceTimestamp", this.eulaAcceptanceTimestamp)
+                .apply();
+        }
     }
 
     public void applyThemeMode() {
@@ -310,12 +328,12 @@ public class AppState {
         }
         // If scan history was empty but we have a last detected shape, add it as initial scan
         if (scanHistory.isEmpty() && lastDetectedShape != null && !lastDetectedShape.isEmpty() && !"Unknown".equalsIgnoreCase(lastDetectedShape)) {
-            FaceShapeDetector.ShapeRecommendation rec = FaceShapeDetector.getRecommendationForShape(lastDetectedShape);
+            FaceShapeDetector.ShapeRecommendation rec = FaceShapeDetector.getRecommendation(lastDetectedShape);
             List<String> recStyles = new ArrayList<>();
             List<String> avoidStyles = new ArrayList<>();
             if (rec != null) {
-                if (rec.recommended != null) recStyles.addAll(Arrays.asList(rec.recommended));
-                if (rec.avoided != null) avoidStyles.addAll(Arrays.asList(rec.avoided));
+                if (rec.primary != null) recStyles.addAll(rec.primary);
+                if (rec.secondary != null) avoidStyles.addAll(rec.secondary);
             }
             ScanModel initialScan = new ScanModel(
                     "scan_initial",
@@ -328,8 +346,8 @@ public class AppState {
                     lastNotes,
                     recStyles,
                     avoidStyles,
-                    rec != null ? rec.recommendedReason : "",
-                    rec != null ? rec.avoidedReason : "",
+                    rec != null ? rec.explanation : "",
+                    "",
                     new Date()
             );
             if (lastImagePath != null) {

@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/reservations_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/surface_white"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar_reservations"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FF8C00"
+        android:background="@color/primary_orange"
         app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="#FFFFFF"
+        app:navigationIconTint="@color/surface_white"
         app:title="My Reservations"
-        app:titleTextColor="#FFFFFF" />
+        app:titleTextColor="@color/surface_white" />
 
     <ProgressBar
         android:id="@+id/progress_reservations"
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="32dp"
-        android:indeterminateTint="#FF8C00"
+        android:indeterminateTint="@color/primary_orange"
         android:visibility="visible" />
 
     <TextView
@@ -46,3 +46,4 @@
         android:clipToPadding="false" />
 
 </LinearLayout>
+

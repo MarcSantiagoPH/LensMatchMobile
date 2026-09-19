@@ -109,26 +109,35 @@ public class GeometricFaceShapeAnalyzer {
         float confChin = getConfidence(rawLandmarks.get(CHIN_BOTTOM));
         float jawConf = (confJawL + confJawR + confChin) / 3.0f;
 
-        // Key Ratios
-        float widthToHeightRatio = cheekWidthIpd / faceLengthIpd;
-        float jawToCheekboneRatio = jawWidthIpd / cheekWidthIpd;
-        float foreheadToJawRatio = foreheadWidthIpd / jawWidthIpd;
+        // Key Ratios (Normalized against cheekbone width)
+        float faceLengthToWidthRatio = faceLengthIpd / cheekWidthIpd;
         float foreheadToCheekRatio = foreheadWidthIpd / cheekWidthIpd;
+        float jawToCheekRatio = jawWidthIpd / cheekWidthIpd;
+        float chinToJawRatio = 0.0f; // Calculate chin width / jaw width
+        
+        // Approximate chin width using base outer landmarks (149/377) vs Jaw Width (172/397)
+        float chinWidthIpd = pts[CHIN_BASE_LEFT_OUTER].dist(pts[CHIN_BASE_RIGHT_OUTER]);
+        if (jawWidthIpd > 0.01f) {
+            chinToJawRatio = chinWidthIpd / jawWidthIpd;
+        }
+
+        // Jaw Taper (Rate at which jaw narrows towards chin)
+        float jawTaper = 1.0f - chinToJawRatio;
 
         return new FaceMetrics(
-                widthToHeightRatio,
-                jawToCheekboneRatio,
-                foreheadToJawRatio,
+                faceLengthToWidthRatio,
                 foreheadToCheekRatio,
+                jawToCheekRatio,
+                chinToJawRatio,
                 jawAngleDeg,
+                jawTaper,
                 chinCurvatureScore,
+                normFace.yawDeg,
+                normFace.pitchDeg,
+                normFace.rollDeg,
                 foreheadConf,
                 isForeheadOccluded,
-                jawConf,
-                faceLengthIpd,
-                cheekWidthIpd,
-                foreheadWidthIpd,
-                jawWidthIpd
+                jawConf
         );
     }
 

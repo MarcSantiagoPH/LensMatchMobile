@@ -33,17 +33,19 @@ public class TFLiteFaceDetector {
         private final String runnerUpShape;
         private final boolean isBorderline;
         private final String notes;
+        private final FaceMetrics metrics;
 
         public FaceShapeResult(String shape, float confidence) {
-            this(shape, confidence, null, false, null);
+            this(shape, confidence, null, false, null, null);
         }
 
-        public FaceShapeResult(String shape, float confidence, String runnerUpShape, boolean isBorderline, String notes) {
+        public FaceShapeResult(String shape, float confidence, String runnerUpShape, boolean isBorderline, String notes, FaceMetrics metrics) {
             this.shape = shape;
             this.confidence = confidence;
             this.runnerUpShape = runnerUpShape;
             this.isBorderline = isBorderline;
             this.notes = notes;
+            this.metrics = metrics;
         }
 
         public String getShape() { return shape; }
@@ -51,6 +53,7 @@ public class TFLiteFaceDetector {
         public String getRunnerUpShape() { return runnerUpShape; }
         public boolean isBorderline() { return isBorderline; }
         public String getNotes() { return notes; }
+        public FaceMetrics getMetrics() { return metrics; }
     }
 
     public TFLiteFaceDetector(Context context) {
@@ -80,7 +83,7 @@ public class TFLiteFaceDetector {
 
     public FaceShapeResult processImage(Bitmap fullBitmap, Rect boundingBox) {
         if (fullBitmap == null) {
-            return new FaceShapeResult("Oval", 0.92f);
+            return new FaceShapeResult("Oval", 0.92f, null, false, null, null);
         }
         return processMultiFrame(Collections.singletonList(fullBitmap), boundingBox);
     }
@@ -93,10 +96,11 @@ public class TFLiteFaceDetector {
      */
     public FaceShapeResult processMultiFrame(List<Bitmap> frames, Rect boundingBox) {
         if (frames == null || frames.isEmpty()) {
-            return new FaceShapeResult("Oval", 0.92f);
+            return new FaceShapeResult("Oval", 0.92f, null, false, null, null);
         }
 
         List<FaceMetrics> collectedMetrics = new ArrayList<>();
+        List<FaceMetrics> fallbackMetrics = new ArrayList<>(); // frames rejected by pose gate, used as fallback
         List<float[]> cnnProbsList = new ArrayList<>();
 
         for (Bitmap frame : frames) {
@@ -104,34 +108,44 @@ public class TFLiteFaceDetector {
             int imgW = frame.getWidth();
             int imgH = frame.getHeight();
 
-            // 1. Extract 478 3D landmarks and 4x4 facial transformation matrix
+            // 2. Evaluate CNN classifier for this frame using exact pose and landmarks
+            float rollDeg = 0f;
+            List<com.google.mediapipe.tasks.components.containers.NormalizedLandmark> lms = null;
             if (landmarkerHelper != null) {
                 MediaPipeFaceLandmarkerHelper.DetectionResult detection = landmarkerHelper.detect(frame);
                 if (detection != null && detection.landmarks != null && !detection.landmarks.isEmpty()) {
-                    // Pose validation gatekeeper
+                    lms = detection.landmarks;
                     PoseNormalizer.NormalizedFace normFace = PoseNormalizer.normalize(
                             detection.landmarks, detection.transformMatrix, imgW, imgH);
-
-                    if (normFace != null && normFace.isPoseAcceptable) {
-                        FaceMetrics metrics = GeometricFaceShapeAnalyzer.extractMetrics(
-                                detection.landmarks, detection.transformMatrix, imgW, imgH);
-                        if (metrics != null) {
-                            collectedMetrics.add(metrics);
+                    
+                    if (normFace != null) {
+                        rollDeg = normFace.rollDeg;
+                        if (normFace.isPoseAcceptable) {
+                            FaceMetrics metrics = GeometricFaceShapeAnalyzer.extractMetrics(
+                                    detection.landmarks, detection.transformMatrix, imgW, imgH);
+                            if (metrics != null) collectedMetrics.add(metrics);
+                        } else {
+                            FaceMetrics metrics = GeometricFaceShapeAnalyzer.extractMetrics(
+                                    detection.landmarks, detection.transformMatrix, imgW, imgH);
+                            if (metrics != null) fallbackMetrics.add(metrics);
                         }
-                    } else if (normFace != null) {
-                        Log.w(TAG, "Frame rejected by pose gatekeeper: " + normFace.rejectionReason);
                     }
                 }
             }
 
-            // 2. Evaluate CNN classifier for this frame if interpreter is loaded
-            float[] cnnProbs = evaluateCnnForFrame(frame, boundingBox);
+            float[] cnnProbs = evaluateCnnForFrame(frame, lms, rollDeg);
             if (cnnProbs != null) {
                 cnnProbsList.add(cnnProbs);
             }
         }
 
         // 3. Robust Temporal MAD Filtering
+        // If pose gatekeeper rejected all strict frames, use fallback (slightly off-pose) frames
+        if (collectedMetrics.isEmpty() && !fallbackMetrics.isEmpty()) {
+            Log.w(TAG, "All frames rejected by strict pose gate. Using " + fallbackMetrics.size() + " fallback frames.");
+            collectedMetrics.addAll(fallbackMetrics);
+        }
+
         FaceMetrics averagedMetrics = null;
         if (!collectedMetrics.isEmpty()) {
             averagedMetrics = TemporalFrameFilter.filterAndAverage(collectedMetrics);
@@ -147,12 +161,38 @@ public class TFLiteFaceDetector {
             Map<String, Float> combinedProbs = new LinkedHashMap<>();
             float[] avgCnn = averageProbabilityVectors(cnnProbsList);
 
+            String cnnPrimary = null;
+            float cnnMaxProb = -1f;
+            for (int i = 0; i < labels.size(); i++) {
+                String label = labels.get(i);
+                float cnnP = (avgCnn != null && i < avgCnn.length) ? avgCnn[i] : 0.0f;
+                if (cnnP > cnnMaxProb) {
+                    cnnMaxProb = cnnP;
+                    cnnPrimary = label;
+                }
+            }
+
+            String geomPrimary = ruleResult.getPrimaryShape();
+            boolean strongAgreement = (cnnPrimary != null && cnnPrimary.equals(geomPrimary));
+            boolean cnnAmbiguous = (cnnMaxProb < 0.45f);
+
             for (int i = 0; i < labels.size(); i++) {
                 String label = labels.get(i);
                 float ruleP = ruleResult.getShapeProbabilities().getOrDefault(label, 0.01f);
                 float cnnP = (avgCnn != null && i < avgCnn.length) ? avgCnn[i] : ruleP;
-                // Weighted ensemble: 70% population-calibrated geometry + 30% deep CNN features
-                combinedProbs.put(label, (0.70f * ruleP) + (0.30f * cnnP));
+                
+                float combinedP = 0f;
+                if (strongAgreement) {
+                    // Synergy bonus
+                    combinedP = (0.50f * ruleP) + (0.50f * cnnP);
+                } else if (cnnAmbiguous) {
+                    // Trust geometry more if CNN is confused
+                    combinedP = (0.85f * ruleP) + (0.15f * cnnP);
+                } else {
+                    // Disagreement: Geometry holds slightly more weight as it is deterministic
+                    combinedP = (0.65f * ruleP) + (0.35f * cnnP);
+                }
+                combinedProbs.put(label, combinedP);
             }
 
             // Normalize combined distribution
@@ -170,7 +210,6 @@ public class TFLiteFaceDetector {
             String runnerUp = ruleResult.getRunnerUpShape();
             float runnerUpProb = combinedProbs.getOrDefault(runnerUp, 0.2f);
 
-            // Re-rank based on combined probabilities
             for (Map.Entry<String, Float> e : combinedProbs.entrySet()) {
                 if (e.getValue() > primaryProb) {
                     runnerUp = primary;
@@ -186,55 +225,91 @@ public class TFLiteFaceDetector {
             float margin = primaryProb - runnerUpProb;
             boolean isBorderline = (margin < 0.12f) || ruleResult.isBorderline();
             float confidence = ruleResult.getPrimaryConfidence();
+            if (strongAgreement) confidence = Math.min(0.99f, confidence + 0.10f);
 
             String notes = ruleResult.getNotes();
-            if (isBorderline && (notes == null || !notes.contains("Borderline Result"))) {
-                notes = "Borderline Result: Your facial features sit between " + primary + " and " + runnerUp + ". " + (notes != null ? notes : "");
+            if (isBorderline && (notes == null || !notes.contains("Borderline"))) {
+                notes = "Borderline Result: Features lean between " + primary + " and " + runnerUp + ".";
+            } else if (!strongAgreement && cnnPrimary != null) {
+                notes = (notes == null ? "" : notes + " ") + "AI suggests a hint of " + cnnPrimary + ", but proportions align closer to " + primary + ".";
             }
 
-            Log.d(TAG, "Multi-Frame MAD Decision (" + collectedMetrics.size() + " inliers): " 
-                    + primary + " (" + (int)(confidence * 100) + "% confidence), Borderline=" + isBorderline);
-
-            return new FaceShapeResult(primary, confidence, runnerUp, isBorderline, notes != null ? notes.trim() : null);
+            return new FaceShapeResult(primary, confidence, runnerUp, isBorderline, notes != null ? notes.trim() : null, averagedMetrics);
         }
 
         // Fallback if landmarking failed
-        return new FaceShapeResult("Oval", 0.90f, "Round", false, null);
+        return new FaceShapeResult("Oval", 0.90f, "Round", false, null, null);
     }
 
-    private float[] evaluateCnnForFrame(Bitmap fullBitmap, Rect boundingBox) {
+    private float[] evaluateCnnForFrame(Bitmap fullBitmap, List<com.google.mediapipe.tasks.components.containers.NormalizedLandmark> landmarks, float rollDeg) {
         if (interpreter == null || fullBitmap == null) return null;
         try {
             int imgW = fullBitmap.getWidth();
             int imgH = fullBitmap.getHeight();
 
-            if (boundingBox == null) {
-                boundingBox = new Rect(0, 0, imgW, imgH);
+            Bitmap alignedBitmap = fullBitmap;
+            // 1. Face Alignment (Level the eyes)
+            if (Math.abs(rollDeg) > 2.0f) {
+                android.graphics.Matrix matrix = new android.graphics.Matrix();
+                matrix.postRotate(-rollDeg);
+                alignedBitmap = Bitmap.createBitmap(fullBitmap, 0, 0, imgW, imgH, matrix, true);
+                imgW = alignedBitmap.getWidth();
+                imgH = alignedBitmap.getHeight();
             }
 
-            int maxDim = Math.max(boundingBox.width(), boundingBox.height());
-            int margin = (int) (maxDim * 0.15f);
-            int squareSize = maxDim + (margin * 2);
+            // 2. Face Cropping
+            Rect cropRect = new Rect(0, 0, imgW, imgH);
+            if (landmarks != null && !landmarks.isEmpty()) {
+                float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE;
+                float maxX = -Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
+                for (com.google.mediapipe.tasks.components.containers.NormalizedLandmark lm : landmarks) {
+                    if (lm.x() < minX) minX = lm.x();
+                    if (lm.x() > maxX) maxX = lm.x();
+                    if (lm.y() < minY) minY = lm.y();
+                    if (lm.y() > maxY) maxY = lm.y();
+                }
+                
+                int left = (int) (minX * fullBitmap.getWidth());
+                int right = (int) (maxX * fullBitmap.getWidth());
+                int top = (int) (minY * fullBitmap.getHeight());
+                int bottom = (int) (maxY * fullBitmap.getHeight());
+                
+                int faceW = right - left;
+                int faceH = bottom - top;
+                
+                // Add proportional padding (20% of face width/height)
+                int padX = (int) (faceW * 0.20f);
+                int padY = (int) (faceH * 0.20f);
+                
+                cropRect.left = Math.max(0, left - padX);
+                cropRect.right = Math.min(imgW, right + padX);
+                cropRect.top = Math.max(0, top - (int)(padY * 1.5f)); // Extra pad on top for forehead/hair
+                cropRect.bottom = Math.min(imgH, bottom + padY);
+            }
 
-            int centerX = boundingBox.centerX();
-            int centerY = boundingBox.centerY();
+            if (cropRect.width() <= 0 || cropRect.height() <= 0) return null;
+            Bitmap faceCrop = Bitmap.createBitmap(alignedBitmap, cropRect.left, cropRect.top, cropRect.width(), cropRect.height());
 
-            int left = Math.max(0, centerX - (squareSize / 2));
-            int top = Math.max(0, centerY - (squareSize / 2));
-            if (left + squareSize > imgW) left = Math.max(0, imgW - squareSize);
-            if (top + squareSize > imgH) top = Math.max(0, imgH - squareSize);
+            // 3. Proportion-Preserving Resize and Pad (224x224)
+            int targetSize = 224;
+            Bitmap finalSquareBmp = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888);
+            android.graphics.Canvas canvas = new android.graphics.Canvas(finalSquareBmp);
+            canvas.drawColor(android.graphics.Color.BLACK); // Pad with black
+            
+            float scale = Math.min((float) targetSize / faceCrop.getWidth(), (float) targetSize / faceCrop.getHeight());
+            int scaledW = Math.round(scale * faceCrop.getWidth());
+            int scaledH = Math.round(scale * faceCrop.getHeight());
+            Bitmap scaledCrop = Bitmap.createScaledBitmap(faceCrop, scaledW, scaledH, true);
+            
+            int drawLeft = (targetSize - scaledW) / 2;
+            int drawTop = (targetSize - scaledH) / 2;
+            canvas.drawBitmap(scaledCrop, drawLeft, drawTop, null);
 
-            int finalSquareDim = Math.min(Math.min(imgW - left, imgH - top), squareSize);
-            if (finalSquareDim <= 0) return null;
-
-            Bitmap faceCrop = Bitmap.createBitmap(fullBitmap, left, top, finalSquareDim, finalSquareDim);
-            Bitmap resizedBitmap = Bitmap.createScaledBitmap(faceCrop, 224, 224, true);
-
-            ByteBuffer inputBuffer = ByteBuffer.allocateDirect(1 * 224 * 224 * 3 * 4);
+            ByteBuffer inputBuffer = ByteBuffer.allocateDirect(1 * targetSize * targetSize * 3 * 4);
             inputBuffer.order(ByteOrder.nativeOrder());
 
-            int[] pixels = new int[224 * 224];
-            resizedBitmap.getPixels(pixels, 0, 224, 0, 0, 224, 224);
+            int[] pixels = new int[targetSize * targetSize];
+            finalSquareBmp.getPixels(pixels, 0, targetSize, 0, 0, targetSize, targetSize);
 
             for (int pixel : pixels) {
                 float r = ((pixel >> 16) & 0xFF) / 255.0f;

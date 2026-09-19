@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/scan_history_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/surface_white"
     android:orientation="vertical">
 
     <!-- Top Toolbar -->
@@ -12,11 +12,11 @@
         android:id="@+id/toolbar_scan_history"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FFFFFF"
+        android:background="@color/surface_white"
         app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="#1A1A1A"
+        app:navigationIconTint="@color/text_primary"
         app:title="Scan History"
-        app:titleTextColor="#1A1A1A" />
+        app:titleTextColor="@color/text_primary" />
 
     <!-- Subtitle summary header -->
     <LinearLayout
@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="SAVED AI SCANS"
-            android:textColor="#CC7700"
+            android:textColor="@color/text_secondary"
             android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.10"
@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Loading..."
-            android:textColor="#FF8C00"
+            android:textColor="@color/primary_orange"
             android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -60,7 +60,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:indeterminateTint="#FF8C00"
+            android:indeterminateTint="@color/primary_orange"
             android:visibility="visible" />
 
         <!-- RecyclerView for multiple scans -->
@@ -94,14 +94,14 @@
                     android:layout_height="36dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_scan"
-                    app:tint="#FF8C00" />
+                    app:tint="@color/secondary_teal" />
             </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="No Scan History Yet"
-                android:textColor="#1A1A1A"
+                android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="6dp" />
@@ -120,11 +120,11 @@
                 android:id="@+id/btn_empty_start_scan"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:text="📷   START AI FACE SCAN"
-                android:textColor="#FFFFFF"
+                android:text="ðŸ“·   START AI FACE SCAN"
+                android:textColor="@color/surface_white"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                app:backgroundTint="#FF8C00"
+                app:backgroundTint="@color/primary_orange"
                 app:cornerRadius="12dp"
                 android:paddingHorizontal="24dp" />
         </LinearLayout>
@@ -135,7 +135,7 @@
         android:id="@+id/layout_bottom_scan_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
+        android:background="@color/surface_white"
         android:elevation="6dp"
         android:paddingHorizontal="20dp"
         android:paddingVertical="12dp">
@@ -144,14 +144,15 @@
             android:id="@+id/btn_scan_again"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:text="📷   TAKE NEW FACE SCAN"
-            android:textColor="#FFFFFF"
+            android:text="ðŸ“·   TAKE NEW FACE SCAN"
+            android:textColor="@color/surface_white"
             android:textSize="13sp"
             android:textStyle="bold"
             android:letterSpacing="0.04"
-            app:backgroundTint="#FF8C00"
+            app:backgroundTint="@color/primary_orange"
             app:cornerRadius="12dp"
             app:elevation="2dp" />
     </LinearLayout>
 
 </LinearLayout>
+

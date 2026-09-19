@@ -55,7 +55,7 @@ public class LandingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_landing);
 
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        getWindow().setNavigationBarColor(androidx.core.content.ContextCompat.getColor(this, R.color.brandOrange));
+        getWindow().setNavigationBarColor(androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange_dark));
         if (controller != null) {
             controller.setAppearanceLightStatusBars(false);
             controller.setAppearanceLightNavigationBars(false);

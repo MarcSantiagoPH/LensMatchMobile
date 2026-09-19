@@ -132,13 +132,20 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
         View btnContinue = overlay.findViewById(R.id.btn_continue_unity_ar);
         if (btnContinue != null) {
             btnContinue.setOnClickListener(v -> {
-                Intent intent = new Intent(this, com.lensmatch.mobile.ui.catalog.FrameReservationNoticeActivity.class);
-                intent.putExtra("frameStyle", selectedFrameStyle);
-                intent.putExtra("colorVariant", selectedColorVariant);
-                if (recommendedFrames != null) {
-                    intent.putStringArrayListExtra("recommendedFrames", recommendedFrames);
-                }
-                startActivity(intent);
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Notice")
+                        .setMessage("You are only reserving the selected frame. The reservation does not mean that the frame has been purchased or that you have confirmed an order.")
+                        .setPositiveButton("Got it", (dialog, which) -> {
+                            Intent intent = new Intent(this, com.lensmatch.mobile.ui.catalog.FrameReservationNoticeActivity.class);
+                            intent.putExtra("frameStyle", selectedFrameStyle);
+                            intent.putExtra("colorVariant", selectedColorVariant);
+                            if (recommendedFrames != null) {
+                                intent.putStringArrayListExtra("recommendedFrames", recommendedFrames);
+                            }
+                            startActivity(intent);
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
             });
         }
 
@@ -181,7 +188,7 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
     }
 
     private void updateTabs() {
-        int orange = Color.parseColor("#FF8C00");
+        int orange = Color.parseColor("#D97745");
         int muted = Color.parseColor("#CCAA80");
         if (tvTabRecommended == null || tvTabAllFrames == null) return;
         if (selectedTabIndex == 0) {
@@ -222,7 +229,7 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
 
             boolean sel = frame.equalsIgnoreCase(selectedFrameStyle);
             circleBg.setBackgroundResource(sel ? R.drawable.bg_ar_circle_selected : R.drawable.bg_ar_circle_unselected);
-            label.setTextColor(sel ? Color.parseColor("#FF8C00") : Color.WHITE);
+            label.setTextColor(sel ? Color.parseColor("#D97745") : Color.WHITE);
 
             item.setOnClickListener(v -> {
                 selectedFrameStyle = frame;
@@ -245,7 +252,7 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
 
             boolean sel = opt.label.equalsIgnoreCase(selectedColorVariant);
             chip.setBackgroundResource(sel ? R.drawable.bg_confidence_chip : R.drawable.bg_color_chip_unselected);
-            chip.setTextColor(sel ? Color.parseColor("#FF8C00") : Color.parseColor("#CC7700"));
+            chip.setTextColor(sel ? Color.parseColor("#D97745") : Color.parseColor("#77716C"));
 
             chip.setOnClickListener(v -> {
                 selectedColorVariant = opt.label;

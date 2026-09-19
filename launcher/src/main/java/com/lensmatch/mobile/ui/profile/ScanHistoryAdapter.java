@@ -87,7 +87,7 @@ public class ScanHistoryAdapter extends RecyclerView.Adapter<ScanHistoryAdapter.
         iv.setPadding(p, p, p, p);
         iv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         iv.setImageResource(R.drawable.ic_scan);
-        iv.setImageTintList(ColorStateList.valueOf(Color.parseColor("#FF8C00")));
+        iv.setImageTintList(ColorStateList.valueOf(Color.parseColor("#D97745")));
     }
 
     @Override

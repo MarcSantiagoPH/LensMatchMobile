@@ -1,87 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Brand Colors -->
-    <color name="brandOrange">#FF8C00</color>
-    <color name="brandOrangeDark">#E07000</color>
-    <color name="brandOrangeLight">#FFB347</color>
-    <color name="brandBlue">#FF8C00</color>
-    <color name="brandBlueDark">#E07000</color>
-    <color name="brandBlueLight">#FFB347</color>
+    <!-- Core Primary (Orange) -->
+    <color name="primary_orange">#F4A261</color>
+    <color name="primary_orange_light">#F6BD8A</color>
+    <color name="primary_orange_tint">#FDEBDD</color>
+    <color name="primary_orange_text">#B0561B</color>
+    <color name="primary_orange_dark">#2E2E2E</color>
 
-    <!-- UI Canvas & General Surfaces (Orange + White Theme) -->
-    <color name="bgPrimary">#FFFFFF</color>
-    <color name="bgCard">#FFF8F0</color>
-    <color name="bgCardSelected">#FFE5C0</color>
-    <color name="borderCard">#FFD199</color>
-    <color name="borderCardSubtle">#FFEBCC</color>
+    <!-- Core Secondary (Teal) -->
+    <color name="secondary_teal">#5F9EA0</color>
+    <color name="secondary_teal_dark">#3D7A7C</color>
+    <color name="secondary_teal_tint">#E8F2F2</color>
 
-    <!-- Two-Tone Bottom Navigation Bar & FAB -->
-    <color name="bottomBarBackground">#FFFFFF</color>
-    <color name="bottomNavIconActive">#FF8C00</color>
-    <color name="bottomNavIconInactive">#CCAA80</color>
-    <color name="fabBackground">#FF8C00</color>
-    <color name="fabIconTint">#FFFFFF</color>
+    <!-- Neutrals & Foundations -->
+    <color name="background_warm">#FFF8F2</color>
+    <color name="surface_white">#FFFFFF</color>
+    <color name="text_primary">#2E2E2E</color>
+    <color name="text_secondary">#757575</color>
+    <color name="border_light">#E0E0E0</color>
 
-    <!-- Standout Hero Cards & Banners -->
-    <color name="heroCardBg">#FF8C00</color>
-    <color name="heroCardStroke">#E07000</color>
-    <color name="heroCardTitle">#FFFFFF</color>
-    <color name="heroCardSubtitle">#FFE5C0</color>
-    <color name="heroCardBtnBg">#FFFFFF</color>
-    <color name="heroCardBtnText">#FF8C00</color>
 
-    <!-- Avatar & Icon Circle Container -->
-    <color name="avatarBg">#FFE5C0</color>
-    <color name="avatarStroke">#FF8C00</color>
-    <color name="avatarIconTint">#FF8C00</color>
+    <!-- Tertiary (Sage Green) -->
+    <color name="tertiary_sage">#8FAF9D</color>
+    <color name="tertiary_sage_tint">#EEF5F0</color>
 
-    <!-- Logo Card Surface -->
-    <color name="logoCardBg">#FFFFFF</color>
-    <color name="logoCardStroke">#FF8C00</color>
+    <!-- Information Accent (Soft Blue) -->
+    <color name="accent_blue">#7FA9C4</color>
+    <color name="accent_blue_tint">#EAF3F8</color>
 
-    <!-- Category Filter Chips -->
-    <color name="chipSelectedBg">#FF8C00</color>
-    <color name="chipSelectedText">#FFFFFF</color>
-    <color name="chipUnselectedBg">#FFF3E0</color>
-    <color name="chipUnselectedText">#CC7700</color>
-    <color name="chipStrokeSelected">#E07000</color>
-    <color name="chipStrokeUnselected">#FFD199</color>
-
-    <!-- Badges & Chips -->
-    <color name="badgeBg">#FFE5C0</color>
-    <color name="badgeText">#FF8C00</color>
-
-    <!-- Typography -->
-    <color name="textPrimary">#1A1A1A</color>
-    <color name="textSecondary">#CC7700</color>
-    <color name="textBrand">#FF8C00</color>
-    <color name="toolbarIconTint">#FF8C00</color>
-
-    <!-- Brand Accent Aliases -->
-    <color name="accentGold">#FF8C00</color>
-    <color name="accentOrange">#FF8C00</color>
-    <color name="accentBlue">#FF8C00</color>
+    <!-- Status -->
+    <color name="success">#66BB6A</color>
+    <color name="warning">#D9A441</color>
+    <color name="error">#E57373</color>
 
     <!-- Utility Colors -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
-    <color name="greenSuccess">#10B981</color>
-    <color name="redError">#EF4444</color>
     <color name="transparent">#00000000</color>
 
-    <!-- Splash Screen Colors -->
-    <color name="staticSplashScreenBackgroundColor">#FF8C00</color>
+    <!-- Legacy Compatibility Aliases -->
+    <color name="brandOrange">@color/primary_orange</color>
+    <color name="brandOrangeDark">@color/primary_orange_dark</color>
+    <color name="brandOrangeLight">@color/primary_orange_light</color>
+    <color name="brandBlue">@color/secondary_teal</color>
+    <color name="brandBlueDark">@color/secondary_teal_dark</color>
+    <color name="brandBlueLight">@color/secondary_teal_tint</color>
+
+    <color name="bgPrimary">@color/background_warm</color>
+    <color name="bgCard">@color/surface_white</color>
+    <color name="bgCardSelected">@color/primary_orange_tint</color>
+    <color name="borderCard">@color/border_light</color>
+    <color name="borderCardSubtle">@color/border_light</color>
+
+    <color name="bottomBarBackground">@color/surface_white</color>
+    <color name="bottomNavIconActive">@color/primary_orange</color>
+    <color name="bottomNavIconInactive">@color/text_secondary</color>
+    <color name="fabBackground">@color/primary_orange</color>
+    <color name="fabIconTint">@color/text_primary</color>
+
+    <color name="heroCardBg">@color/primary_orange</color>
+    <color name="heroCardStroke">@color/primary_orange_light</color>
+    <color name="heroCardTitle">@color/surface_white</color>
+    <color name="heroCardSubtitle">@color/primary_orange_tint</color>
+    <color name="heroCardBtnBg">@color/surface_white</color>
+    <color name="heroCardBtnText">@color/primary_orange</color>
+
+    <color name="avatarBg">@color/secondary_teal_tint</color>
+    <color name="avatarStroke">@color/secondary_teal_dark</color>
+    <color name="avatarIconTint">@color/secondary_teal</color>
+
+    <color name="logoCardBg">@color/surface_white</color>
+    <color name="logoCardStroke">@color/border_light</color>
+
+    <color name="chipSelectedBg">@color/primary_orange</color>
+    <color name="chipSelectedText">@color/text_primary</color>
+    <color name="chipUnselectedBg">@color/surface_white</color>
+    <color name="chipUnselectedText">@color/text_secondary</color>
+    <color name="chipStrokeSelected">@color/primary_orange_dark</color>
+    <color name="chipStrokeUnselected">@color/border_light</color>
+
+    <color name="badgeBg">@color/secondary_teal_tint</color>
+    <color name="badgeText">@color/secondary_teal_dark</color>
+
+    <color name="textPrimary">@color/text_primary</color>
+    <color name="textSecondary">@color/text_secondary</color>
+    <color name="textBrand">@color/primary_orange_text</color>
+    <color name="toolbarIconTint">@color/text_primary</color>
+
+    <color name="accentGold">@color/warning</color>
+    <color name="accentOrange">@color/primary_orange</color>
+    <color name="accentBlue">@color/secondary_teal</color>
+
+    <color name="greenSuccess">@color/success</color>
+    <color name="amberWarning">@color/warning</color>
+    <color name="redError">@color/error</color>
+
+    <color name="staticSplashScreenBackgroundColor">@color/primary_orange</color>
     <color name="windowSplashScreenIconBackgroundColor">@android:color/transparent</color>
     <color name="windowSplashScreenAnimatedIconColor">@android:color/transparent</color>
 
-    <!-- AR Try-On Dynamic Theming -->
-    <color name="arBtnContinueBg">#FF8C00</color>
-    <color name="arBtnContinueStroke">#E07000</color>
-    <color name="arBtnContinueText">#FFFFFF</color>
+    <color name="arBtnContinueBg">@color/primary_orange</color>
+    <color name="arBtnContinueStroke">@color/primary_orange_dark</color>
+    <color name="arBtnContinueText">@color/text_primary</color>
     <color name="arBackBtnBg">#80FFFFFF</color>
-    <color name="arBackBtnStroke">#40FF8C00</color>
-    <color name="arBottomGradientCenter">#CCFFF3E0</color>
-    <color name="arBottomGradientEnd">#F5FFF3E0</color>
-    <color name="arCircleUnselectedBg">#80FFE5C0</color>
-    <color name="arCircleUnselectedStroke">#FFD199</color>
+    <color name="arBackBtnStroke">#40F4A261</color>
+    <color name="arBottomGradientCenter">#CCFDEBDD</color>
+    <color name="arBottomGradientEnd">#F5FDEBDD</color>
+    <color name="arCircleUnselectedBg">#80FDEBDD</color>
+    <color name="arCircleUnselectedStroke">#E0E0E0</color>
 </resources>

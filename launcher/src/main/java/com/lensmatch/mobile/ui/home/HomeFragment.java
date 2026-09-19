@@ -115,21 +115,21 @@ public class HomeFragment extends Fragment {
             });
         }
 
-        View actionQuickScan = root.findViewById(R.id.action_quick_scan);
         View actionQuickCatalog = root.findViewById(R.id.action_quick_catalog);
         View actionQuickResult = root.findViewById(R.id.action_quick_result);
         View actionQuickReservations = root.findViewById(R.id.action_quick_reservations);
         View actionQuickClinic = root.findViewById(R.id.action_quick_clinic);
         MaterialCardView cardAnnouncementNewFrames = root.findViewById(R.id.card_announcement_new_frames);
-        MaterialCardView cardAboutApp = root.findViewById(R.id.card_about_app);
+        View btnSeeMoreGuide = root.findViewById(R.id.btn_see_more_guide);
 
-        if (actionQuickScan != null) {
-            actionQuickScan.setOnClickListener(v -> {
-                if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).openCameraScan();
-                }
+        if (btnSeeMoreGuide != null) {
+            btnSeeMoreGuide.setOnClickListener(v -> {
+                FullGuideBottomSheet bottomSheet = new FullGuideBottomSheet();
+                bottomSheet.show(getChildFragmentManager(), "FullGuideBottomSheet");
             });
         }
+
+
 
         if (actionQuickCatalog != null) {
             actionQuickCatalog.setOnClickListener(v -> {
@@ -173,13 +173,6 @@ public class HomeFragment extends Fragment {
                         bNav.setSelectedItemId(R.id.nav_frame);
                     }
                 }
-            });
-        }
-
-        if (cardAboutApp != null) {
-            cardAboutApp.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), HelpSupportActivity.class);
-                startActivity(intent);
             });
         }
 
@@ -252,7 +245,7 @@ public class HomeFragment extends Fragment {
                         } else if ("Cancelled".equalsIgnoreCase(status)) {
                             tvResStatusBadge.setTextColor(Color.parseColor("#EF4444"));
                         } else {
-                            tvResStatusBadge.setTextColor(Color.parseColor("#FF8C00"));
+                            tvResStatusBadge.setTextColor(Color.parseColor("#D97745"));
                         }
                     }
 

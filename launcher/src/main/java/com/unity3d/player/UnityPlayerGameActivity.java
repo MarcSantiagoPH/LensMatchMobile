@@ -163,14 +163,21 @@ public class UnityPlayerGameActivity extends GameActivity
             return;
         }
 
-        String targetStyle = toCatalogStyleName(rawStyle);
-        Intent intent = new Intent(this, com.lensmatch.mobile.ui.catalog.FrameReservationNoticeActivity.class);
-        intent.putExtra("frameStyle", targetStyle);
-        intent.putExtra("colorVariant", mCurrentColor);
-        if (recommendedFrames != null) {
-            intent.putStringArrayListExtra("recommendedFrames", recommendedFrames);
-        }
-        startActivity(intent);
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Notice")
+                .setMessage("You are only reserving the selected frame. The reservation does not mean that the frame has been purchased or that you have confirmed an order.")
+                .setPositiveButton("Got it", (dialog, which) -> {
+                    String targetStyle = toCatalogStyleName(rawStyle);
+                    Intent intent = new Intent(this, com.lensmatch.mobile.ui.catalog.FrameReservationNoticeActivity.class);
+                    intent.putExtra("frameStyle", targetStyle);
+                    intent.putExtra("colorVariant", mCurrentColor);
+                    if (recommendedFrames != null) {
+                        intent.putStringArrayListExtra("recommendedFrames", recommendedFrames);
+                    }
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private String toCatalogStyleName(String raw) {
@@ -236,7 +243,7 @@ public class UnityPlayerGameActivity extends GameActivity
     }
 
     private void updateTabs() {
-        int orange = Color.parseColor("#FF8C00");
+        int orange = Color.parseColor("#D97745");
         int muted = Color.parseColor("#CCAA80");
         if (tvTabRecommended == null || tvTabAllFrames == null) return;
         if (selectedTabIndex == 0) {
@@ -277,7 +284,7 @@ public class UnityPlayerGameActivity extends GameActivity
 
             boolean sel = normalizeShapeName(frame).equalsIgnoreCase(mCurrentShape);
             circleBg.setBackgroundResource(sel ? R.drawable.bg_ar_circle_selected : R.drawable.bg_ar_circle_unselected);
-            label.setTextColor(sel ? Color.parseColor("#FF8C00") : Color.WHITE);
+            label.setTextColor(sel ? Color.parseColor("#D97745") : Color.WHITE);
 
             item.setOnClickListener(v -> {
                 mCurrentShape = normalizeShapeName(frame);
@@ -300,7 +307,7 @@ public class UnityPlayerGameActivity extends GameActivity
 
             boolean sel = opt.code.equalsIgnoreCase(mCurrentColor);
             chip.setBackgroundResource(sel ? R.drawable.bg_confidence_chip : R.drawable.bg_color_chip_unselected);
-            chip.setTextColor(sel ? Color.parseColor("#FF8C00") : Color.parseColor("#CC7700"));
+            chip.setTextColor(sel ? Color.parseColor("#D97745") : Color.parseColor("#77716C"));
 
             chip.setOnClickListener(v -> {
                 mCurrentColor = opt.code;

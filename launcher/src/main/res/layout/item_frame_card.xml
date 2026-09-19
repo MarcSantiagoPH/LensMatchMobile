@@ -4,9 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="240dp"
     android:layout_margin="8dp"
-    app:cardBackgroundColor="#FFFFFF"
+    app:cardBackgroundColor="@color/surface_white"
     app:cardCornerRadius="16dp"
-    app:strokeColor="#FFD199"
+    app:strokeColor="@color/border_light"
     app:strokeWidth="1.5dp"
     app:cardElevation="2dp">
 
@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="#FFF8F0">
+            android:background="@color/surface_white">
 
             <ImageView
                 android:id="@+id/iv_frame"
@@ -38,8 +38,8 @@
                 android:background="@drawable/bg_new_badge"
                 android:paddingHorizontal="6dp"
                 android:paddingVertical="2dp"
-                android:text="✨ NEW"
-                android:textColor="#FFFFFF"
+                android:text="âœ¨ NEW"
+                android:textColor="@color/surface_white"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:visibility="gone" />
@@ -54,7 +54,7 @@
             android:paddingHorizontal="8dp"
             android:paddingVertical="2dp"
             android:text="Aviator"
-            android:textColor="#FF8C00"
+            android:textColor="@color/text_primary"
             android:textSize="11sp" />
 
         <TextView
@@ -65,7 +65,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="Classic Aviator"
-            android:textColor="#1A1A1A"
+            android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -74,7 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Metal"
-            android:textColor="#CC7700"
+            android:textColor="@color/text_secondary"
             android:textSize="12sp" />
 
         <TextView
@@ -82,9 +82,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="₱9,500.00"
-            android:textColor="#FF8C00"
+            android:text="â‚±9,500.00"
+            android:textColor="@color/primary_orange"
             android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
+

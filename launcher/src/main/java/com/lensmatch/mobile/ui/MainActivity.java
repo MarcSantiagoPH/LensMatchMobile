@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
         View coordinator = findViewById(R.id.coordinator_main);
         androidx.core.view.WindowInsetsControllerCompat controller = 
                 androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        int orangeColor = androidx.core.content.ContextCompat.getColor(this, R.color.brandOrange);
+        int orangeColor = androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange_dark);
         int whiteColor = android.graphics.Color.WHITE;
 
         getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);

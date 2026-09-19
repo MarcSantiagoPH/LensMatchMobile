@@ -1,6 +1,17 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { instr ->
+        localProperties.load(instr)
+    }
+}
+def rawKey = localProperties.getProperty('GEMINI_API_KEY') ?: "YOUR_GEMINI_API_KEY"
+def geminiApiKey = rawKey.trim().replaceAll("^\"|\"\$", "")
+
+
 android {
     namespace "com.lensmatch.mobile"
     ndkVersion "27.2.12479018"
@@ -22,6 +33,12 @@ android {
             abiFilters "arm64-v8a"
             debugSymbolLevel "none"
         }
+
+        buildConfigField("String", "GEMINI_API_KEY", "\"${geminiApiKey}\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     lint {

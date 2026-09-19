@@ -292,101 +292,135 @@ public class CameraActivity extends AppCompatActivity {
         latestFace = face;
         Rect bounds = face.getBoundingBox();
 
-        // 1. Luminance Quality Gate (Forgiving: 30 <= Y <= 235)
-        if (luminance < 30f) {
+        Matrix matrix = getScreenTransformMatrix(sourceTransform);
+        if (matrix == null) return; // Need matrix for accurate position gating
+
+        // Transform ML Kit face bounds into Screen (PreviewView) coordinates
+        RectF transformedBounds = new RectF(bounds);
+        matrix.mapRect(transformedBounds);
+
+        // Fetch the visual oval guide boundaries
+        RectF guideBounds = faceMeshOverlay.getGuideOvalRect();
+        if (guideBounds == null || guideBounds.isEmpty()) return;
+
+        // 1. Luminance Quality Gate (Forgiving: 20 <= Y <= 245)
+        if (luminance < 20f) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Lighting too dark — move to light", FaceMeshOverlayView.GuideState.MISALIGNED);
             });
             return;
         }
-        if (luminance > 235f) {
+        if (luminance > 245f) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Lighting too harsh — avoid direct glare", FaceMeshOverlayView.GuideState.MISALIGNED);
             });
             return;
         }
 
-        // 2. Size Quality Gate: Face occupies 18%–88% of screen height
-        float faceHeight = bounds.height();
-        if (faceHeight < imageHeight * 0.18f) {
+        // 2. Position and Size Quality Gate (Strict alignment with the visible guide oval)
+        float guideCenterX = guideBounds.centerX();
+        float guideCenterY = guideBounds.centerY();
+        float guideW = guideBounds.width();
+        float guideH = guideBounds.height();
+
+        float faceCenterX = transformedBounds.centerX();
+        float faceCenterY = transformedBounds.centerY();
+        float faceH = transformedBounds.height();
+
+        float toleranceX = guideW * 0.15f;
+        float toleranceY = guideH * 0.15f;
+
+        // Size check against the oval (not the raw screen height)
+        if (faceH < guideH * 0.60f) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Move slightly closer", FaceMeshOverlayView.GuideState.MISALIGNED);
             });
             return;
         }
-        if (faceHeight > imageHeight * 0.88f) {
+        if (faceH > guideH * 0.95f) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Move a little further back", FaceMeshOverlayView.GuideState.MISALIGNED);
             });
             return;
         }
 
-        // 3. Boundary Safe Margins Check (only left/right/bottom — top is skipped because
-        //    hair naturally extends above the bounding box top edge and should not block scanning)
-        float marginX = imageWidth * 0.03f;
-        float marginBottom = imageHeight * 0.03f;
-        if (bounds.left < marginX || bounds.right > (imageWidth - marginX) ||
-            bounds.bottom > (imageHeight - marginBottom)) {
+        // Center position checks (providing directional feedback relative to the screen)
+        if (faceCenterY < guideCenterY - toleranceY) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
-                setInstruction("Keep face inside frame", FaceMeshOverlayView.GuideState.MISALIGNED);
+                setInstruction("Move down", FaceMeshOverlayView.GuideState.MISALIGNED);
+            });
+            return;
+        }
+        if (faceCenterY > guideCenterY + toleranceY) {
+            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            runOnUiThread(() -> {
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
+                setInstruction("Move up", FaceMeshOverlayView.GuideState.MISALIGNED);
+            });
+            return;
+        }
+        if (faceCenterX < guideCenterX - toleranceX) {
+            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            runOnUiThread(() -> {
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
+                setInstruction("Move right", FaceMeshOverlayView.GuideState.MISALIGNED);
+            });
+            return;
+        }
+        if (faceCenterX > guideCenterX + toleranceX) {
+            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            runOnUiThread(() -> {
+                faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
+                setInstruction("Move left", FaceMeshOverlayView.GuideState.MISALIGNED);
             });
             return;
         }
 
         // 4. Face Contour Completeness Check
         FaceContour faceContour = face.getContour(FaceContour.FACE);
-        if (faceContour == null || faceContour.getPoints() == null || faceContour.getPoints().size() < 25) {
+        if (faceContour == null || faceContour.getPoints() == null || faceContour.getPoints().size() < 20) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Keep full face inside frame", FaceMeshOverlayView.GuideState.MISALIGNED);
             });
             return;
         }
 
-        // 5. 3D Head Pose Orientation Check (Yaw <= 20°, Pitch <= 18°, Roll <= 18°)
+        // 5. 3D Head Pose Orientation Check (Yaw <= 30°, Pitch <= 30°, Roll <= 30°)
         float yaw = face.getHeadEulerAngleY();   // Left / Right turn
         float pitch = face.getHeadEulerAngleX(); // Up / Down tilt
         float roll = face.getHeadEulerAngleZ();  // Sideways ear-to-shoulder tilt
 
-        if (Math.abs(yaw) > 20.0f) {
+        if (Math.abs(yaw) > 30.0f) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Look straight at the camera", FaceMeshOverlayView.GuideState.TILTED);
             });
             return;
         }
-        if (Math.abs(pitch) > 18.0f) {
+        if (Math.abs(pitch) > 30.0f) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Level your head", FaceMeshOverlayView.GuideState.TILTED);
             });
             return;
         }
-        if (Math.abs(roll) > 18.0f) {
+        if (Math.abs(roll) > 30.0f) {
             scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
             runOnUiThread(() -> {
-                Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Keep head upright", FaceMeshOverlayView.GuideState.TILTED);
             });
@@ -398,7 +432,6 @@ public class CameraActivity extends AppCompatActivity {
 
         if (scanProgress >= 1.0f) {
             runOnUiThread(() -> {
-                Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.SUCCESS, 1.0f, matrix, imageWidth, imageHeight);
                 setInstruction("Face aligned! Scanning...", FaceMeshOverlayView.GuideState.SUCCESS);
                 triggerHapticFeedback();
@@ -408,7 +441,6 @@ public class CameraActivity extends AppCompatActivity {
             final float currentProgress = scanProgress;
             runOnUiThread(() -> {
                 FaceMeshOverlayView.GuideState state = FaceMeshOverlayView.GuideState.ALIGNED;
-                Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(faces, state, currentProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Face centered — Hold still...", state);
             });
@@ -421,16 +453,22 @@ public class CameraActivity extends AppCompatActivity {
             state == FaceMeshOverlayView.GuideState.SCANNING ||
             state == FaceMeshOverlayView.GuideState.ALIGNED) {
             if (layoutInstructionPill != null) {
-                layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill_green);
+                layoutInstructionPill.setBackgroundTintList(android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this, R.color.success)));
             }
             tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
         } else if (state == FaceMeshOverlayView.GuideState.TILTED) {
             if (layoutInstructionPill != null) {
-                layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill_amber);
+                layoutInstructionPill.setBackgroundTintList(android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this, R.color.warning)));
+            }
+            tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
+        } else if (state == FaceMeshOverlayView.GuideState.MISALIGNED) {
+            if (layoutInstructionPill != null) {
+                layoutInstructionPill.setBackgroundTintList(android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this, R.color.error)));
             }
             tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
         } else {
             if (layoutInstructionPill != null) {
+                layoutInstructionPill.setBackgroundTintList(null); // Revert to original background tint if any
                 layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill);
             }
             tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
@@ -550,16 +588,19 @@ public class CameraActivity extends AppCompatActivity {
         AppState.getInstance().setLastRunnerUpShape(result.getRunnerUpShape());
         AppState.getInstance().setLastNotes(result.getNotes());
 
-        FaceShapeDetector.ShapeRecommendation rec = FaceShapeDetector.getRecommendationForShape(result.getShape());
+        FaceShapeDetector.ShapeRecommendation rec = FaceShapeDetector.getRecommendation(result);
         List<String> recStyles = new ArrayList<>();
         List<String> avoidStyles = new ArrayList<>();
         String recReason = "";
         String avoidReason = "";
         if (rec != null) {
-            if (rec.recommended != null) recStyles.addAll(Arrays.asList(rec.recommended));
-            if (rec.avoided != null) avoidStyles.addAll(Arrays.asList(rec.avoided));
-            recReason = rec.recommendedReason != null ? rec.recommendedReason : "";
-            avoidReason = rec.avoidedReason != null ? rec.avoidedReason : "";
+            if (rec.primary != null) recStyles.addAll(rec.primary);
+            if (rec.secondary != null) {
+                // We map secondary options to avoidedStyles just to preserve DB schema backwards compatibility,
+                // or we could append them. The UI handles them appropriately.
+                avoidStyles.addAll(rec.secondary);
+            }
+            recReason = rec.explanation != null ? rec.explanation : "";
         }
 
         String scanId = "scan_" + System.currentTimeMillis();
@@ -613,6 +654,11 @@ public class CameraActivity extends AppCompatActivity {
         intent.putExtra("isBorderline", result.isBorderline());
         intent.putExtra("runnerUpShape", result.getRunnerUpShape());
         intent.putExtra("notes", result.getNotes());
+        
+        ArrayList<String> combinedRecommendations = new ArrayList<>(recStyles);
+        combinedRecommendations.addAll(avoidStyles); // avoidStyles holds the secondary recommendations now
+        intent.putStringArrayListExtra("recommendedFrames", combinedRecommendations);
+        
         setResult(RESULT_OK, intent);
         finish();
     }

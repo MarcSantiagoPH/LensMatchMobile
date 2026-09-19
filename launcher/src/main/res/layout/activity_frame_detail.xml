@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="@color/surface_white">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -19,7 +19,7 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                android:background="#FF8C00">
+                android:background="@color/primary_orange">
 
                 <!-- Decorative ambient circle -->
                 <View
@@ -38,7 +38,7 @@
                     android:layout_gravity="center"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="12dp"
-                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardBackgroundColor="@color/surface_white"
                     app:strokeWidth="0dp">
 
                     <ImageView
@@ -58,7 +58,7 @@
                     android:padding="8dp"
                     android:background="#33FFFFFF"
                     android:src="@drawable/ic_chevron_left"
-                    app:tint="#FFFFFF" />
+                    app:tint="@color/surface_white" />
             </FrameLayout>
 
             <LinearLayout
@@ -83,7 +83,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Classic Aviator"
-                            android:textColor="#1A1A1A"
+                            android:textColor="@color/text_primary"
                             android:textSize="24sp"
                             android:textStyle="bold" />
 
@@ -92,8 +92,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="₱9,500.00"
-                            android:textColor="#FF8C00"
+                            android:text="₱ 9,500.00"
+                            android:textColor="@color/primary_orange"
                             android:textSize="20sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -107,7 +107,7 @@
                         android:paddingHorizontal="12dp"
                         android:paddingVertical="6dp"
                         android:text="Aviator"
-                        android:textColor="#FF8C00"
+                        android:textColor="@color/text_primary"
                         android:textSize="14sp" />
                 </RelativeLayout>
 
@@ -116,7 +116,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
                     android:text="Details"
-                    android:textColor="#1A1A1A"
+                    android:textColor="@color/text_primary"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -131,14 +131,14 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Material"
-                        android:textColor="#CC7700" />
+                        android:textColor="@color/text_secondary" />
 
                     <TextView
                         android:id="@+id/tv_detail_material"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Metal"
-                        android:textColor="#1A1A1A"
+                        android:textColor="@color/text_primary"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -153,14 +153,14 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Shape"
-                        android:textColor="#CC7700" />
+                        android:textColor="@color/text_secondary" />
 
                     <TextView
                         android:id="@+id/tv_detail_shape_val"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Aviator"
-                        android:textColor="#1A1A1A"
+                        android:textColor="@color/text_primary"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -169,7 +169,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
                     android:text="Description"
-                    android:textColor="#1A1A1A"
+                    android:textColor="@color/text_primary"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -180,7 +180,7 @@
                     android:layout_marginTop="8dp"
                     android:lineSpacingExtra="4dp"
                     android:text="Elevate your look with these premium frames. Crafted from high-grade materials for optimal durability and comfort."
-                    android:textColor="#555555"
+                    android:textColor="@color/text_secondary"
                     android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
@@ -192,7 +192,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#FFFFFF"
+        android:background="@color/surface_white"
         android:elevation="8dp"
         android:orientation="horizontal"
         android:padding="20dp">
@@ -205,11 +205,11 @@
             android:layout_marginEnd="12dp"
             android:layout_weight="1"
             android:text="Preview Frame"
-            android:textColor="#FF8C00"
+            android:textColor="@color/primary_orange"
             android:textSize="15sp"
             android:textStyle="bold"
             app:cornerRadius="12dp"
-            app:strokeColor="#FF8C00"
+            app:strokeColor="@color/primary_orange"
             app:strokeWidth="1.5dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -218,10 +218,11 @@
             android:layout_height="56dp"
             android:layout_weight="1"
             android:text="Reserve Now"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/surface_white"
             android:textSize="15sp"
             android:textStyle="bold"
-            app:backgroundTint="#FF8C00"
+            app:backgroundTint="@color/primary_orange"
             app:cornerRadius="12dp" />
     </LinearLayout>
 </RelativeLayout>
+

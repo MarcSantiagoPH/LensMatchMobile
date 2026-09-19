@@ -77,10 +77,10 @@ public class FaceMeshOverlayView extends View {
         haloRadius = dpToPx(5.5f);
 
         dotPaint.setStyle(Paint.Style.FILL);
-        dotPaint.setColor(Color.parseColor("#00E676")); // Vibrant neon green
+        dotPaint.setColor(Color.parseColor("#66BB6A")); // Soft Green
 
         dotHaloPaint.setStyle(Paint.Style.FILL);
-        dotHaloPaint.setColor(Color.parseColor("#4500E676"));
+        dotHaloPaint.setColor(Color.parseColor("#4566BB6A"));
 
         ovalPaint.setStyle(Paint.Style.STROKE);
         ovalPaint.setStrokeWidth(dpToPx(2.2f));
@@ -93,7 +93,7 @@ public class FaceMeshOverlayView extends View {
         progressPaint.setStyle(Paint.Style.STROKE);
         progressPaint.setStrokeWidth(dpToPx(4.5f));
         progressPaint.setStrokeCap(Paint.Cap.ROUND);
-        progressPaint.setColor(Color.parseColor("#00E676"));
+        progressPaint.setColor(Color.parseColor("#66BB6A"));
 
         bracketPaint.setStyle(Paint.Style.STROKE);
         bracketPaint.setStrokeWidth(dpToPx(2.5f));
@@ -158,34 +158,34 @@ public class FaceMeshOverlayView extends View {
 
         switch (state) {
             case SUCCESS:
-                color = Color.parseColor("#00E676"); // Vibrant Green
-                halo = Color.parseColor("#4500E676");
-                ovalColor = Color.parseColor("#00E676");
-                glowColor = Color.parseColor("#6000E676");
+                color = Color.parseColor("#66BB6A"); // Green Success
+                halo = Color.parseColor("#4566BB6A");
+                ovalColor = Color.parseColor("#66BB6A");
+                glowColor = Color.parseColor("#6066BB6A");
                 break;
             case SCANNING:
             case ALIGNED:
-                color = Color.parseColor("#00E676"); // Vibrant Green
-                halo = Color.parseColor("#4500E676");
-                ovalColor = Color.parseColor("#00E676");
-                glowColor = Color.parseColor("#3500E676");
+                color = Color.parseColor("#66BB6A");
+                halo = Color.parseColor("#4566BB6A");
+                ovalColor = Color.parseColor("#66BB6A");
+                glowColor = Color.parseColor("#3566BB6A");
                 break;
             case TILTED:
-                color = Color.parseColor("#FFB300"); // Amber
-                halo = Color.parseColor("#45FFB300");
-                ovalColor = Color.parseColor("#FFB300");
-                glowColor = Color.parseColor("#35FFB300");
+                color = Color.parseColor("#D9A441"); // Amber Warning
+                halo = Color.parseColor("#45D9A441");
+                ovalColor = Color.parseColor("#D9A441");
+                glowColor = Color.parseColor("#35D9A441");
                 break;
             case MISALIGNED:
-                color = Color.parseColor("#FF5252"); // Red
-                halo = Color.parseColor("#45FF5252");
-                ovalColor = Color.parseColor("#FF5252");
-                glowColor = Color.parseColor("#35FF5252");
+                color = Color.parseColor("#E57373"); // Red Error
+                halo = Color.parseColor("#45E57373");
+                ovalColor = Color.parseColor("#E57373");
+                glowColor = Color.parseColor("#35E57373");
                 break;
             case SEARCHING:
             default:
-                color = Color.parseColor("#8000E676");
-                halo = Color.parseColor("#2500E676");
+                color = Color.parseColor("#8066BB6A");
+                halo = Color.parseColor("#2566BB6A");
                 ovalColor = Color.parseColor("#70FFFFFF");
                 glowColor = Color.parseColor("#20FFFFFF");
                 break;
@@ -418,10 +418,10 @@ public class FaceMeshOverlayView extends View {
 
     private void calculateGuideBoundary(int viewW, int viewH) {
         if (viewW <= 0 || viewH <= 0) return;
-        float ovalH = viewH * 0.52f;  // Tall enough to frame full face
-        float ovalW = ovalH * 0.76f;  // Wide for face width
+        float ovalH = viewH * 0.52f;
+        float ovalW = ovalH * 0.76f;
         float centerX = viewW / 2.0f;
-        float centerY = viewH * 0.35f; // Upper portion — face sits at top in selfie view
+        float centerY = viewH / 2.0f; // Exactly centered
 
         guideBoundaryRect.set(
                 centerX - (ovalW / 2.0f),

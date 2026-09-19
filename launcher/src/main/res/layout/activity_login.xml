@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/login_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF8C00"
+    android:background="@color/primary_orange"
     android:orientation="vertical">
 
     <!-- Top Orange Header Banner -->
@@ -37,7 +37,7 @@
                 android:layout_height="60dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="8dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/surface_white"
                 app:strokeWidth="0dp">
 
                 <ImageView
@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="LensMatch"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/surface_white"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.02"
@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="AI Eyewear Frame Preview"
-                android:textColor="#FFE5C0"
+                android:textColor="@color/primary_orange_tint"
                 android:textSize="12sp"
                 android:letterSpacing="0.03" />
         </LinearLayout>
@@ -87,7 +87,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Welcome Back"
-            android:textColor="#1A1A1A"
+            android:textColor="@color/text_primary"
             android:textSize="22sp"
             android:textStyle="bold"
             android:letterSpacing="0.01"
@@ -98,7 +98,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="Sign in to your LensMatch account"
-            android:textColor="#888888"
+            android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
         <!-- Email Input -->
@@ -109,16 +109,16 @@
             android:layout_marginTop="16dp"
             android:hint="Email"
             android:textColorHint="#AAAAAA"
-            app:hintTextColor="#FF8C00"
-            app:boxBackgroundColor="#FFF8F0"
+            app:hintTextColor="@color/primary_orange"
+            app:boxBackgroundColor="@color/surface_white"
             app:boxCornerRadiusBottomEnd="14dp"
             app:boxCornerRadiusBottomStart="14dp"
             app:boxCornerRadiusTopEnd="14dp"
             app:boxCornerRadiusTopStart="14dp"
-            app:boxStrokeColor="#FF8C00"
+            app:boxStrokeColor="@color/primary_orange"
             app:boxStrokeWidthFocused="2dp"
             app:startIconDrawable="@drawable/ic_user"
-            app:startIconTint="#FF8C00">
+            app:startIconTint="@color/primary_orange">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_login_email"
@@ -127,7 +127,7 @@
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:textColor="#1A1A1A"
+                android:textColor="@color/text_primary"
                 android:textColorHint="#AAAAAA"
                 android:textSize="14sp" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -140,18 +140,18 @@
             android:layout_marginTop="10dp"
             android:hint="Password"
             android:textColorHint="#AAAAAA"
-            app:hintTextColor="#FF8C00"
-            app:boxBackgroundColor="#FFF8F0"
+            app:hintTextColor="@color/primary_orange"
+            app:boxBackgroundColor="@color/surface_white"
             app:boxCornerRadiusBottomEnd="14dp"
             app:boxCornerRadiusBottomStart="14dp"
             app:boxCornerRadiusTopEnd="14dp"
             app:boxCornerRadiusTopStart="14dp"
-            app:boxStrokeColor="#FF8C00"
+            app:boxStrokeColor="@color/primary_orange"
             app:boxStrokeWidthFocused="2dp"
             app:passwordToggleEnabled="true"
-            app:passwordToggleTint="#FF8C00"
+            app:passwordToggleTint="@color/primary_orange"
             app:startIconDrawable="@drawable/ic_lock"
-            app:startIconTint="#FF8C00">
+            app:startIconTint="@color/primary_orange">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_login_password"
@@ -160,7 +160,7 @@
                 android:inputType="textPassword"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:textColor="#1A1A1A"
+                android:textColor="@color/text_primary"
                 android:textColorHint="#AAAAAA"
                 android:textSize="14sp" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -175,7 +175,7 @@
             android:paddingHorizontal="4dp"
             android:paddingVertical="4dp"
             android:text="Forgot Password?"
-            android:textColor="#FF8C00"
+            android:textColor="@color/primary_orange"
             android:textStyle="bold"
             android:textSize="12sp" />
 
@@ -186,11 +186,11 @@
             android:layout_height="50dp"
             android:layout_marginTop="12dp"
             android:text="Log In"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/surface_white"
             android:textSize="15sp"
             android:textStyle="bold"
             android:letterSpacing="0.02"
-            app:backgroundTint="#FF8C00"
+            app:backgroundTint="@color/primary_orange"
             app:cornerRadius="14dp"
             app:elevation="3dp" />
 
@@ -206,7 +206,7 @@
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
-                android:background="#FFD199" />
+                android:background="@color/border_light" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -222,7 +222,7 @@
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
-                android:background="#FFD199" />
+                android:background="@color/border_light" />
         </LinearLayout>
 
         <!-- Google Login Button -->
@@ -233,10 +233,10 @@
             android:layout_height="48dp"
             android:layout_marginTop="12dp"
             android:text="Continue with Google"
-            android:textColor="#1A1A1A"
+            android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold"
-            app:backgroundTint="#FFFFFF"
+            app:backgroundTint="@color/surface_white"
             app:cornerRadius="14dp"
             app:icon="@drawable/ic_google"
             app:iconGravity="textStart"
@@ -264,7 +264,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Don't have an account? "
-                android:textColor="#888888"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
 
             <TextView
@@ -272,7 +272,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Sign Up"
-                android:textColor="#FF8C00"
+                android:textColor="@color/primary_orange"
                 android:textSize="13sp"
                 android:textStyle="bold" />
         </LinearLayout>
