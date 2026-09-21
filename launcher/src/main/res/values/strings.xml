@@ -40,4 +40,11 @@
 
     <!-- AR Navigation Strings -->
     <string name="btn_ar_continue">Continue →</string>
+
+    <!-- Frame Detail Color Labels -->
+    <string name="label_detail_color">Color</string>
+    <string name="preview_detail_color">Silver</string>
+
+    <!-- Reservation Notice Agreement String -->
+    <string name="notice_agreement_text">I understand that this reservation is for the eyeglass frame only. Prescription lenses and fitting will be finalized and paid for at the clinic.</string>
 </resources>

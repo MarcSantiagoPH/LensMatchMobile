@@ -1,0 +1,129 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==========================================
+    // STAFF AUTHORIZATION HELPER
+    // Evaluates to true if the authenticated user is an active staff member.
+    // ==========================================
+    function isStaff() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/STAFF/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/STAFF/$(request.auth.uid)).data.role == "staff" &&
+        get(/databases/$(database)/documents/STAFF/$(request.auth.uid)).data.isActive == true;
+    }
+
+    // ==========================================
+    // STAFF COLLECTION
+    // Staff users can read their own STAFF authorization document.
+    // Writes and reading other staff documents are denied.
+    // ==========================================
+    match /STAFF/{staffId} {
+      allow read: if request.auth != null && request.auth.uid == staffId;
+      allow write: if false;
+    }
+
+    // ==========================================
+    // CUSTOMERS COLLECTION
+    // Customers can read, create, and update their own CUSTOMERS profile document.
+    // Staff can read all customer records. Deletion and cross-customer access are denied.
+    // ==========================================
+    match /CUSTOMERS/{customerId} {
+      allow read: if request.auth != null && (request.auth.uid == customerId || isStaff());
+      allow create, update: if request.auth != null && request.auth.uid == customerId;
+      allow delete: if false;
+    }
+
+    // ==========================================
+    // PATIENT_RECORDS COLLECTION
+    // Standalone digital clinical case files.
+    // Accessible ONLY to active staff members. Customers and unauthenticated users are denied.
+    // ==========================================
+    match /PATIENT_RECORDS/{recordId} {
+      allow read, create, update, delete: if isStaff();
+    }
+
+    // ==========================================
+    // RESERVATIONS COLLECTION
+    // Customer: Create own Pending reservation; read own reservations.
+    // Staff: Read all reservations; update status according to strict lifecycle and field immutability.
+    // ==========================================
+    match /RESERVATIONS/{reservationId} {
+      // READ: Customer reads own reservation; Staff reads all.
+      allow read: if request.auth != null && (resource.data.customerId == request.auth.uid || isStaff());
+
+      // CREATE: Customer creates their own reservation with initial status "Pending".
+      allow create: if request.auth != null
+        && request.resource.data.customerId == request.auth.uid
+        && request.resource.data.status == 'Pending';
+
+      // UPDATE: Only active Staff may update reservations.
+      // Requires that ONLY 'status' and 'statusUpdatedAt' are modified, enforcing strict status lifecycle transitions.
+      allow update: if isStaff()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'statusUpdatedAt'])
+        && (
+          // Pending -> Approved OR Pending -> Rejected
+          (resource.data.status == 'Pending' && (request.resource.data.status == 'Approved' || request.resource.data.status == 'Rejected'))
+          ||
+          // Approved -> Completed
+          (resource.data.status == 'Approved' && request.resource.data.status == 'Completed')
+        );
+
+      // DELETE: Denied for all users (no application workflow requires deletion).
+      allow delete: if false;
+    }
+
+    // ==========================================
+    // FRAME_CATALOG COLLECTION
+    // Public read access for mobile app catalog browsing.
+    // Full write access (create, update, delete) restricted to active staff.
+    // ==========================================
+    match /FRAME_CATALOG/{frameId} {
+      allow read: if true;
+      allow create, update, delete: if isStaff();
+    }
+
+    // ==========================================
+    // CLINIC_INFORMATION COLLECTION
+    // Public read access for clinic details and opening hours.
+    // Write access restricted to active staff.
+    // ==========================================
+    match /CLINIC_INFORMATION/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isStaff();
+    }
+
+    // ==========================================
+    // ANNOUNCEMENTS COLLECTION
+    // Public read access for mobile customer application browsing.
+    // Full write access (create, update, delete) restricted to active staff.
+    // ==========================================
+    match /ANNOUNCEMENTS/{announcementId} {
+      allow read: if true;
+      allow create, update, delete: if isStaff();
+    }
+
+    // ==========================================
+    // SCAN_HISTORY COLLECTION
+    // Enforces strict customer account isolation while permitting staff review.
+    // ==========================================
+    match /SCAN_HISTORY/{scanId} {
+      allow create: if request.auth != null
+        && request.resource.data.customerId == request.auth.uid;
+
+      allow read, update, delete: if request.auth != null
+        && (
+          resource.data.customerId == request.auth.uid
+          || isStaff()
+        );
+    }
+
+    // ==========================================
+    // OTP_VERIFICATIONS COLLECTION
+    // Server-managed via Firebase Admin SDK only. Direct client SDK access denied.
+    // ==========================================
+    match /OTP_VERIFICATIONS/{docId} {
+      allow read, write: if false;
+    }
+  }
+}

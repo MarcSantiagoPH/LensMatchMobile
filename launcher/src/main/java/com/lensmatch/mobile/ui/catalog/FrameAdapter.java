@@ -61,6 +61,7 @@ public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.ViewHolder> 
         if (imageUrl != null && !imageUrl.trim().isEmpty()) {
             Glide.with(context)
                     .load(imageUrl)
+                    .fitCenter()
                     .placeholder(R.drawable.ic_eyeglasses)
                     .error(R.drawable.ic_eyeglasses)
                     .into(holder.ivFrame);

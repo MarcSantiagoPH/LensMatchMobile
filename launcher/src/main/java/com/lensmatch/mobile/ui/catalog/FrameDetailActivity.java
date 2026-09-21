@@ -1,6 +1,7 @@
 package com.lensmatch.mobile.ui.catalog;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -8,10 +9,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+
 import android.view.View;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.FrameModel;
 import com.lensmatch.mobile.service.FirestoreService;
@@ -40,9 +45,9 @@ public class FrameDetailActivity extends AppCompatActivity {
 
         View bottomBar = findViewById(R.id.bottom_bar);
         StatusBarUtils.applyBottomWindowInsets(bottomBar);
-        getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
-        androidx.core.view.WindowInsetsControllerCompat insetsController =
-                androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        getWindow().setNavigationBarColor(Color.WHITE);
+        WindowInsetsControllerCompat insetsController =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         if (insetsController != null) {
             insetsController.setAppearanceLightNavigationBars(true);
         }
@@ -52,6 +57,7 @@ public class FrameDetailActivity extends AppCompatActivity {
         TextView tvPrice = findViewById(R.id.tv_detail_price);
         TextView tvShapeBadge = findViewById(R.id.tv_detail_shape_badge);
         TextView tvMaterial = findViewById(R.id.tv_detail_material);
+        TextView tvColorVal = findViewById(R.id.tv_detail_color);
         TextView tvShapeVal = findViewById(R.id.tv_detail_shape_val);
         TextView tvDescription = findViewById(R.id.tv_detail_description);
         btnReserveNow = findViewById(R.id.btn_reserve_now);
@@ -63,6 +69,11 @@ public class FrameDetailActivity extends AppCompatActivity {
 
             String mat = frame.getMaterial();
             tvMaterial.setText(mat != null && !mat.trim().isEmpty() ? mat : "—");
+
+            if (tvColorVal != null) {
+                String color = frame.getFrameColor();
+                tvColorVal.setText(color != null && !color.trim().isEmpty() ? color : "—");
+            }
             tvShapeVal.setText(frame.getDisplayFrameStyle());
 
             if (frame.getDescription() != null && !frame.getDescription().trim().isEmpty()) {
@@ -80,6 +91,7 @@ public class FrameDetailActivity extends AppCompatActivity {
             if (imageUrl != null && !imageUrl.trim().isEmpty()) {
                 Glide.with(this)
                         .load(imageUrl)
+                        .fitCenter()
                         .placeholder(R.drawable.ic_eyeglasses)
                         .error(R.drawable.ic_eyeglasses)
                         .into(ivDetailImage);
@@ -107,7 +119,7 @@ public class FrameDetailActivity extends AppCompatActivity {
         btnReserveNow.setOnClickListener(v -> {
             if (frame == null) return;
 
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            new MaterialAlertDialogBuilder(this)
                     .setTitle("Confirm Frame Reservation")
                     .setIcon(R.drawable.ic_eyeglasses)
                     .setMessage("You are reserving the \"" + frame.getName() + "\" eyeglass frame only.\n\nPrescription lens options, lens fitting, and custom physical adjustments will be finalized and paid during your visit at Franselle Optical Clinic.")

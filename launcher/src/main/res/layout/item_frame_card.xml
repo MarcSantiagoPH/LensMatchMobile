@@ -24,9 +24,13 @@
 
             <ImageView
                 android:id="@+id/iv_frame"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                android:scaleX="1.15"
+                android:scaleY="1.15"
+                android:padding="2dp"
                 android:src="@drawable/ic_eyeglasses" />
 
             <TextView

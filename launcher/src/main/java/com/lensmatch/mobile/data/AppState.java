@@ -3,6 +3,8 @@ package com.lensmatch.mobile.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.lensmatch.mobile.utils.FaceShapeDetector;
 
 import org.json.JSONArray;
@@ -234,6 +236,7 @@ public class AppState {
         this.userAddress = "";
         this.userPhotoUrl = null;
         this.lastActiveTab = 0;
+        this.scanHistory.clear();
         if (prefs != null) {
             prefs.edit()
                     .putBoolean("isLoggedIn", false)
@@ -243,12 +246,32 @@ public class AppState {
                     .remove("userAddress")
                     .remove("userPhotoUrl")
                     .remove("lastActiveTab")
+                    .remove("scanHistoryList")
                     .apply();
         }
     }
 
     public synchronized List<ScanModel> getScanHistory() {
-        return new ArrayList<>(scanHistory);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        List<ScanModel> filtered = new ArrayList<>();
+        if (user != null && user.getUid() != null) {
+            String currentUid = user.getUid();
+            for (ScanModel scan : scanHistory) {
+                if (scan != null && currentUid.equalsIgnoreCase(scan.getCustomerId())) {
+                    filtered.add(scan);
+                }
+            }
+        } else {
+            for (ScanModel scan : scanHistory) {
+                if (scan != null) {
+                    String cId = scan.getCustomerId();
+                    if (cId == null || cId.isEmpty() || "local".equalsIgnoreCase(cId) || "guest".equalsIgnoreCase(cId)) {
+                        filtered.add(scan);
+                    }
+                }
+            }
+        }
+        return filtered;
     }
 
     public synchronized void addScan(ScanModel scan) {
@@ -275,13 +298,34 @@ public class AppState {
 
     public synchronized void syncScanHistory(List<ScanModel> cloudScans) {
         if (cloudScans == null || cloudScans.isEmpty()) return;
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String currentUid = user != null ? user.getUid() : null;
+
+        // Exclude local in-memory scans belonging to a different authenticated UID
+        if (currentUid != null) {
+            scanHistory.removeIf(s -> s != null && s.getCustomerId() != null
+                    && !s.getCustomerId().isEmpty()
+                    && !"local".equalsIgnoreCase(s.getCustomerId())
+                    && !"guest".equalsIgnoreCase(s.getCustomerId())
+                    && !currentUid.equalsIgnoreCase(s.getCustomerId()));
+        }
+
         for (ScanModel cloudScan : cloudScans) {
+            if (cloudScan == null) continue;
+            // Do not merge cloud scans belonging to another user
+            if (currentUid != null && cloudScan.getCustomerId() != null
+                    && !cloudScan.getCustomerId().isEmpty()
+                    && !currentUid.equalsIgnoreCase(cloudScan.getCustomerId())) {
+                continue;
+            }
+
             boolean exists = false;
             for (ScanModel local : scanHistory) {
-                if ((cloudScan.getId() != null && cloudScan.getId().equals(local.getId())) ||
+                if (local != null && ((cloudScan.getId() != null && cloudScan.getId().equals(local.getId())) ||
                     (cloudScan.getTimestamp() != null && local.getTimestamp() != null &&
                      Math.abs(cloudScan.getTimestamp().getTime() - local.getTimestamp().getTime()) < 5000 &&
-                     cloudScan.getFaceShape().equals(local.getFaceShape()))) {
+                     cloudScan.getFaceShape().equals(local.getFaceShape())))) {
                     exists = true;
                     break;
                 }

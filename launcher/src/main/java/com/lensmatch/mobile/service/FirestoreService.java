@@ -2,21 +2,26 @@ package com.lensmatch.mobile.service;
 
 import android.util.Log;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.lensmatch.mobile.data.AnnouncementModel;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.data.ClinicModel;
 import com.lensmatch.mobile.data.FrameModel;
 import com.lensmatch.mobile.data.ReservationModel;
 import com.lensmatch.mobile.data.ScanModel;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class FirestoreService {
@@ -26,6 +31,7 @@ public class FirestoreService {
     public static final String COLLECTION_CLINIC_INFORMATION = "CLINIC_INFORMATION";
     public static final String COLLECTION_CUSTOMERS = "CUSTOMERS";
     public static final String COLLECTION_SCAN_HISTORY = "SCAN_HISTORY";
+    public static final String COLLECTION_ANNOUNCEMENTS = "ANNOUNCEMENTS";
     public static final String DOC_CLINIC_GENERAL = "general";
 
     public interface Callback<T> {
@@ -257,6 +263,77 @@ public class FirestoreService {
                 });
     }
 
+    public static void createInitialCustomerProfile(String fullName, String phoneNumber, String email, Callback<Void> callback) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            if (callback != null) callback.onError("You must be logged in to create a customer profile.");
+            return;
+        }
+
+        Map<String, Object> initialData = new HashMap<>();
+        initialData.put("uid", user.getUid());
+        initialData.put("fullName", fullName != null && !fullName.trim().isEmpty() ? fullName.trim() : "Customer");
+        initialData.put("email", email != null && !email.trim().isEmpty() ? email.trim() : (user.getEmail() != null ? user.getEmail() : ""));
+        initialData.put("phoneNumber", phoneNumber != null ? phoneNumber.trim() : "");
+        initialData.put("address", "");
+        initialData.put("role", "customer");
+        initialData.put("isActive", true);
+        initialData.put("createdAt", Timestamp.now());
+
+        getDb().collection(COLLECTION_CUSTOMERS)
+                .document(user.getUid())
+                .set(initialData, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> {
+                    if (callback != null) callback.onSuccess(null);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error creating initial customer profile: " + e.getMessage(), e);
+                    if (callback != null) callback.onError("Failed to create customer profile: " + e.getMessage());
+                });
+    }
+
+    public static void ensureCustomerProfileExists(String fullName, String email, Callback<Void> callback) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            if (callback != null) callback.onError("You must be logged in to verify your profile.");
+            return;
+        }
+
+        getDb().collection(COLLECTION_CUSTOMERS)
+                .document(user.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        if (callback != null) callback.onSuccess(null);
+                    } else {
+                        Map<String, Object> initialData = new HashMap<>();
+                        initialData.put("uid", user.getUid());
+                        initialData.put("fullName", fullName != null && !fullName.trim().isEmpty() ? fullName.trim() : "Customer");
+                        initialData.put("email", email != null ? email.trim() : (user.getEmail() != null ? user.getEmail() : ""));
+                        initialData.put("phoneNumber", "");
+                        initialData.put("address", "");
+                        initialData.put("role", "customer");
+                        initialData.put("isActive", true);
+                        initialData.put("createdAt", Timestamp.now());
+
+                        getDb().collection(COLLECTION_CUSTOMERS)
+                                .document(user.getUid())
+                                .set(initialData, SetOptions.merge())
+                                .addOnSuccessListener(aVoid -> {
+                                    if (callback != null) callback.onSuccess(null);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "Error creating initial Google customer profile: " + e.getMessage(), e);
+                                    if (callback != null) callback.onError("Failed to create customer profile: " + e.getMessage());
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error checking customer profile existence: " + e.getMessage(), e);
+                    if (callback != null) callback.onError("Failed to check customer profile: " + e.getMessage());
+                });
+    }
+
     public static void checkHasActiveReservation(String frameId, Callback<Boolean> callback) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
@@ -355,6 +432,45 @@ public class FirestoreService {
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to delete scan: " + e.getMessage(), e);
+                    if (callback != null) callback.onError(e.getMessage());
+                });
+    }
+
+    public static void getAnnouncements(Callback<List<AnnouncementModel>> callback) {
+        getDb().collection(COLLECTION_ANNOUNCEMENTS)
+                .whereEqualTo("status", "Active")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<AnnouncementModel> activeList = new ArrayList<>();
+                    String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
+
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Map<String, Object> data = doc.getData();
+                        if (data != null) {
+                            AnnouncementModel model = AnnouncementModel.fromMap(data, doc.getId());
+                            String start = model.getStartDate();
+                            String end = model.getEndDate();
+
+                            boolean isStarted = start.isEmpty() || start.compareTo(today) <= 0;
+                            boolean isNotEnded = end.isEmpty() || end.compareTo(today) >= 0;
+
+                            if (isStarted && isNotEnded) {
+                                activeList.add(model);
+                            }
+                        }
+                    }
+
+                    Collections.sort(activeList, (a, b) -> {
+                        if (a.getCreatedAt() == null && b.getCreatedAt() == null) return 0;
+                        if (a.getCreatedAt() == null) return 1;
+                        if (b.getCreatedAt() == null) return -1;
+                        return b.getCreatedAt().compareTo(a.getCreatedAt());
+                    });
+
+                    if (callback != null) callback.onSuccess(activeList);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error fetching announcements: " + e.getMessage(), e);
                     if (callback != null) callback.onError(e.getMessage());
                 });
     }

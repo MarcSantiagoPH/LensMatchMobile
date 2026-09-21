@@ -16,7 +16,10 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.lensmatch.mobile.R;
+import com.lensmatch.mobile.data.ClinicModel;
+import com.lensmatch.mobile.service.FirestoreService;
 import com.lensmatch.mobile.ui.MainActivity;
 import com.lensmatch.mobile.utils.StatusBarUtils;
 
@@ -124,7 +127,35 @@ public class FrameReservationNoticeActivity extends AppCompatActivity {
         tvFrameName.setText(frameStyle + " Frame");
         tvColorVariant.setText("Color: " + colorVariant);
 
+        TextView tvClinicName = findViewById(R.id.tv_notice_clinic_name);
+        TextView tvClinicHours = findViewById(R.id.tv_notice_clinic_hours);
+
+        FirestoreService.getClinicInformation(new FirestoreService.Callback<ClinicModel>() {
+            @Override
+            public void onSuccess(ClinicModel clinic) {
+                if (isFinishing() || isDestroyed() || clinic == null) return;
+                if (tvClinicName != null && clinic.getClinicName() != null && !clinic.getClinicName().isEmpty()) {
+                    tvClinicName.setText(clinic.getClinicName());
+                }
+                if (tvClinicHours != null && clinic.getBusinessHours() != null && !clinic.getBusinessHours().isEmpty()) {
+                    tvClinicHours.setText(clinic.getBusinessHours());
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                // Keep default layout fallback
+            }
+        });
+
         MaterialButton btnProceed = findViewById(R.id.btn_proceed_to_catalog);
+        btnProceed.setEnabled(false);
+
+        MaterialCheckBox cbAgree = findViewById(R.id.cb_agree_notice);
+        if (cbAgree != null) {
+            cbAgree.setOnCheckedChangeListener((buttonView, isChecked) -> btnProceed.setEnabled(isChecked));
+        }
+
         btnProceed.setOnClickListener(v -> {
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra("open_tab", R.id.nav_frame);

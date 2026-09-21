@@ -1,14 +1,18 @@
 package com.lensmatch.mobile.ui.home;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,9 +20,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.lensmatch.mobile.R;
+import com.lensmatch.mobile.data.AnnouncementModel;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.data.ReservationModel;
 import com.lensmatch.mobile.service.FirestoreService;
@@ -26,12 +32,15 @@ import com.lensmatch.mobile.ui.MainActivity;
 import com.lensmatch.mobile.ui.profile.HelpSupportActivity;
 import com.lensmatch.mobile.ui.profile.ReservationDetailActivity;
 import com.lensmatch.mobile.ui.profile.ReservationsActivity;
+import com.lensmatch.mobile.ui.profile.ScanHistoryActivity;
 
 import java.util.List;
 
 public class HomeFragment extends Fragment {
+    private static final String TAG = "HomeFragment";
     private TextView tvReservationsCount;
     private ImageView ivHomeLogo;
+    private LinearLayout layoutAnnouncementsContainer;
 
     // Reservation Status UI components
     private MaterialCardView cardReservationStatus;
@@ -53,7 +62,6 @@ public class HomeFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
 
         MaterialButton btnScanFace = root.findViewById(R.id.btn_scan_face);
-        MaterialCardView cardAnnouncement = root.findViewById(R.id.card_announcement);
         cardReservationStatus = root.findViewById(R.id.card_reservation_status);
         layoutActiveReservation = root.findViewById(R.id.layout_active_reservation);
         layoutNoReservation = root.findViewById(R.id.layout_no_reservation);
@@ -72,13 +80,6 @@ public class HomeFragment extends Fragment {
                 ((MainActivity) getActivity()).openCameraScan();
             }
         });
-
-        if (cardAnnouncement != null) {
-            cardAnnouncement.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), HelpSupportActivity.class);
-                startActivity(intent);
-            });
-        }
 
         if (cardReservationStatus != null) {
             cardReservationStatus.setOnClickListener(v -> {
@@ -99,7 +100,7 @@ public class HomeFragment extends Fragment {
         if (cardFaceShapeGuide != null) {
             cardFaceShapeGuide.setOnClickListener(v -> {
                 if (getActivity() != null) {
-                    com.google.android.material.bottomnavigation.BottomNavigationView bNav =
+                    BottomNavigationView bNav =
                             getActivity().findViewById(R.id.bottom_navigation);
                     if (bNav != null) {
                         bNav.setSelectedItemId(R.id.nav_frame);
@@ -119,7 +120,6 @@ public class HomeFragment extends Fragment {
         View actionQuickResult = root.findViewById(R.id.action_quick_result);
         View actionQuickReservations = root.findViewById(R.id.action_quick_reservations);
         View actionQuickClinic = root.findViewById(R.id.action_quick_clinic);
-        MaterialCardView cardAnnouncementNewFrames = root.findViewById(R.id.card_announcement_new_frames);
         View btnSeeMoreGuide = root.findViewById(R.id.btn_see_more_guide);
 
         if (btnSeeMoreGuide != null) {
@@ -134,7 +134,7 @@ public class HomeFragment extends Fragment {
         if (actionQuickCatalog != null) {
             actionQuickCatalog.setOnClickListener(v -> {
                 if (getActivity() != null) {
-                    com.google.android.material.bottomnavigation.BottomNavigationView bNav =
+                    BottomNavigationView bNav =
                             getActivity().findViewById(R.id.bottom_navigation);
                     if (bNav != null) {
                         bNav.setSelectedItemId(R.id.nav_frame);
@@ -145,7 +145,7 @@ public class HomeFragment extends Fragment {
 
         if (actionQuickResult != null) {
             actionQuickResult.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), com.lensmatch.mobile.ui.profile.ScanHistoryActivity.class);
+                Intent intent = new Intent(requireContext(), ScanHistoryActivity.class);
                 startActivity(intent);
             });
         }
@@ -164,20 +164,11 @@ public class HomeFragment extends Fragment {
             });
         }
 
-        if (cardAnnouncementNewFrames != null) {
-            cardAnnouncementNewFrames.setOnClickListener(v -> {
-                if (getActivity() != null) {
-                    com.google.android.material.bottomnavigation.BottomNavigationView bNav =
-                            getActivity().findViewById(R.id.bottom_navigation);
-                    if (bNav != null) {
-                        bNav.setSelectedItemId(R.id.nav_frame);
-                    }
-                }
-            });
-        }
+        layoutAnnouncementsContainer = root.findViewById(R.id.layout_announcements_container);
 
         updateLogoForTheme();
         updateQuickLinks();
+        loadAnnouncements();
         return root;
     }
 
@@ -186,6 +177,7 @@ public class HomeFragment extends Fragment {
         super.onResume();
         updateLogoForTheme();
         updateQuickLinks();
+        loadAnnouncements();
     }
 
     private void updateLogoForTheme() {
@@ -302,5 +294,122 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void loadAnnouncements() {
+        if (layoutAnnouncementsContainer == null || !isAdded() || getContext() == null) return;
+
+        layoutAnnouncementsContainer.removeAllViews();
+
+        ProgressBar pb = new ProgressBar(requireContext());
+        pb.setIndeterminateTintList(ColorStateList.valueOf(Color.parseColor("#D97745")));
+        LinearLayout.LayoutParams pbParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        pbParams.gravity = Gravity.CENTER_HORIZONTAL;
+        pbParams.setMargins(0, 24, 0, 24);
+        layoutAnnouncementsContainer.addView(pb, pbParams);
+
+        FirestoreService.getAnnouncements(new FirestoreService.Callback<List<AnnouncementModel>>() {
+            @Override
+            public void onSuccess(List<AnnouncementModel> list) {
+                if (!isAdded() || getContext() == null || layoutAnnouncementsContainer == null) return;
+                layoutAnnouncementsContainer.removeAllViews();
+
+                if (list == null || list.isEmpty()) {
+                    showFallbackAnnouncementCard();
+                    return;
+                }
+
+                LayoutInflater inflater = LayoutInflater.from(requireContext());
+                for (AnnouncementModel item : list) {
+                    View card = inflater.inflate(R.layout.item_announcement_card, layoutAnnouncementsContainer, false);
+                    TextView tvBadge = card.findViewById(R.id.tv_announcement_badge);
+                    TextView tvSubtitle = card.findViewById(R.id.tv_announcement_subtitle);
+                    TextView tvTitle = card.findViewById(R.id.tv_announcement_title);
+                    TextView tvDesc = card.findViewById(R.id.tv_announcement_desc);
+                    ImageView ivFooterIcon = card.findViewById(R.id.iv_announcement_footer_icon);
+                    TextView tvFooterLabel = card.findViewById(R.id.tv_announcement_footer_label);
+                    TextView tvActionText = card.findViewById(R.id.tv_announcement_action_text);
+
+                    String category = item.getCategory() != null && !item.getCategory().isEmpty() ? item.getCategory().toUpperCase() : "GENERAL";
+                    if (tvBadge != null) tvBadge.setText(category);
+
+                    if ("NEW ARRIVALS".equals(category)) {
+                        if (tvBadge != null) {
+                            tvBadge.setBackgroundResource(R.drawable.bg_new_badge);
+                            tvBadge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#D97745")));
+                            tvBadge.setTextColor(Color.parseColor("#FFFFFF"));
+                        }
+                        if (ivFooterIcon != null) ivFooterIcon.setImageResource(R.drawable.ic_eyeglasses);
+                        if (tvFooterLabel != null) tvFooterLabel.setText("Browse New Arrivals in Catalog");
+                        if (tvActionText != null) tvActionText.setText("View Catalog →");
+
+                        card.setOnClickListener(v -> {
+                            if (getActivity() != null) {
+                                BottomNavigationView bNav = getActivity().findViewById(R.id.bottom_navigation);
+                                if (bNav != null) {
+                                    bNav.setSelectedItemId(R.id.nav_frame);
+                                }
+                            }
+                        });
+                    } else {
+                        if (tvBadge != null) {
+                            tvBadge.setBackgroundResource(R.drawable.bg_confidence_chip);
+                            tvBadge.setBackgroundTintList(null);
+                            tvBadge.setTextColor(Color.parseColor("#1A1A1A"));
+                        }
+                        if (ivFooterIcon != null) ivFooterIcon.setImageResource(R.drawable.ic_location);
+                        if (tvFooterLabel != null) tvFooterLabel.setText("Franselle Optical Clinic");
+                        if (tvActionText != null) tvActionText.setText("View Details →");
+
+                        card.setOnClickListener(v -> {
+                            Intent intent = new Intent(requireContext(), HelpSupportActivity.class);
+                            startActivity(intent);
+                        });
+                    }
+
+                    if (tvSubtitle != null) tvSubtitle.setText("Franselle Optical");
+                    if (tvTitle != null) tvTitle.setText(item.getTitle());
+                    if (tvDesc != null) tvDesc.setText(item.getDescription());
+
+                    layoutAnnouncementsContainer.addView(card);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (!isAdded() || getContext() == null || layoutAnnouncementsContainer == null) return;
+                Log.e(TAG, "Error loading announcements: " + errorMessage);
+                showFallbackAnnouncementCard();
+            }
+        });
+    }
+
+    private void showFallbackAnnouncementCard() {
+        if (layoutAnnouncementsContainer == null || !isAdded() || getContext() == null) return;
+        layoutAnnouncementsContainer.removeAllViews();
+
+        View card = LayoutInflater.from(requireContext()).inflate(R.layout.item_announcement_card, layoutAnnouncementsContainer, false);
+        TextView tvBadge = card.findViewById(R.id.tv_announcement_badge);
+        TextView tvTitle = card.findViewById(R.id.tv_announcement_title);
+        TextView tvDesc = card.findViewById(R.id.tv_announcement_desc);
+        TextView tvAction = card.findViewById(R.id.tv_announcement_action_text);
+
+        if (tvBadge != null) {
+            tvBadge.setText("CLINIC NOTICE");
+            tvBadge.setBackgroundResource(R.drawable.bg_confidence_chip);
+            tvBadge.setBackgroundTintList(null);
+            tvBadge.setTextColor(Color.parseColor("#1A1A1A"));
+        }
+        if (tvTitle != null) tvTitle.setText("No Active Announcements");
+        if (tvDesc != null) tvDesc.setText("Check back soon for upcoming frame releases, promotions, and optical clinic updates.");
+        if (tvAction != null) tvAction.setText("Help & Support →");
+
+        card.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), HelpSupportActivity.class);
+            startActivity(intent);
+        });
+
+        layoutAnnouncementsContainer.addView(card);
     }
 }

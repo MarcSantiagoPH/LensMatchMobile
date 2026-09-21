@@ -3,6 +3,7 @@ package com.lensmatch.mobile.ui.camera;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -24,12 +25,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.AspectRatio;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ExperimentalGetImage;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
@@ -45,6 +48,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceContour;
@@ -81,6 +86,7 @@ public class CameraActivity extends AppCompatActivity {
     private TextView tvScanningStatus;
 
     private ImageCapture imageCapture;
+    private ProcessCameraProvider cameraProvider;
     private FaceDetector faceDetector;
     private TFLiteFaceDetector tfliteDetector;
     private ExecutorService cameraExecutor;
@@ -154,7 +160,7 @@ public class CameraActivity extends AppCompatActivity {
 
         cameraProviderFuture.addListener(() -> {
             try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                this.cameraProvider = cameraProviderFuture.get();
 
                 Preview preview = new Preview.Builder()
                         .setTargetAspectRatio(AspectRatio.RATIO_16_9)
@@ -174,8 +180,10 @@ public class CameraActivity extends AppCompatActivity {
 
                 CameraSelector cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
 
-                cameraProvider.unbindAll();
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalysis);
+                if (this.cameraProvider != null) {
+                    this.cameraProvider.unbindAll();
+                    this.cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalysis);
+                }
 
             } catch (ExecutionException | InterruptedException e) {
                 Log.e(TAG, "Use case binding failed", e);
@@ -183,7 +191,7 @@ public class CameraActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
-    @androidx.camera.core.ExperimentalGetImage
+    @ExperimentalGetImage
     @TransformExperimental
     private void processImageProxy(ImageProxy imageProxy) {
         if (isCapturing) {
@@ -453,17 +461,17 @@ public class CameraActivity extends AppCompatActivity {
             state == FaceMeshOverlayView.GuideState.SCANNING ||
             state == FaceMeshOverlayView.GuideState.ALIGNED) {
             if (layoutInstructionPill != null) {
-                layoutInstructionPill.setBackgroundTintList(android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this, R.color.success)));
+                layoutInstructionPill.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.success)));
             }
             tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
         } else if (state == FaceMeshOverlayView.GuideState.TILTED) {
             if (layoutInstructionPill != null) {
-                layoutInstructionPill.setBackgroundTintList(android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this, R.color.warning)));
+                layoutInstructionPill.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.warning)));
             }
             tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
         } else if (state == FaceMeshOverlayView.GuideState.MISALIGNED) {
             if (layoutInstructionPill != null) {
-                layoutInstructionPill.setBackgroundTintList(android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this, R.color.error)));
+                layoutInstructionPill.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.error)));
             }
             tvInstruction.setTextColor(ContextCompat.getColor(this, R.color.white));
         } else {
@@ -605,7 +613,7 @@ public class CameraActivity extends AppCompatActivity {
 
         String scanId = "scan_" + System.currentTimeMillis();
         String customerId = "local";
-        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null && user.getUid() != null) {
             customerId = user.getUid();
         }
@@ -697,7 +705,7 @@ public class CameraActivity extends AppCompatActivity {
 
             Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
-            try (java.io.FileOutputStream out = new java.io.FileOutputStream(photoFile)) {
+            try (FileOutputStream out = new FileOutputStream(photoFile)) {
                 rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 92, out);
             }
 
@@ -713,8 +721,25 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
+    private void stopCamera() {
+        try {
+            if (cameraProvider != null) {
+                cameraProvider.unbindAll();
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Error unbinding camera provider", e);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        stopCamera();
+        super.onPause();
+    }
+
     @Override
     protected void onDestroy() {
+        stopCamera();
         super.onDestroy();
         if (tfliteDetector != null) tfliteDetector.close();
         if (cameraExecutor != null) cameraExecutor.shutdown();

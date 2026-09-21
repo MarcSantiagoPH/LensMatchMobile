@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.lensmatch.mobile.data.AppState;
+import com.lensmatch.mobile.service.FirestoreService;
 
 /**
  * Helper to manage Google Sign-In and Firebase Authentication lifecycle.
@@ -83,9 +84,22 @@ public class GoogleAuthHelper {
                                     String photoUrl = account.getPhotoUrl() != null ? account.getPhotoUrl().toString() : null;
 
                                     AppState.getInstance().setUserProfile(finalName, finalEmail, photoUrl);
-                                    if (callback != null) {
-                                        callback.onAuthSuccess(finalName, finalEmail, photoUrl);
-                                    }
+
+                                    FirestoreService.ensureCustomerProfileExists(finalName, finalEmail, new FirestoreService.Callback<Void>() {
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            if (callback != null) {
+                                                callback.onAuthSuccess(finalName, finalEmail, photoUrl);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onError(String errorMessage) {
+                                            if (callback != null) {
+                                                callback.onAuthFailure(errorMessage != null ? errorMessage : "Failed to verify customer profile.");
+                                            }
+                                        }
+                                    });
                                 } else {
                                     Exception ex = authTask.getException();
                                     if (ex instanceof FirebaseAuthUserCollisionException) {

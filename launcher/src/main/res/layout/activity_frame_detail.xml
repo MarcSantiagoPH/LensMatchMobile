@@ -33,7 +33,7 @@
 
                 <!-- Frame image on white card -->
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="160dp"
+                    android:layout_width="220dp"
                     android:layout_height="160dp"
                     android:layout_gravity="center"
                     app:cardCornerRadius="20dp"
@@ -43,9 +43,11 @@
 
                     <ImageView
                         android:id="@+id/iv_detail_image"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center"
+                        android:scaleType="fitCenter"
+                        android:padding="12dp"
                         android:src="@drawable/ic_eyeglasses" />
                 </com.google.android.material.card.MaterialCardView>
 
@@ -138,6 +140,28 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Metal"
+                        android:textColor="@color/text_primary"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/label_detail_color"
+                        android:textColor="@color/text_secondary" />
+
+                    <TextView
+                        android:id="@+id/tv_detail_color"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/preview_detail_color"
                         android:textColor="@color/text_primary"
                         android:textStyle="bold" />
                 </LinearLayout>

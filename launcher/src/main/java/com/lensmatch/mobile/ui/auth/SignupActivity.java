@@ -22,6 +22,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
+import com.lensmatch.mobile.service.FirestoreService;
 import com.lensmatch.mobile.ui.MainActivity;
 import com.lensmatch.mobile.utils.GoogleAuthHelper;
 import com.lensmatch.mobile.utils.StatusBarUtils;
@@ -181,9 +182,31 @@ public class SignupActivity extends AppCompatActivity {
                             AppState.getInstance().setEulaAccepted(true);
                             AppState.getInstance().updateAccountDetails(finalName, finalPhone, "", finalEmail);
                             AppState.getInstance().setUserProfile(finalName, finalEmail, null);
-                            Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show();
-                            proceedToMain();
+
+                            btnSignup.setEnabled(false);
+                            btnSignup.setText("Creating profile...");
+
+                            FirestoreService.createInitialCustomerProfile(finalName, finalPhone, finalEmail, new FirestoreService.Callback<Void>() {
+                                @Override
+                                public void onSuccess(Void result) {
+                                    if (isFinishing() || isDestroyed()) return;
+                                    btnSignup.setEnabled(true);
+                                    btnSignup.setText("Sign Up");
+                                    Toast.makeText(SignupActivity.this, "Account created successfully!", Toast.LENGTH_SHORT).show();
+                                    proceedToMain();
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    if (isFinishing() || isDestroyed()) return;
+                                    btnSignup.setEnabled(true);
+                                    btnSignup.setText("Sign Up");
+                                    Toast.makeText(SignupActivity.this, errorMessage != null ? errorMessage : "Failed to create customer profile.", Toast.LENGTH_LONG).show();
+                                }
+                            });
                         } else {
+                            btnSignup.setEnabled(true);
+                            btnSignup.setText("Sign Up");
                             String error = task.getException() != null ? task.getException().getMessage() : "Registration failed.";
                             Toast.makeText(SignupActivity.this, error, Toast.LENGTH_LONG).show();
                         }

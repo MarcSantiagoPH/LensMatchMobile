@@ -13,6 +13,7 @@ public class FrameModel implements Serializable {
     private String frameStyle;
     private double price;
     private String material;
+    private String frameColor;
     private String description;
     private String imageUrl;
     private String arModelUrl;
@@ -28,17 +29,23 @@ public class FrameModel implements Serializable {
 
     public FrameModel(String id, String frameName, String brand, String frameStyle, double price,
                       String material, String description, String imageUrl, String arModelUrl, boolean availability) {
-        this(id, frameName, brand, frameStyle, price, material, description, imageUrl, arModelUrl, availability, false);
+        this(id, frameName, brand, frameStyle, price, material, "", description, imageUrl, arModelUrl, availability, false);
     }
 
     public FrameModel(String id, String frameName, String brand, String frameStyle, double price,
                       String material, String description, String imageUrl, String arModelUrl, boolean availability, boolean isNew) {
+        this(id, frameName, brand, frameStyle, price, material, "", description, imageUrl, arModelUrl, availability, isNew);
+    }
+
+    public FrameModel(String id, String frameName, String brand, String frameStyle, double price,
+                      String material, String frameColor, String description, String imageUrl, String arModelUrl, boolean availability, boolean isNew) {
         this.id = id;
         this.frameName = frameName;
         this.brand = brand;
         this.frameStyle = frameStyle;
         this.price = price;
         this.material = material;
+        this.frameColor = frameColor;
         this.description = description;
         this.imageUrl = imageUrl;
         this.arModelUrl = arModelUrl;
@@ -75,6 +82,7 @@ public class FrameModel implements Serializable {
                 : (data.containsKey("style") ? String.valueOf(data.get("style"))
                 : (data.containsKey("shape") ? String.valueOf(data.get("shape")) : ""));
         String mat = data.containsKey("material") && data.get("material") != null ? String.valueOf(data.get("material")).trim() : "";
+        String color = data.containsKey("frameColor") && data.get("frameColor") != null ? String.valueOf(data.get("frameColor")).trim() : "";
         String desc = data.containsKey("description") && data.get("description") != null ? String.valueOf(data.get("description")) : "";
         String img = data.containsKey("imageUrl") && data.get("imageUrl") != null ? String.valueOf(data.get("imageUrl")) : "";
         String arUrl = data.containsKey("arModelUrl") && data.get("arModelUrl") != null ? String.valueOf(data.get("arModelUrl")) : "";
@@ -90,7 +98,7 @@ public class FrameModel implements Serializable {
             isNewVal = Boolean.parseBoolean(String.valueOf(data.get("new")));
         }
 
-        return new FrameModel(id, name, brand, style, priceVal, mat, desc, img, arUrl, isAvailable, isNewVal);
+        return new FrameModel(id, name, brand, style, priceVal, mat, color, desc, img, arUrl, isAvailable, isNewVal);
     }
 
     private static double parsePriceDouble(Object raw) {
@@ -128,6 +136,7 @@ public class FrameModel implements Serializable {
     public double getPriceValue() { return price; }
     public String getPrice() { return String.format(Locale.US, "₱%,.2f", price); }
     public String getMaterial() { return material != null ? material : ""; }
+    public String getFrameColor() { return frameColor != null ? frameColor : ""; }
     public String getDescription() { return description != null ? description : ""; }
     public String getImageUrl() { return imageUrl != null ? imageUrl : ""; }
     public String getArModelUrl() { return arModelUrl != null ? arModelUrl : ""; }
