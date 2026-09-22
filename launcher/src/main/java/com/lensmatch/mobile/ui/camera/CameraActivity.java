@@ -315,8 +315,8 @@ public class CameraActivity extends AppCompatActivity {
         RectF guideBounds = faceMeshOverlay.getGuideOvalRect();
         if (guideBounds == null || guideBounds.isEmpty()) return;
 
-        // 1. Luminance Quality Gate (Forgiving: 20 <= Y <= 245)
-        if (luminance < 20f) {
+        // 1. Luminance Quality Gate (Strict: 50 <= Y <= 245)
+        if (luminance < 50f) {
             applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
@@ -409,12 +409,12 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
 
-        // 5. 3D Head Pose Orientation Check (Yaw <= 30°, Pitch <= 30°, Roll <= 30°)
+        // 5. 3D Head Pose Orientation Check (Strict: Yaw <= 12°, Pitch <= 10°, Roll <= 12°)
         float yaw = face.getHeadEulerAngleY();   // Left / Right turn
         float pitch = face.getHeadEulerAngleX(); // Up / Down tilt
         float roll = face.getHeadEulerAngleZ();  // Sideways ear-to-shoulder tilt
 
-        if (Math.abs(yaw) > 30.0f) {
+        if (Math.abs(yaw) > 12.0f) {
             applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, scanProgress, matrix, imageWidth, imageHeight);
@@ -422,15 +422,15 @@ public class CameraActivity extends AppCompatActivity {
             });
             return;
         }
-        if (Math.abs(pitch) > 30.0f) {
+        if (Math.abs(pitch) > 10.0f) {
             applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, scanProgress, matrix, imageWidth, imageHeight);
-                setInstruction("Level your head", FaceMeshOverlayView.GuideState.TILTED);
+                setInstruction("Hold phone at eye level", FaceMeshOverlayView.GuideState.TILTED);
             });
             return;
         }
-        if (Math.abs(roll) > 30.0f) {
+        if (Math.abs(roll) > 12.0f) {
             applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, scanProgress, matrix, imageWidth, imageHeight);
@@ -652,6 +652,9 @@ public class CameraActivity extends AppCompatActivity {
         AppState.getInstance().setLastIsBorderline(result.isBorderline());
         AppState.getInstance().setLastRunnerUpShape(result.getRunnerUpShape());
         AppState.getInstance().setLastNotes(result.getNotes());
+        if (result != null && result.getMetrics() != null) {
+            AppState.getInstance().setLastMetrics(result.getMetrics());
+        }
 
         FaceShapeDetector.ShapeRecommendation rec = FaceShapeDetector.getRecommendation(result);
         List<String> recStyles = new ArrayList<>();

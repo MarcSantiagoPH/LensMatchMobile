@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.lensmatch.mobile.utils.FaceMetrics;
 import com.lensmatch.mobile.utils.FaceShapeDetector;
 
 import org.json.JSONArray;
@@ -28,6 +29,7 @@ public class AppState {
     private boolean lastIsBorderline = false;
     private String lastRunnerUpShape = "Round";
     private String lastNotes = null;
+    private FaceMetrics lastMetrics = null;
     private int lastActiveTab = 0;
     private String pendingCatalogStyle = null;
 
@@ -209,6 +211,11 @@ public class AppState {
         if (prefs != null) {
             prefs.edit().putString("lastNotes", notes).apply();
         }
+    }
+
+    public FaceMetrics getLastMetrics() { return lastMetrics; }
+    public void setLastMetrics(FaceMetrics metrics) {
+        this.lastMetrics = metrics;
     }
 
     public int getLastActiveTab() { return lastActiveTab; }

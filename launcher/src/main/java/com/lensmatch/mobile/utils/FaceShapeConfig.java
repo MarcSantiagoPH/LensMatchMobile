@@ -8,9 +8,9 @@ public class FaceShapeConfig {
     
     // Quality & Pose Thresholds
     public static float MIN_LANDMARK_CONFIDENCE = 0.50f;
-    public static float MAX_VALID_YAW = 15.0f;
-    public static float MAX_VALID_PITCH = 15.0f;
-    public static float MAX_VALID_ROLL = 15.0f;
+    public static float MAX_VALID_YAW = 12.0f;
+    public static float MAX_VALID_PITCH = 10.0f;
+    public static float MAX_VALID_ROLL = 12.0f;
 
     // =========================================================================
     // Geometric Shape Rules (Ratio-based)
