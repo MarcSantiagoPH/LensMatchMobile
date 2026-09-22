@@ -100,7 +100,7 @@ public class FaceMeshOverlayView extends View {
         progressPaint.setColor(Color.parseColor("#66BB6A"));
 
         bracketPaint.setStyle(Paint.Style.STROKE);
-        bracketPaint.setStrokeWidth(dpToPx(2.5f));
+        bracketPaint.setStrokeWidth(dpToPx(3.2f));
         bracketPaint.setStrokeCap(Paint.Cap.ROUND);
         bracketPaint.setColor(Color.parseColor("#70FFFFFF"));
 
@@ -455,53 +455,51 @@ public class FaceMeshOverlayView extends View {
         }
 
         if (!guideBoundaryRect.isEmpty()) {
-            // 1. Draw subtle guide oval with glow
-            canvas.drawOval(guideBoundaryRect, ovalGlowPaint);
-            canvas.drawOval(guideBoundaryRect, ovalPaint);
-
-            // 2. Draw 4 subtle corner reticle brackets
-            float bSize = dpToPx(20f);
+            // Draw sleek corner box brackets framing the face (no oval)
             float pad = dpToPx(6f);
             float left = guideBoundaryRect.left - pad;
             float top = guideBoundaryRect.top - pad;
             float right = guideBoundaryRect.right + pad;
             float bottom = guideBoundaryRect.bottom + pad;
+            RectF boxRect = new RectF(left, top, right, bottom);
+
+            float baseSize = dpToPx(24f);
+            // As scanProgress increases from 0 to 1.0, brackets smoothly extend along the box perimeter
+            float maxArmH = (right - left) / 2.0f;
+            float maxArmV = (bottom - top) / 2.0f;
+            float armH = baseSize + ((maxArmH - baseSize) * scanProgress);
+            float armV = baseSize + ((maxArmV - baseSize) * scanProgress);
 
             // Top-Left corner bracket
-            canvas.drawLine(left, top + bSize, left, top, bracketPaint);
-            canvas.drawLine(left, top, left + bSize, top, bracketPaint);
+            canvas.drawLine(left, top + armV, left, top, bracketPaint);
+            canvas.drawLine(left, top, left + armH, top, bracketPaint);
 
             // Top-Right corner bracket
-            canvas.drawLine(right - bSize, top, right, top, bracketPaint);
-            canvas.drawLine(right, top, right, top + bSize, bracketPaint);
+            canvas.drawLine(right - armH, top, right, top, bracketPaint);
+            canvas.drawLine(right, top, right, top + armV, bracketPaint);
 
             // Bottom-Left corner bracket
-            canvas.drawLine(left, bottom - bSize, left, bottom, bracketPaint);
-            canvas.drawLine(left, bottom, left + bSize, bottom, bracketPaint);
+            canvas.drawLine(left, bottom - armV, left, bottom, bracketPaint);
+            canvas.drawLine(left, bottom, left + armH, bottom, bracketPaint);
 
             // Bottom-Right corner bracket
-            canvas.drawLine(right - bSize, bottom, right, bottom, bracketPaint);
-            canvas.drawLine(right, bottom, right, bottom - bSize, bracketPaint);
+            canvas.drawLine(right - armH, bottom, right, bottom, bracketPaint);
+            canvas.drawLine(right, bottom, right, bottom - armV, bracketPaint);
 
-            // 3. Draw biometric circular progress arc clockwise around the oval from the top apex
-            if (scanProgress > 0.005f) {
-                canvas.drawArc(guideBoundaryRect, -90f, scanProgress * 360f, false, progressPaint);
-            }
-
-            // 4. Draw futuristic animated horizontal laser sweep beam while actively scanning
+            // Futuristic animated horizontal laser sweep beam within the box
             boolean isActivelyScanning = (guideState == GuideState.ALIGNED || guideState == GuideState.SCANNING || guideState == GuideState.SUCCESS) && scanProgress > 0.05f;
             if (isActivelyScanning) {
                 long elapsed = System.currentTimeMillis() - animationStartTime;
                 float cycle = (float) ((Math.sin(elapsed * 0.003) + 1.0) / 2.0); // 0.0 to 1.0 oscillation
-                float sweepY = guideBoundaryRect.top + (cycle * guideBoundaryRect.height());
+                float sweepY = top + (cycle * (bottom - top));
 
                 canvas.save();
                 clipOvalPath.reset();
-                clipOvalPath.addOval(guideBoundaryRect, android.graphics.Path.Direction.CW);
+                clipOvalPath.addRoundRect(boxRect, dpToPx(14f), dpToPx(14f), android.graphics.Path.Direction.CW);
                 canvas.clipPath(clipOvalPath);
 
-                canvas.drawLine(guideBoundaryRect.left, sweepY, guideBoundaryRect.right, sweepY, laserGlowPaint);
-                canvas.drawLine(guideBoundaryRect.left, sweepY, guideBoundaryRect.right, sweepY, laserPaint);
+                canvas.drawLine(left, sweepY, right, sweepY, laserGlowPaint);
+                canvas.drawLine(left, sweepY, right, sweepY, laserPaint);
                 canvas.restore();
 
                 // Request continuous redraw while laser is active

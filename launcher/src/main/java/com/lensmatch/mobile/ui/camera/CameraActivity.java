@@ -94,10 +94,10 @@ public class CameraActivity extends AppCompatActivity {
     private Face latestFace = null;
     private boolean isCapturing = false;
 
-    // Auto-capture progress tracking (~5.0s deliberate biometric hold)
+    // Auto-capture progress tracking (~3.0s deliberate biometric hold)
     private float scanProgress = 0f;
-    private static final float SCAN_INCREMENT = 0.0068f; // ~147 frames (~5.0s at 30fps)
-    private static final float SCAN_DECAY = 0.0060f;      // Gentle decay on slight movement
+    private static final float SCAN_INCREMENT = 0.0112f; // ~89 frames (~3.0s at 30fps)
+    private static final float SCAN_DECAY = 0.0090f;      // Gentle decay on slight movement
 
     // Multi-Frame Temporal Averaging buffer
     private final List<Bitmap> temporalFrames = new ArrayList<>();
@@ -202,7 +202,7 @@ public class CameraActivity extends AppCompatActivity {
 
         // Continuously buffer clean frames while holding alignment (progress >= 15%)
         long now = System.currentTimeMillis();
-        if (scanProgress >= 0.15f && (now - lastFrameSampleTimestamp >= 160)) {
+        if (scanProgress >= 0.15f && (now - lastFrameSampleTimestamp >= 110)) {
             synchronized (temporalFrames) {
                 if (temporalFrames.size() < TARGET_TEMPORAL_SAMPLES) {
                     try {
@@ -442,20 +442,17 @@ public class CameraActivity extends AppCompatActivity {
         // All quality & orientation checks passed! Face is ready for biometric capture
         scanProgress = Math.min(1.0f, scanProgress + SCAN_INCREMENT);
 
-        // Milestone haptic ticks for 20%, 40%, 60%, 80%, 100%
+        // Milestone haptic ticks for 25%, 50%, 75%, 100%
         int percent = Math.round(scanProgress * 100f);
-        if (percent >= 20 && lastHapticMilestone < 20) {
-            lastHapticMilestone = 20;
+        if (percent >= 25 && lastHapticMilestone < 25) {
+            lastHapticMilestone = 25;
             triggerHapticFeedback(25);
-        } else if (percent >= 40 && lastHapticMilestone < 40) {
-            lastHapticMilestone = 40;
+        } else if (percent >= 50 && lastHapticMilestone < 50) {
+            lastHapticMilestone = 50;
             triggerHapticFeedback(25);
-        } else if (percent >= 60 && lastHapticMilestone < 60) {
-            lastHapticMilestone = 60;
+        } else if (percent >= 75 && lastHapticMilestone < 75) {
+            lastHapticMilestone = 75;
             triggerHapticFeedback(30);
-        } else if (percent >= 80 && lastHapticMilestone < 80) {
-            lastHapticMilestone = 80;
-            triggerHapticFeedback(35);
         }
 
         if (scanProgress >= 1.0f) {
@@ -471,16 +468,16 @@ public class CameraActivity extends AppCompatActivity {
         } else {
             final float currentProgress = scanProgress;
             final String instructionText;
-            if (percent < 20) {
+            if (percent < 25) {
                 instructionText = "Aligning facial landmarks... (" + percent + "%)";
-            } else if (percent < 40) {
+            } else if (percent < 50) {
                 instructionText = "Scanning jawline & cheekbones (" + percent + "%)...";
-            } else if (percent < 60) {
+            } else if (percent < 75) {
                 instructionText = "Measuring facial proportions & symmetry (" + percent + "%)...";
-            } else if (percent < 80) {
+            } else if (percent < 95) {
                 instructionText = "Calibrating 3D face structure (" + percent + "%)...";
             } else {
-                instructionText = "Optimizing multi-frame anthropometrics (" + percent + "%)...";
+                instructionText = "Optimizing biometric analysis (" + percent + "%)...";
             }
 
             runOnUiThread(() -> {
