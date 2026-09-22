@@ -6,6 +6,7 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.lensmatch.mobile.data.AnnouncementModel;
@@ -219,6 +220,41 @@ public class FirestoreService {
                     Log.e(TAG, "Error fetching user reservations: " + e.getMessage(), e);
                     if (callback != null) callback.onError(e.getMessage());
                 });
+    }
+
+    public static void cancelReservation(String reservationId, String cancellationReason, Callback<Void> callback) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            if (callback != null) callback.onError("You must be logged in to cancel a reservation.");
+            return;
+        }
+
+        if (reservationId == null || reservationId.trim().isEmpty()) {
+            if (callback != null) callback.onError("Invalid reservation ID.");
+            return;
+        }
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", "Cancelled");
+        updates.put("statusUpdatedAt", FieldValue.serverTimestamp());
+        if (cancellationReason != null && !cancellationReason.trim().isEmpty()) {
+            updates.put("cancellationReason", cancellationReason.trim());
+        }
+
+        getDb().collection(COLLECTION_RESERVATIONS)
+                .document(reservationId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    if (callback != null) callback.onSuccess(null);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to cancel reservation: " + e.getMessage(), e);
+                    if (callback != null) callback.onError("Failed to cancel reservation: " + e.getMessage());
+                });
+    }
+
+    public static void cancelReservation(String reservationId, Callback<Void> callback) {
+        cancelReservation(reservationId, null, callback);
     }
 
     public static void getClinicInformation(Callback<ClinicModel> callback) {

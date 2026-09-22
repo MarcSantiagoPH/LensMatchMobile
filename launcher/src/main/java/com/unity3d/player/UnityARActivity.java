@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -188,16 +189,21 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
 
     private void updateTabs() {
         int orange = Color.parseColor("#F4A261");
-        int muted = Color.parseColor("#CCAA80");
+        int darkText = Color.BLACK;
+        int mutedText = Color.parseColor("#444444");
         if (tvTabRecommended == null || tvTabAllFrames == null) return;
         if (selectedTabIndex == 0) {
-            tvTabRecommended.setTextColor(orange);
-            tvTabAllFrames.setTextColor(muted);
+            tvTabRecommended.setTextColor(darkText);
+            tvTabRecommended.setTypeface(null, Typeface.BOLD);
+            tvTabAllFrames.setTextColor(mutedText);
+            tvTabAllFrames.setTypeface(null, Typeface.NORMAL);
             if (indicatorRecommended != null) indicatorRecommended.setBackgroundColor(orange);
             if (indicatorAllFrames   != null) indicatorAllFrames.setBackgroundColor(Color.TRANSPARENT);
         } else {
-            tvTabRecommended.setTextColor(muted);
-            tvTabAllFrames.setTextColor(orange);
+            tvTabRecommended.setTextColor(mutedText);
+            tvTabRecommended.setTypeface(null, Typeface.NORMAL);
+            tvTabAllFrames.setTextColor(darkText);
+            tvTabAllFrames.setTypeface(null, Typeface.BOLD);
             if (indicatorRecommended != null) indicatorRecommended.setBackgroundColor(Color.TRANSPARENT);
             if (indicatorAllFrames   != null) indicatorAllFrames.setBackgroundColor(orange);
         }
@@ -225,10 +231,12 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
 
             label.setText(frame);
             icon.setImageResource("None".equalsIgnoreCase(frame) ? R.drawable.ic_none : R.drawable.ic_eyeglasses);
+            icon.setColorFilter(Color.BLACK);
 
             boolean sel = frame.equalsIgnoreCase(selectedFrameStyle);
             circleBg.setBackgroundResource(sel ? R.drawable.bg_ar_circle_selected : R.drawable.bg_ar_circle_unselected);
-            label.setTextColor(sel ? Color.parseColor("#F4A261") : Color.WHITE);
+            label.setTextColor(Color.BLACK);
+            label.setTypeface(null, sel ? Typeface.BOLD : Typeface.NORMAL);
 
             item.setOnClickListener(v -> {
                 selectedFrameStyle = frame;
@@ -251,7 +259,8 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
 
             boolean sel = opt.label.equalsIgnoreCase(selectedColorVariant);
             chip.setBackgroundResource(sel ? R.drawable.bg_confidence_chip : R.drawable.bg_color_chip_unselected);
-            chip.setTextColor(sel ? Color.parseColor("#F4A261") : Color.parseColor("#77716C"));
+            chip.setTextColor(Color.BLACK);
+            chip.setTypeface(null, sel ? Typeface.BOLD : Typeface.NORMAL);
 
             chip.setOnClickListener(v -> {
                 selectedColorVariant = opt.label;

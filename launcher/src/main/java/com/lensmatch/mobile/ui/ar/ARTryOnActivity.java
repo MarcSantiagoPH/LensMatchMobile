@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -204,16 +205,24 @@ public class ARTryOnActivity extends AppCompatActivity {
     }
 
     private void updateTabs() {
+        int orange = Color.parseColor("#F4A261");
+        int darkText = Color.BLACK;
+        int mutedText = Color.parseColor("#444444");
+        if (tvTabRecommended == null || tvTabAllFrames == null) return;
         if (selectedTabIndex == 0) {
-            tvTabRecommended.setTextColor(getColor(R.color.primary_orange));
-            tvTabAllFrames.setTextColor(getColor(R.color.textSecondary));
-            indicatorRecommended.setBackgroundColor(getColor(R.color.primary_orange));
-            indicatorAllFrames.setBackgroundColor(getColor(R.color.transparent));
+            tvTabRecommended.setTextColor(darkText);
+            tvTabRecommended.setTypeface(null, Typeface.BOLD);
+            tvTabAllFrames.setTextColor(mutedText);
+            tvTabAllFrames.setTypeface(null, Typeface.NORMAL);
+            indicatorRecommended.setBackgroundColor(orange);
+            indicatorAllFrames.setBackgroundColor(Color.TRANSPARENT);
         } else {
-            tvTabRecommended.setTextColor(getColor(R.color.textSecondary));
-            tvTabAllFrames.setTextColor(getColor(R.color.primary_orange));
-            indicatorRecommended.setBackgroundColor(getColor(R.color.transparent));
-            indicatorAllFrames.setBackgroundColor(getColor(R.color.primary_orange));
+            tvTabRecommended.setTextColor(mutedText);
+            tvTabRecommended.setTypeface(null, Typeface.NORMAL);
+            tvTabAllFrames.setTextColor(darkText);
+            tvTabAllFrames.setTypeface(null, Typeface.BOLD);
+            indicatorRecommended.setBackgroundColor(Color.TRANSPARENT);
+            indicatorAllFrames.setBackgroundColor(orange);
         }
     }
 
@@ -244,15 +253,16 @@ public class ARTryOnActivity extends AppCompatActivity {
             } else {
                 ivIcon.setImageResource(R.drawable.ic_eyeglasses);
             }
+            ivIcon.setColorFilter(Color.BLACK);
 
             boolean isSelected = frame.equalsIgnoreCase(selectedFrameStyle);
             if (isSelected) {
                 circleBg.setBackgroundResource(R.drawable.bg_ar_circle_selected);
-                tvLabel.setTextColor(getColor(R.color.primary_orange));
             } else {
                 circleBg.setBackgroundResource(R.drawable.bg_ar_circle_unselected);
-                tvLabel.setTextColor(getColor(R.color.white));
             }
+            tvLabel.setTextColor(Color.BLACK);
+            tvLabel.setTypeface(null, isSelected ? Typeface.BOLD : Typeface.NORMAL);
 
             itemView.setOnClickListener(v -> {
                 selectedFrameStyle = frame;
@@ -274,13 +284,9 @@ public class ARTryOnActivity extends AppCompatActivity {
             chip.setTextSize(13);
 
             boolean isSelected = option.hex.equalsIgnoreCase(selectedFrameColor);
-            if (isSelected) {
-                chip.setBackgroundResource(R.drawable.bg_confidence_chip);
-                chip.setTextColor(getColor(R.color.primary_orange));
-            } else {
-                chip.setBackgroundResource(R.drawable.bg_color_chip_unselected);
-                chip.setTextColor(getColor(R.color.textSecondary));
-            }
+            chip.setBackgroundResource(isSelected ? R.drawable.bg_confidence_chip : R.drawable.bg_color_chip_unselected);
+            chip.setTextColor(Color.BLACK);
+            chip.setTypeface(null, isSelected ? Typeface.BOLD : Typeface.NORMAL);
 
             chip.setOnClickListener(v -> {
                 selectedFrameColor = option.hex;

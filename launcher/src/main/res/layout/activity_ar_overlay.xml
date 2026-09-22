@@ -20,8 +20,8 @@
             android:clickable="true"
             android:focusable="true"
             android:padding="10dp"
-            android:src="@drawable/ic_scan"
-            app:tint="@android:color/white" />
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/black" />
 
         <TextView
             android:id="@+id/btn_continue_unity_ar"
@@ -35,7 +35,7 @@
             android:gravity="center"
             android:paddingHorizontal="16dp"
             android:text="@string/btn_ar_continue"
-            android:textColor="@color/arBtnContinueText"
+            android:textColor="@color/black"
             android:textSize="13sp"
             android:textStyle="bold" />
     </RelativeLayout>
@@ -97,7 +97,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="All Frames"
-                    android:textColor="@color/textSecondary"
+                    android:textColor="@color/black"
                     android:textSize="15sp" />
 
                 <View
@@ -131,7 +131,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="12dp"
             android:text="Color Variations:"
-            android:textColor="@color/textSecondary"
+            android:textColor="@color/black"
             android:textSize="12sp"
             android:textStyle="bold" />
 
@@ -167,8 +167,8 @@
             android:layout_height="48dp"
             android:layout_margin="16dp"
             android:padding="8dp"
-            android:src="@drawable/ic_scan"
-            app:tint="@color/brandOrange" />
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/black" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -190,7 +190,7 @@
                 android:layout_marginTop="20dp"
                 android:letterSpacing="0.02"
                 android:text="Preparing 3D Frame Preview"
-                android:textColor="@color/textPrimary"
+                android:textColor="@color/black"
                 android:textSize="17sp"
                 android:textStyle="bold" />
 
@@ -200,7 +200,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Calibrating face tracking sensors..."
-                android:textColor="@color/textSecondary"
+                android:textColor="@color/black"
                 android:textSize="13sp" />
         </LinearLayout>
 

@@ -33,7 +33,7 @@
             android:focusable="true"
             android:padding="10dp"
             android:src="@drawable/ic_chevron_left"
-            app:tint="@color/white" />
+            app:tint="@color/black" />
 
         <TextView
             android:id="@+id/btn_continue_ar"
@@ -47,7 +47,7 @@
             android:gravity="center"
             android:paddingHorizontal="16dp"
             android:text="@string/btn_ar_continue"
-            android:textColor="@color/arBtnContinueText"
+            android:textColor="@color/black"
             android:textSize="13sp"
             android:textStyle="bold" />
     </RelativeLayout>
@@ -109,7 +109,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="All Frames"
-                    android:textColor="@color/textSecondary"
+                    android:textColor="@color/black"
                     android:textSize="15sp" />
 
                 <View
@@ -143,7 +143,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="12dp"
             android:text="Color Variations:"
-            android:textColor="@color/textSecondary"
+            android:textColor="@color/black"
             android:textSize="12sp"
             android:textStyle="bold" />
 

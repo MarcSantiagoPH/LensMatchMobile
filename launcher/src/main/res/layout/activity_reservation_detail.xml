@@ -239,6 +239,36 @@
                         android:text="Your reservation request has been received. Our staff is currently reviewing your request."
                         android:textColor="@color/text_secondary"
                         android:textSize="13sp" />
+
+                    <!-- Reason for cancellation (visible only when reservation was cancelled) -->
+                    <LinearLayout
+                        android:id="@+id/layout_cancellation_reason"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_cancel_reason"
+                        android:orientation="vertical"
+                        android:padding="12dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Reason for Cancellation"
+                            android:textColor="#D32F2F"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_detail_cancellation_reason"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:lineSpacingExtra="2dp"
+                            android:text="Changed my mind"
+                            android:textColor="@color/text_primary"
+                            android:textSize="13sp" />
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -403,6 +433,24 @@
                         android:textSize="12sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Cancel Reservation Button (Visible for active reservations) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_cancel_reservation"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="24dp"
+                android:text="Cancel Reservation"
+                android:textColor="#D32F2F"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:cornerRadius="14dp"
+                app:icon="@drawable/ic_close"
+                app:iconGravity="textStart"
+                app:iconTint="#D32F2F"
+                app:strokeColor="#D32F2F"
+                app:strokeWidth="1.5dp" />
 
         </LinearLayout>
     </ScrollView>

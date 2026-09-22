@@ -475,14 +475,15 @@
                 android:letterSpacing="0.10"
                 android:fontFamily="sans-serif-medium" />
 
-            <!-- Dynamic Announcements Container with seamless invisible scrollable box capped at 2 items -->
+            <!-- Dynamic Announcements Container with seamless scrollable box capped at 2 items -->
             <com.lensmatch.mobile.utils.MaxHeightNestedScrollView
                 android:id="@+id/scroll_announcements_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
-                android:overScrollMode="never"
-                android:scrollbars="none"
+                android:overScrollMode="ifContentScrolls"
+                android:scrollbars="vertical"
+                android:fadeScrollbars="true"
                 app:maxHeight="360dp"
                 android:maxHeight="360dp">
 
@@ -499,7 +500,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="26dp"
                 android:layout_marginBottom="10dp"
-                android:text="RESERVATION STATUS &amp; TRANSACTIONS"
+                android:text="RESERVATION STATUS"
                 android:textColor="@color/text_secondary"
                 android:textSize="11sp"
                 android:textStyle="bold"
@@ -573,14 +574,15 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Dynamic Reservations Container with seamless invisible scrollable box capped at 2 items -->
+            <!-- Dynamic Reservations Container with seamless scrollable box capped at 2 items -->
             <com.lensmatch.mobile.utils.MaxHeightNestedScrollView
                 android:id="@+id/scroll_reservations_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
-                android:overScrollMode="never"
-                android:scrollbars="none"
+                android:overScrollMode="ifContentScrolls"
+                android:scrollbars="vertical"
+                android:fadeScrollbars="true"
                 android:visibility="gone"
                 app:maxHeight="360dp"
                 android:maxHeight="360dp">

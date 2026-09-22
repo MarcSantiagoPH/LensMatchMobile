@@ -23,6 +23,7 @@ public class ReservationModel implements Serializable {
     private String status;
     private Date createdAt;
     private Date statusUpdatedAt;
+    private String cancellationReason;
 
     public ReservationModel() {}
 
@@ -62,8 +63,12 @@ public class ReservationModel implements Serializable {
         double priceVal = parsePriceDouble(rawPrice);
         Date createdDate = parseDate(data.get("createdAt"));
         Date updatedDate = parseDate(data.get("statusUpdatedAt"));
+        String cancelReason = data.containsKey("cancellationReason") && data.get("cancellationReason") != null
+                ? String.valueOf(data.get("cancellationReason")) : null;
 
-        return new ReservationModel(id, cId, cName, cEmail, fId, fName, brandStr, fStyle, priceVal, img, statusStr, createdDate, updatedDate);
+        ReservationModel model = new ReservationModel(id, cId, cName, cEmail, fId, fName, brandStr, fStyle, priceVal, img, statusStr, createdDate, updatedDate);
+        model.setCancellationReason(cancelReason);
+        return model;
     }
 
     private static double parsePriceDouble(Object raw) {
@@ -107,6 +112,9 @@ public class ReservationModel implements Serializable {
         map.put("status", status != null ? status : "Pending");
         map.put("createdAt", FieldValue.serverTimestamp());
         map.put("statusUpdatedAt", null);
+        if (cancellationReason != null && !cancellationReason.trim().isEmpty()) {
+            map.put("cancellationReason", cancellationReason.trim());
+        }
         return map;
     }
 
@@ -124,6 +132,7 @@ public class ReservationModel implements Serializable {
     public String getStatus() { return status != null ? status : "Pending"; }
     public Date getCreatedAt() { return createdAt; }
     public Date getStatusUpdatedAt() { return statusUpdatedAt; }
+    public String getCancellationReason() { return cancellationReason; }
 
     public String getFormattedDate() {
         if (createdAt == null) return "Recent";
@@ -135,5 +144,17 @@ public class ReservationModel implements Serializable {
         if (statusUpdatedAt == null) return null;
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
         return sdf.format(statusUpdatedAt);
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setStatusUpdatedAt(Date statusUpdatedAt) {
+        this.statusUpdatedAt = statusUpdatedAt;
+    }
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
     }
 }

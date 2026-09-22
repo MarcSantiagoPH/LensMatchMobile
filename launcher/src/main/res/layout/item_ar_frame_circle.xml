@@ -20,7 +20,7 @@
             android:layout_height="28dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_eyeglasses"
-            app:tint="@color/white" />
+            app:tint="@color/black" />
     </FrameLayout>
 
     <TextView
@@ -31,6 +31,6 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="Wayfarer"
-        android:textColor="@color/white"
+        android:textColor="@color/black"
         android:textSize="12sp" />
 </LinearLayout>

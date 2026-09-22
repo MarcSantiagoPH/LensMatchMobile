@@ -43,6 +43,8 @@ public class HomeFragment extends Fragment {
     private ImageView ivHomeLogo;
     private LinearLayout layoutAnnouncementsContainer;
     private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh;
+    private androidx.core.widget.NestedScrollView homeScrollView;
+    private com.lensmatch.mobile.utils.MaxHeightNestedScrollView scrollAnnouncementsContainer;
 
     // Reservation Status UI components
     private MaterialCardView cardNoReservation;
@@ -54,6 +56,15 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
 
+        homeScrollView = root.findViewById(R.id.home_scroll_view);
+        scrollAnnouncementsContainer = root.findViewById(R.id.scroll_announcements_container);
+        scrollReservationsContainer = root.findViewById(R.id.scroll_reservations_container);
+        cardNoReservation = root.findViewById(R.id.card_no_reservation);
+        layoutReservationsContainer = root.findViewById(R.id.layout_reservations_container);
+        tvReservationsCount = root.findViewById(R.id.tv_reservations_count);
+        ivHomeLogo = root.findViewById(R.id.iv_home_logo);
+        MaterialButton btnScanFace = root.findViewById(R.id.btn_scan_face);
+
         swipeRefresh = root.findViewById(R.id.swipe_refresh_home);
         if (swipeRefresh != null) {
             swipeRefresh.setColorSchemeColors(
@@ -61,15 +72,19 @@ public class HomeFragment extends Fragment {
                     androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange_dark)
             );
             swipeRefresh.setOnRefreshListener(this::refreshHomeData);
+            swipeRefresh.setOnChildScrollUpCallback((parent, child) -> {
+                if (homeScrollView != null && homeScrollView.canScrollVertically(-1)) {
+                    return true;
+                }
+                if (scrollAnnouncementsContainer != null && scrollAnnouncementsContainer.isShown() && scrollAnnouncementsContainer.canScrollVertically(-1)) {
+                    return true;
+                }
+                if (scrollReservationsContainer != null && scrollReservationsContainer.isShown() && scrollReservationsContainer.canScrollVertically(-1)) {
+                    return true;
+                }
+                return false;
+            });
         }
-
-        MaterialButton btnScanFace = root.findViewById(R.id.btn_scan_face);
-        cardNoReservation = root.findViewById(R.id.card_no_reservation);
-        scrollReservationsContainer = root.findViewById(R.id.scroll_reservations_container);
-        layoutReservationsContainer = root.findViewById(R.id.layout_reservations_container);
-        tvReservationsCount = root.findViewById(R.id.tv_reservations_count);
-
-        ivHomeLogo = root.findViewById(R.id.iv_home_logo);
 
         btnScanFace.setOnClickListener(v -> {
             if (getActivity() instanceof MainActivity) {
@@ -224,7 +239,7 @@ public class HomeFragment extends Fragment {
                 if (tvReservationsCount != null) {
                     tvReservationsCount.setText(allReservations.isEmpty()
                             ? "Reserve a frame to schedule an in-store fitting"
-                            : allReservations.size() + (allReservations.size() == 1 ? " reservation transaction" : " reservation transactions"));
+                            : allReservations.size() + (allReservations.size() == 1 ? " reservation" : " reservations"));
                 }
 
                 if (allReservations.isEmpty()) {

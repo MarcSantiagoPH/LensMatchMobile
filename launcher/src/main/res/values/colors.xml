@@ -101,7 +101,7 @@
 
     <color name="arBtnContinueBg">@color/primary_orange</color>
     <color name="arBtnContinueStroke">@color/primary_orange_dark</color>
-    <color name="arBtnContinueText">@color/text_primary</color>
+    <color name="arBtnContinueText">@color/black</color>
     <color name="arBackBtnBg">#80FFFFFF</color>
     <color name="arBackBtnStroke">#40F4A261</color>
     <color name="arBottomGradientCenter">#CCFDEBDD</color>

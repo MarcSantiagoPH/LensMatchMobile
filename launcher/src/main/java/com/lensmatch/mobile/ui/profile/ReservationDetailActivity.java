@@ -5,24 +5,36 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.lensmatch.mobile.R;
+import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.data.ClinicModel;
 import com.lensmatch.mobile.data.ReservationModel;
 import com.lensmatch.mobile.service.FirestoreService;
 import com.lensmatch.mobile.utils.StatusBarUtils;
 
+import java.util.Date;
+
 public class ReservationDetailActivity extends AppCompatActivity {
     private ReservationModel reservation;
+    private MaterialButton btnCancelReservation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +103,10 @@ public class ReservationDetailActivity extends AppCompatActivity {
             if ("APPROVED".equals(statusUpper) || "CONFIRMED".equals(statusUpper)) {
                 tvStatus.setTextColor(Color.parseColor("#4CAF50"));
                 tvStatusMessage.setText("Your reservation has been approved!\n\nPlease contact the clinic using the information below so our staff can assist you with the next steps of your reservation.");
-            } else if ("REJECTED".equals(statusUpper) || "CANCELLED".equals(statusUpper)) {
+            } else if ("CANCELLED".equals(statusUpper)) {
+                tvStatus.setTextColor(Color.parseColor("#F44336"));
+                tvStatusMessage.setText("You have cancelled this reservation.\n\nPlease contact the clinic if you have questions or would like to reserve a different frame.");
+            } else if ("REJECTED".equals(statusUpper)) {
                 tvStatus.setTextColor(Color.parseColor("#F44336"));
                 tvStatusMessage.setText("Unfortunately, your reservation request was not approved.\n\nPlease contact the clinic if you have questions or would like to reserve a different frame.");
             } else if ("COMPLETED".equals(statusUpper)) {
@@ -106,6 +121,8 @@ public class ReservationDetailActivity extends AppCompatActivity {
             if (tvSpecialInstructions != null) {
                 if ("APPROVED".equals(statusUpper)) {
                     tvSpecialInstructions.setText(R.string.instruction_approved);
+                } else if ("CANCELLED".equals(statusUpper)) {
+                    tvSpecialInstructions.setText(R.string.instruction_cancelled);
                 } else if ("REJECTED".equals(statusUpper)) {
                     tvSpecialInstructions.setText(R.string.instruction_rejected);
                 } else { // PENDING or default
@@ -125,9 +142,182 @@ public class ReservationDetailActivity extends AppCompatActivity {
                     ivFrame.setImageResource(R.drawable.ic_eyeglasses);
                 }
             }
+
+            LinearLayout layoutCancellationReason = findViewById(R.id.layout_cancellation_reason);
+            TextView tvCancellationReason = findViewById(R.id.tv_detail_cancellation_reason);
+            if ("CANCELLED".equals(statusUpper) && reservation.getCancellationReason() != null && !reservation.getCancellationReason().trim().isEmpty()) {
+                if (layoutCancellationReason != null) layoutCancellationReason.setVisibility(View.VISIBLE);
+                if (tvCancellationReason != null) tvCancellationReason.setText(reservation.getCancellationReason());
+            } else {
+                if (layoutCancellationReason != null) layoutCancellationReason.setVisibility(View.GONE);
+            }
+
+            btnCancelReservation = findViewById(R.id.btn_cancel_reservation);
+            updateCancelButtonVisibility();
+            if (btnCancelReservation != null) {
+                btnCancelReservation.setOnClickListener(v -> confirmCancelReservation());
+            }
         }
 
         loadClinicInformation();
+    }
+
+    private void updateCancelButtonVisibility() {
+        if (btnCancelReservation == null || reservation == null) return;
+        String status = reservation.getStatus() != null ? reservation.getStatus().trim().toUpperCase() : "PENDING";
+        boolean canCancel = "PENDING".equals(status) || "APPROVED".equals(status) || "CONFIRMED".equals(status);
+        btnCancelReservation.setVisibility(canCancel ? View.VISIBLE : View.GONE);
+    }
+
+    private void confirmCancelReservation() {
+        if (reservation == null || reservation.getReservationId() == null) return;
+
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_cancel_reservation, null);
+        TextView tvSubtitle = dialogView.findViewById(R.id.tv_cancel_dialog_subtitle);
+        RadioGroup rgReasons = dialogView.findViewById(R.id.rg_cancel_reasons);
+        TextInputLayout tilNotes = dialogView.findViewById(R.id.til_cancel_reason_notes);
+        TextInputEditText etNotes = dialogView.findViewById(R.id.et_cancel_reason_notes);
+
+        String frameName = reservation.getFrameName() != null ? reservation.getFrameName() : "this frame";
+        if (tvSubtitle != null) {
+            tvSubtitle.setText("Please select a reason for cancelling your reservation for \"" + frameName + "\":");
+        }
+
+        if (rgReasons != null && tilNotes != null) {
+            rgReasons.setOnCheckedChangeListener((group, checkedId) -> {
+                tilNotes.setError(null);
+                if (checkedId == R.id.rb_reason_other) {
+                    tilNotes.setHint("Please specify your reason (required)");
+                } else {
+                    tilNotes.setHint("Additional details (optional)");
+                }
+            });
+        }
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle("Cancel Reservation")
+                .setIcon(R.drawable.ic_close)
+                .setView(dialogView)
+                .setPositiveButton("Cancel Reservation", null)
+                .setNegativeButton("Keep Reservation", (d, which) -> d.dismiss())
+                .create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            View positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            if (positiveButton instanceof TextView) {
+                ((TextView) positiveButton).setTextColor(Color.parseColor("#D32F2F"));
+            }
+            if (positiveButton != null) {
+                positiveButton.setOnClickListener(v -> {
+                    int checkedId = rgReasons != null ? rgReasons.getCheckedRadioButtonId() : -1;
+                    String notes = etNotes != null && etNotes.getText() != null ? etNotes.getText().toString().trim() : "";
+
+                    if (checkedId == R.id.rb_reason_other) {
+                        if (notes.isEmpty()) {
+                            if (tilNotes != null) {
+                                tilNotes.setError("Please specify the reason for cancellation");
+                            }
+                            return;
+                        }
+                    }
+
+                    String reasonText;
+                    if (checkedId == R.id.rb_reason_mind) {
+                        reasonText = "Changed my mind";
+                    } else if (checkedId == R.id.rb_reason_frame) {
+                        reasonText = "Found another frame I prefer";
+                    } else if (checkedId == R.id.rb_reason_schedule) {
+                        reasonText = "Unable to visit clinic / Schedule conflict";
+                    } else if (checkedId == R.id.rb_reason_mistake) {
+                        reasonText = "Reserved by mistake";
+                    } else if (checkedId == R.id.rb_reason_budget) {
+                        reasonText = "Price or budget considerations";
+                    } else if (checkedId == R.id.rb_reason_other) {
+                        reasonText = "Other: " + notes;
+                    } else {
+                        reasonText = "Customer requested cancellation";
+                    }
+
+                    if (checkedId != R.id.rb_reason_other && !notes.isEmpty()) {
+                        reasonText += " (" + notes + ")";
+                    }
+
+                    dialog.dismiss();
+                    executeCancelReservation(reasonText);
+                });
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void executeCancelReservation(String cancellationReason) {
+        if (reservation == null || reservation.getReservationId() == null) return;
+
+        if (btnCancelReservation != null) {
+            btnCancelReservation.setEnabled(false);
+            btnCancelReservation.setText("Cancelling...");
+        }
+
+        FirestoreService.cancelReservation(reservation.getReservationId(), cancellationReason, new FirestoreService.Callback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                if (isFinishing() || isDestroyed()) return;
+
+                if (reservation.getFrameId() != null) {
+                    AppState.getInstance().removeReservation(reservation.getFrameId());
+                }
+
+                reservation.setStatus("Cancelled");
+                reservation.setCancellationReason(cancellationReason);
+                reservation.setStatusUpdatedAt(new Date());
+
+                TextView tvStatus = findViewById(R.id.tv_detail_status);
+                TextView tvStatusMessage = findViewById(R.id.tv_detail_status_message);
+                TextView tvSpecialInstructions = findViewById(R.id.tv_special_instructions);
+                LinearLayout layoutUpdatedDate = findViewById(R.id.layout_updated_date);
+                TextView tvUpdatedDate = findViewById(R.id.tv_detail_updated_date);
+                LinearLayout layoutCancellationReason = findViewById(R.id.layout_cancellation_reason);
+                TextView tvCancellationReason = findViewById(R.id.tv_detail_cancellation_reason);
+
+                if (tvStatus != null) {
+                    tvStatus.setText("Cancelled");
+                    tvStatus.setTextColor(Color.parseColor("#F44336"));
+                }
+                if (tvStatusMessage != null) {
+                    tvStatusMessage.setText("You have cancelled this reservation.\n\nPlease contact the clinic if you have questions or would like to reserve a different frame.");
+                }
+                if (tvSpecialInstructions != null) {
+                    tvSpecialInstructions.setText(R.string.instruction_cancelled);
+                }
+                if (layoutUpdatedDate != null && tvUpdatedDate != null) {
+                    layoutUpdatedDate.setVisibility(View.VISIBLE);
+                    tvUpdatedDate.setText(reservation.getFormattedUpdatedDate());
+                }
+                if (layoutCancellationReason != null && tvCancellationReason != null && cancellationReason != null && !cancellationReason.trim().isEmpty()) {
+                    layoutCancellationReason.setVisibility(View.VISIBLE);
+                    tvCancellationReason.setText(cancellationReason);
+                }
+
+                updateCancelButtonVisibility();
+
+                Toast.makeText(ReservationDetailActivity.this, "Reservation cancelled successfully.", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (isFinishing() || isDestroyed()) return;
+
+                if (btnCancelReservation != null) {
+                    btnCancelReservation.setEnabled(true);
+                    btnCancelReservation.setText("Cancel Reservation");
+                }
+
+                Toast.makeText(ReservationDetailActivity.this,
+                        errorMessage != null ? errorMessage : "Failed to cancel reservation.",
+                        Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void loadClinicInformation() {

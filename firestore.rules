@@ -57,16 +57,26 @@ service cloud.firestore {
         && request.resource.data.customerId == request.auth.uid
         && request.resource.data.status == 'Pending';
 
-      // UPDATE: Only active Staff may update reservations.
-      // Requires that ONLY 'status' and 'statusUpdatedAt' are modified, enforcing strict status lifecycle transitions.
-      allow update: if isStaff()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'statusUpdatedAt'])
+      // UPDATE:
+      // Staff: Update status according to lifecycle (Pending -> Approved/Rejected, Approved -> Completed).
+      // Customer: Cancel own active reservation (Pending or Approved -> Cancelled) with optional cancellationReason.
+      // Requires that ONLY 'status', 'statusUpdatedAt', and optionally 'cancellationReason' are modified.
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'statusUpdatedAt', 'cancellationReason'])
         && (
-          // Pending -> Approved OR Pending -> Rejected
-          (resource.data.status == 'Pending' && (request.resource.data.status == 'Approved' || request.resource.data.status == 'Rejected'))
+          (isStaff() && (
+            // Pending -> Approved OR Pending -> Rejected
+            (resource.data.status == 'Pending' && (request.resource.data.status == 'Approved' || request.resource.data.status == 'Rejected'))
+            ||
+            // Approved -> Completed
+            (resource.data.status == 'Approved' && request.resource.data.status == 'Completed')
+          ))
           ||
-          // Approved -> Completed
-          (resource.data.status == 'Approved' && request.resource.data.status == 'Completed')
+          (request.auth != null
+            && resource.data.customerId == request.auth.uid
+            && (resource.data.status == 'Pending' || resource.data.status == 'Approved')
+            && request.resource.data.status == 'Cancelled'
+            && (!('cancellationReason' in request.resource.data) || request.resource.data.cancellationReason is string)
+          )
         );
 
       // DELETE: Denied for all users (no application workflow requires deletion).
