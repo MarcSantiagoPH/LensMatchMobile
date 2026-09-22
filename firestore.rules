@@ -45,41 +45,71 @@ service cloud.firestore {
 
     // ==========================================
     // RESERVATIONS COLLECTION
-    // Customer: Create own Pending reservation; read own reservations.
-    // Staff: Read all reservations; update status according to strict lifecycle and field immutability.
+    // Customer: Create own Pending reservation; read own reservations; cancel Pending reservation with required reason.
+    // Staff: Read all reservations; update status according to transition-specific field restrictions.
     // ==========================================
     match /RESERVATIONS/{reservationId} {
       // READ: Customer reads own reservation; Staff reads all.
       allow read: if request.auth != null && (resource.data.customerId == request.auth.uid || isStaff());
 
       // CREATE: Customer creates their own reservation with initial status "Pending".
+      // Allows standard customer fields (including customerPhone) while prohibiting staff-controlled fields.
       allow create: if request.auth != null
         && request.resource.data.customerId == request.auth.uid
-        && request.resource.data.status == 'Pending';
+        && request.resource.data.status == 'Pending'
+        && request.resource.data.keys().hasOnly([
+          'customerId', 'customerName', 'customerEmail', 'customerPhone',
+          'frameId', 'frameName', 'brand', 'frameStyle', 'price',
+          'imageUrl', 'status', 'createdAt', 'statusUpdatedAt'
+        ])
+        && (!('statusUpdatedAt' in request.resource.data) || request.resource.data.statusUpdatedAt == null)
+        && !request.resource.data.keys().hasAny(['reservationDeadline', 'rejectionReason', 'cancellationReason']);
 
       // UPDATE:
-      // Staff: Update status according to lifecycle (Pending -> Approved/Rejected, Approved -> Completed).
-      // Customer: Cancel own active reservation (Pending or Approved -> Cancelled) with optional cancellationReason.
-      // Requires that ONLY 'status', 'statusUpdatedAt', and optionally 'cancellationReason' are modified.
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'statusUpdatedAt', 'cancellationReason'])
-        && (
-          (isStaff() && (
-            // Pending -> Approved OR Pending -> Rejected
-            (resource.data.status == 'Pending' && (request.resource.data.status == 'Approved' || request.resource.data.status == 'Rejected'))
-            ||
-            // Approved -> Completed
-            (resource.data.status == 'Approved' && request.resource.data.status == 'Completed')
-          ))
-          ||
-          (request.auth != null
-            && resource.data.customerId == request.auth.uid
-            && (resource.data.status == 'Pending' || resource.data.status == 'Approved')
-            && request.resource.data.status == 'Cancelled'
-            && (!('cancellationReason' in request.resource.data) || request.resource.data.cancellationReason is string)
-          )
-        );
+      // Customer: Cancel own Pending reservation (Pending -> Cancelled) with required non-empty cancellationReason.
+      // Staff: Update status according to transition-specific field immutability and lifecycle rules.
+      allow update: if (
+        // 1. Customer Pending -> Cancelled (Evaluated FIRST so customer updates short-circuit without triggering isStaff())
+        (request.auth != null
+          && resource.data.customerId == request.auth.uid
+          && resource.data.status == 'Pending'
+          && request.resource.data.status == 'Cancelled'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'statusUpdatedAt', 'cancellationReason'])
+          && 'cancellationReason' in request.resource.data
+          && request.resource.data.cancellationReason is string
+          && request.resource.data.cancellationReason.trim().size() > 0
+          && request.resource.data.statusUpdatedAt is timestamp
+        )
+        ||
+        // 2. Staff Pending -> Approved (Allowed changed fields ONLY: status, statusUpdatedAt, reservationDeadline)
+        (isStaff()
+          && resource.data.status == 'Pending'
+          && request.resource.data.status == 'Approved'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'statusUpdatedAt', 'reservationDeadline'])
+          && request.resource.data.reservationDeadline is timestamp
+          && request.resource.data.statusUpdatedAt is timestamp
+        )
+        ||
+        // 3. Staff Pending -> Rejected (Allowed changed fields ONLY: status, statusUpdatedAt, rejectionReason)
+        (isStaff()
+          && resource.data.status == 'Pending'
+          && request.resource.data.status == 'Rejected'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'statusUpdatedAt', 'rejectionReason'])
+          && request.resource.data.rejectionReason is string
+          && request.resource.data.rejectionReason.trim().size() > 0
+          && request.resource.data.statusUpdatedAt is timestamp
+        )
+        ||
+        // 4. Staff Approved -> Completed (Allowed changed fields ONLY: status, statusUpdatedAt)
+        (isStaff()
+          && resource.data.status == 'Approved'
+          && request.resource.data.status == 'Completed'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'statusUpdatedAt'])
+          && request.resource.data.statusUpdatedAt is timestamp
+        )
+      );
 
-      // DELETE: Denied for all users (no application workflow requires deletion).
+      // DELETE: Denied for all users
       allow delete: if false;
     }
 
@@ -119,18 +149,12 @@ service cloud.firestore {
     // ==========================================
     match /SCAN_HISTORY/{scanId} {
       allow create: if request.auth != null
-        && (
-          request.resource.data.customerId == request.auth.uid
-          || ('customerEmail' in request.resource.data && request.resource.data.customerEmail == request.auth.token.email)
-        );
+        && request.resource.data.customerId == request.auth.uid;
 
       allow read, update, delete: if request.auth != null
-        && (
-          resource.data.customerId == request.auth.uid
-          || ('customerEmail' in resource.data && resource.data.customerEmail == request.auth.token.email)
-          || ('userId' in resource.data && resource.data.userId == request.auth.uid)
-          || isStaff()
-        );
+        && resource.data.customerId == request.auth.uid;
+
+      allow read: if isStaff();
     }
 
     // ==========================================

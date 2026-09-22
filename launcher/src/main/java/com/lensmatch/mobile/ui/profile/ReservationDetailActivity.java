@@ -114,7 +114,7 @@ public class ReservationDetailActivity extends AppCompatActivity {
                 tvStatusMessage.setText("Your reservation has been completed. Thank you for choosing Franselle Optical Clinic!");
             } else { // Pending
                 tvStatus.setTextColor(ContextCompat.getColor(this, R.color.primary_orange));
-                tvStatusMessage.setText("Your reservation request has been received.\n\nOur staff is currently reviewing your request. We'll update the status once the review is complete.");
+                tvStatusMessage.setText("Expect a call within the day — reservation pending.");
             }
 
             TextView tvSpecialInstructions = findViewById(R.id.tv_special_instructions);
@@ -143,6 +143,15 @@ public class ReservationDetailActivity extends AppCompatActivity {
                 }
             }
 
+            LinearLayout layoutDeadline = findViewById(R.id.layout_reservation_deadline);
+            TextView tvDeadline = findViewById(R.id.tv_detail_deadline);
+            if ("APPROVED".equals(statusUpper) && reservation.getFormattedDeadline() != null) {
+                if (layoutDeadline != null) layoutDeadline.setVisibility(View.VISIBLE);
+                if (tvDeadline != null) tvDeadline.setText(reservation.getFormattedDeadline());
+            } else {
+                if (layoutDeadline != null) layoutDeadline.setVisibility(View.GONE);
+            }
+
             LinearLayout layoutCancellationReason = findViewById(R.id.layout_cancellation_reason);
             TextView tvCancellationReason = findViewById(R.id.tv_detail_cancellation_reason);
             if ("CANCELLED".equals(statusUpper) && reservation.getCancellationReason() != null && !reservation.getCancellationReason().trim().isEmpty()) {
@@ -150,6 +159,15 @@ public class ReservationDetailActivity extends AppCompatActivity {
                 if (tvCancellationReason != null) tvCancellationReason.setText(reservation.getCancellationReason());
             } else {
                 if (layoutCancellationReason != null) layoutCancellationReason.setVisibility(View.GONE);
+            }
+
+            LinearLayout layoutRejectionReason = findViewById(R.id.layout_rejection_reason);
+            TextView tvRejectionReason = findViewById(R.id.tv_detail_rejection_reason);
+            if ("REJECTED".equals(statusUpper) && reservation.getRejectionReason() != null && !reservation.getRejectionReason().trim().isEmpty()) {
+                if (layoutRejectionReason != null) layoutRejectionReason.setVisibility(View.VISIBLE);
+                if (tvRejectionReason != null) tvRejectionReason.setText(reservation.getRejectionReason());
+            } else {
+                if (layoutRejectionReason != null) layoutRejectionReason.setVisibility(View.GONE);
             }
 
             btnCancelReservation = findViewById(R.id.btn_cancel_reservation);
@@ -165,7 +183,7 @@ public class ReservationDetailActivity extends AppCompatActivity {
     private void updateCancelButtonVisibility() {
         if (btnCancelReservation == null || reservation == null) return;
         String status = reservation.getStatus() != null ? reservation.getStatus().trim().toUpperCase() : "PENDING";
-        boolean canCancel = "PENDING".equals(status) || "APPROVED".equals(status) || "CONFIRMED".equals(status);
+        boolean canCancel = "PENDING".equals(status);
         btnCancelReservation.setVisibility(canCancel ? View.VISIBLE : View.GONE);
     }
 

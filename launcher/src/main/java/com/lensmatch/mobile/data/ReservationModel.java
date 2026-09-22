@@ -24,6 +24,8 @@ public class ReservationModel implements Serializable {
     private Date createdAt;
     private Date statusUpdatedAt;
     private String cancellationReason;
+    private Date reservationDeadline;
+    private String rejectionReason;
 
     public ReservationModel() {}
 
@@ -63,11 +65,16 @@ public class ReservationModel implements Serializable {
         double priceVal = parsePriceDouble(rawPrice);
         Date createdDate = parseDate(data.get("createdAt"));
         Date updatedDate = parseDate(data.get("statusUpdatedAt"));
+        Date deadlineDate = parseDate(data.get("reservationDeadline"));
         String cancelReason = data.containsKey("cancellationReason") && data.get("cancellationReason") != null
                 ? String.valueOf(data.get("cancellationReason")) : null;
+        String rejectReason = data.containsKey("rejectionReason") && data.get("rejectionReason") != null
+                ? String.valueOf(data.get("rejectionReason")).trim() : null;
 
         ReservationModel model = new ReservationModel(id, cId, cName, cEmail, fId, fName, brandStr, fStyle, priceVal, img, statusStr, createdDate, updatedDate);
         model.setCancellationReason(cancelReason);
+        model.setReservationDeadline(deadlineDate);
+        model.setRejectionReason(rejectReason);
         return model;
     }
 
@@ -133,6 +140,8 @@ public class ReservationModel implements Serializable {
     public Date getCreatedAt() { return createdAt; }
     public Date getStatusUpdatedAt() { return statusUpdatedAt; }
     public String getCancellationReason() { return cancellationReason; }
+    public Date getReservationDeadline() { return reservationDeadline; }
+    public String getRejectionReason() { return rejectionReason; }
 
     public String getFormattedDate() {
         if (createdAt == null) return "Recent";
@@ -146,6 +155,12 @@ public class ReservationModel implements Serializable {
         return sdf.format(statusUpdatedAt);
     }
 
+    public String getFormattedDeadline() {
+        if (reservationDeadline == null) return null;
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.US);
+        return sdf.format(reservationDeadline);
+    }
+
     public void setStatus(String status) {
         this.status = status;
     }
@@ -156,5 +171,13 @@ public class ReservationModel implements Serializable {
 
     public void setCancellationReason(String cancellationReason) {
         this.cancellationReason = cancellationReason;
+    }
+
+    public void setReservationDeadline(Date reservationDeadline) {
+        this.reservationDeadline = reservationDeadline;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 }

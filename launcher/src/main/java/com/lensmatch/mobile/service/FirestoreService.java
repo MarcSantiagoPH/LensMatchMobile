@@ -502,60 +502,32 @@ public class FirestoreService {
         }
 
         final String customerId = user.getUid();
-        final String customerEmail = user.getEmail() != null ? user.getEmail().trim() : "";
 
-        // Query by authenticated customerId
         getDb().collection(COLLECTION_SCAN_HISTORY)
                 .whereEqualTo("customerId", customerId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    Map<String, ScanModel> scanMap = new HashMap<>();
+                    List<ScanModel> list = new ArrayList<>();
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
                         Map<String, Object> data = doc.getData();
                         if (data != null) {
-                            ScanModel sm = ScanModel.fromMap(data, doc.getId());
-                            scanMap.put(doc.getId(), sm);
+                            list.add(ScanModel.fromMap(data, doc.getId()));
                         }
                     }
 
-                    // If user has email, also check for any scans saved by email (legacy or multi-login)
-                    if (!customerEmail.isEmpty()) {
-                        getDb().collection(COLLECTION_SCAN_HISTORY)
-                                .whereEqualTo("customerEmail", customerEmail)
-                                .get()
-                                .addOnSuccessListener(emailSnapshots -> {
-                                    for (DocumentSnapshot doc : emailSnapshots) {
-                                        Map<String, Object> data = doc.getData();
-                                        if (data != null && !scanMap.containsKey(doc.getId())) {
-                                            ScanModel sm = ScanModel.fromMap(data, doc.getId());
-                                            scanMap.put(doc.getId(), sm);
-                                        }
-                                    }
-                                    deliverScanResults(scanMap, callback);
-                                })
-                                .addOnFailureListener(e -> {
-                                    // If email query fails (e.g. index/rules), return the customerId results
-                                    deliverScanResults(scanMap, callback);
-                                });
-                    } else {
-                        deliverScanResults(scanMap, callback);
-                    }
+                    Collections.sort(list, (a, b) -> {
+                        if (a.getTimestamp() == null && b.getTimestamp() == null) return 0;
+                        if (a.getTimestamp() == null) return 1;
+                        if (b.getTimestamp() == null) return -1;
+                        return b.getTimestamp().compareTo(a.getTimestamp());
+                    });
+
+                    if (callback != null) callback.onSuccess(list);
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error fetching user scan history: " + e.getMessage(), e);
                     if (callback != null) callback.onError(e.getMessage());
                 });
-    }
-
-    private static void deliverScanResults(Map<String, ScanModel> scanMap, Callback<List<ScanModel>> callback) {
-        List<ScanModel> list = new ArrayList<>(scanMap.values());
-        Collections.sort(list, (a, b) -> {
-            if (a.getTimestamp() == null && b.getTimestamp() == null) return 0;
-            if (a.getTimestamp() == null) return 1;
-            if (b.getTimestamp() == null) return -1;
-            return b.getTimestamp().compareTo(a.getTimestamp());
-        });
-        if (callback != null) callback.onSuccess(list);
     }
 
     public static void syncPendingScans(Callback<Integer> callback) {

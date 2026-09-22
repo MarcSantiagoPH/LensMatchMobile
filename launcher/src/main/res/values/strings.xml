@@ -48,4 +48,9 @@
 
     <!-- Reservation Notice Agreement String -->
     <string name="notice_agreement_text">I understand that this reservation is for the eyeglass frame only. Prescription lenses and fitting will be finalized and paid for at the clinic.</string>
+
+    <!-- Reservation Detail Labels -->
+    <string name="label_reservation_deadline">Reservation Deadline</string>
+    <string name="label_rejection_reason">Reason for Rejection</string>
+    <string name="preview_rejection_reason">Frame unavailable</string>
 </resources>
