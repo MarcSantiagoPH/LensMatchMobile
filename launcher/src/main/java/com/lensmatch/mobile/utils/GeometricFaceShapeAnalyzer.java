@@ -43,6 +43,9 @@ public class GeometricFaceShapeAnalyzer {
     public static final int CHIN_BASE_RIGHT_INNER = 378;
     public static final int CHIN_BASE_RIGHT_OUTER = 377;
 
+    public static final int NASION = 168;                // Midpoint between eyes (top of midface)
+    public static final int SUB_NASALE = 2;              // Base of nose (top of lower face)
+
     private static final FaceShapeClassifierStrategy classifier = new RulesDecisionTreeClassifier();
 
     /**
@@ -73,17 +76,37 @@ public class GeometricFaceShapeAnalyzer {
         // 4. Jaw Width (172/397)
         float jawWidthIpd = pts[JAW_LEFT].dist(pts[JAW_RIGHT]);
 
-        // 5. Vertical Face Length (10 to 152)
-        float faceLengthIpd = pts[FOREHEAD_TOP].dist(pts[CHIN_BOTTOM]);
+        // 5. Forehead Occlusion Confidence Check (54, 284, 21, 251, 10)
+        float conf54 = getConfidence(rawLandmarks.get(FOREHEAD_LEFT));
+        float conf284 = getConfidence(rawLandmarks.get(FOREHEAD_RIGHT));
+        float conf21 = getConfidence(rawLandmarks.get(FOREHEAD_FALLBACK_LEFT));
+        float conf251 = getConfidence(rawLandmarks.get(FOREHEAD_FALLBACK_RIGHT));
+        float conf10 = getConfidence(rawLandmarks.get(FOREHEAD_TOP));
+        float foreheadConf = (conf54 + conf284 + conf21 + conf251 + conf10) / 5.0f;
+
+        // Check Da Vinci facial thirds proportions (hair/bangs occlusion check)
+        float upperThirdIpd = pts[FOREHEAD_TOP].dist(pts[NASION]);
+        float midfaceIpd = pts[NASION].dist(pts[SUB_NASALE]);
+        float lowerfaceIpd = pts[SUB_NASALE].dist(pts[CHIN_BOTTOM]);
+        boolean hasBangsOcclusion = (upperThirdIpd < 0.72f * midfaceIpd);
+
+        boolean isForeheadOccluded = (foreheadConf < FaceShapeConfig.MIN_LANDMARK_CONFIDENCE) || hasBangsOcclusion;
+
+        // 6. Vertical Face Length (10 to 152) with Da Vinci Anthropometric Compensation
+        float rawFaceLengthIpd = pts[FOREHEAD_TOP].dist(pts[CHIN_BOTTOM]);
+        float reconstructedFaceLengthIpd = (midfaceIpd + lowerfaceIpd) * 1.50f;
+        float faceLengthIpd = (isForeheadOccluded && reconstructedFaceLengthIpd > rawFaceLengthIpd)
+                ? reconstructedFaceLengthIpd
+                : rawFaceLengthIpd;
 
         if (cheekWidthIpd <= 0.05f || faceLengthIpd <= 0.05f || jawWidthIpd <= 0.05f) {
             return null;
         }
 
-        // 6. Jaw Angle Sharpness (148 - 152 - 377: vertex at 152)
+        // 7. Jaw Angle Sharpness (148 - 152 - 377: vertex at 152)
         float jawAngleDeg = calculateAngleDeg(pts[JAW_ANGLE_LEFT], pts[CHIN_BOTTOM], pts[JAW_ANGLE_RIGHT]);
 
-        // 7. Chin Curvature Score (across 149, 150, 152, 377, 378)
+        // 8. Chin Curvature Score (across 149, 150, 152, 377, 378)
         // Inner chin apex angle (150 - 152 - 378)
         float angleInner = calculateAngleDeg(pts[CHIN_BASE_LEFT_INNER], pts[CHIN_BOTTOM], pts[CHIN_BASE_RIGHT_INNER]);
         // Outer chin apex angle (149 - 152 - 377)
@@ -92,16 +115,6 @@ public class GeometricFaceShapeAnalyzer {
 
         // Normalize chin curvature: 0.0 = sharp V-line (~105°), 1.0 = broad/square (~160°)
         float chinCurvatureScore = Math.max(0.0f, Math.min(1.0f, (compositeChinAngle - 105.0f) / (160.0f - 105.0f)));
-
-        // 8. Forehead Occlusion Confidence Check (54, 284, 21, 251, 10)
-        float conf54 = getConfidence(rawLandmarks.get(FOREHEAD_LEFT));
-        float conf284 = getConfidence(rawLandmarks.get(FOREHEAD_RIGHT));
-        float conf21 = getConfidence(rawLandmarks.get(FOREHEAD_FALLBACK_LEFT));
-        float conf251 = getConfidence(rawLandmarks.get(FOREHEAD_FALLBACK_RIGHT));
-        float conf10 = getConfidence(rawLandmarks.get(FOREHEAD_TOP));
-        float foreheadConf = (conf54 + conf284 + conf21 + conf251 + conf10) / 5.0f;
-
-        boolean isForeheadOccluded = foreheadConf < FaceShapeConfig.MIN_LANDMARK_CONFIDENCE;
 
         // Jaw Confidence
         float confJawL = getConfidence(rawLandmarks.get(JAW_LEFT));

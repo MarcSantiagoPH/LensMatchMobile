@@ -22,50 +22,79 @@ public class RulesDecisionTreeClassifier implements FaceShapeClassifierStrategy 
         }
 
         Map<String, Float> rawScores = new HashMap<>();
-        float fW = metrics.isForeheadOccluded ? 0.3f : 1.0f;
+        float fW = metrics.isForeheadOccluded ? 0.25f : 1.0f;
+        float lenW = metrics.faceLengthToWidthRatio;
+        float jawCheek = metrics.jawToCheekRatio;
+        float foreCheek = metrics.foreheadToCheekRatio;
+        float chinCurv = metrics.chinCurvatureScore;
 
-        // 1. OVAL: Balanced
-        float ovalScore = gaussian(metrics.faceLengthToWidthRatio, 1.45f, 0.1f)
-                * gaussian(metrics.jawToCheekRatio, 0.77f, 0.05f)
-                * weightedGaussian(metrics.foreheadToCheekRatio, 0.82f, 0.05f, fW)
-                * gaussian(metrics.chinCurvatureScore, 0.45f, 0.15f);
+        // 1. OVAL: Balanced length, gently tapering jaw, soft curved chin
+        float ovalScore = geomMean(
+                gaussian(lenW, 1.45f, 0.11f),
+                gaussian(jawCheek, 0.76f, 0.06f),
+                weightedGaussian(foreCheek, 0.84f, 0.07f, fW),
+                gaussian(chinCurv, 0.45f, 0.14f)
+        );
         rawScores.put("Oval", Math.max(0.001f, ovalScore));
 
-        // 2. ROUND: Compact, tapered jaw, soft chin
-        float roundCompact = metrics.faceLengthToWidthRatio <= FaceShapeConfig.ROUND_LENGTH_WIDTH_MAX ? 1.5f : 0.5f;
-        float roundScore = roundCompact * gaussian(metrics.jawToCheekRatio, 0.78f, 0.05f) * gaussian(metrics.chinCurvatureScore, 0.6f, 0.2f);
+        // 2. ROUND: Compact length, soft/tapered jaw, rounded circular chin (no sharp gonial angle)
+        float roundJawPenalty = (jawCheek > 0.84f) ? 0.4f : 1.0f; // Wide jaw belongs to Square, not Round
+        float roundScore = geomMean(
+                gaussian(lenW, 1.18f, 0.09f),
+                gaussian(jawCheek, 0.76f, 0.06f),
+                gaussian(chinCurv, 0.58f, 0.13f),
+                weightedGaussian(foreCheek, 0.86f, 0.08f, fW)
+        ) * roundJawPenalty;
         rawScores.put("Round", Math.max(0.001f, roundScore));
 
-        // 3. SQUARE: Broad mandible, blunt chin, wide jaw
-        float sqCompact = metrics.faceLengthToWidthRatio <= FaceShapeConfig.ROUND_LENGTH_WIDTH_MAX ? 1.2f : 0.8f;
-        float sqJaw = metrics.jawToCheekRatio >= FaceShapeConfig.STRONG_JAW_TO_CHEEK_MIN ? 1.5f : 0.5f;
-        float sqChin = metrics.chinCurvatureScore >= FaceShapeConfig.BROAD_CHIN_CURVATURE_MIN ? 1.5f : 0.5f;
-        rawScores.put("Square", Math.max(0.001f, sqCompact * sqJaw * sqChin));
+        // 3. SQUARE: Compact length, strong broad jawbone, flat/angular chin
+        float sqJawBonus = (jawCheek >= 0.82f) ? 1.0f : 0.3f;
+        float sqChinBonus = (chinCurv >= 0.55f) ? 1.0f : 0.3f;
+        float squareScore = geomMean(
+                gaussian(lenW, 1.20f, 0.09f),
+                gaussian(jawCheek, 0.88f, 0.06f),
+                gaussian(chinCurv, 0.75f, 0.13f),
+                weightedGaussian(foreCheek, 0.88f, 0.08f, fW)
+        ) * sqJawBonus * sqChinBonus;
+        rawScores.put("Square", Math.max(0.001f, squareScore));
 
-        // 4. OBLONG: Elongated
-        float oblongLen = metrics.faceLengthToWidthRatio >= FaceShapeConfig.OBLONG_LENGTH_WIDTH_MIN ? 1.8f : 0.3f;
-        float oblongJaw = gaussian(metrics.jawToCheekRatio, 0.82f, 0.06f);
-        rawScores.put("Oblong", Math.max(0.001f, oblongLen * oblongJaw));
+        // 4. OBLONG: Elongated vertical face, straight sides, balanced jaw
+        float oblongLenBonus = (lenW >= 1.50f) ? 1.0f : 0.3f;
+        float oblongScore = geomMean(
+                gaussian(lenW, 1.62f, 0.10f),
+                gaussian(jawCheek, 0.80f, 0.07f),
+                gaussian(chinCurv, 0.50f, 0.15f),
+                weightedGaussian(foreCheek, 0.84f, 0.08f, fW)
+        ) * oblongLenBonus;
+        rawScores.put("Oblong", Math.max(0.001f, oblongScore));
 
-        // 5. HEART: Forehead wider, tapering pointed V-line chin
-        float heartForehead = metrics.foreheadToCheekRatio >= FaceShapeConfig.WIDE_FOREHEAD_TO_CHEEK_MIN ? 1.5f : 0.5f;
-        heartForehead = (1.0f - fW) + (fW * heartForehead);
-        float heartJaw = metrics.jawToCheekRatio <= FaceShapeConfig.NARROW_JAW_TO_CHEEK_MAX ? 1.4f : 0.6f;
-        float heartChin = metrics.chinCurvatureScore <= FaceShapeConfig.SHARP_CHIN_CURVATURE_MAX ? 1.4f : 0.6f;
-        rawScores.put("Heart", Math.max(0.001f, heartForehead * heartJaw * heartChin));
+        // 5. HEART: Forehead noticeably widest, slender tapering jaw, sharp pointed V-line chin
+        float heartScore = geomMean(
+                weightedGaussian(foreCheek, 0.98f, 0.08f, fW),
+                gaussian(jawCheek, 0.67f, 0.06f),
+                gaussian(chinCurv, 0.25f, 0.10f),
+                gaussian(lenW, 1.38f, 0.10f)
+        );
+        rawScores.put("Heart", Math.max(0.001f, heartScore));
 
-        // 6. DIAMOND: Cheekbones widest, pointed chin
-        float diamondForehead = metrics.foreheadToCheekRatio <= FaceShapeConfig.NARROW_FOREHEAD_TO_CHEEK_MAX ? 1.4f : 0.6f;
-        diamondForehead = (1.0f - fW) + (fW * diamondForehead);
-        float diamondJaw = metrics.jawToCheekRatio <= FaceShapeConfig.NARROW_JAW_TO_CHEEK_MAX ? 1.4f : 0.6f;
-        float diamondChin = metrics.chinCurvatureScore <= FaceShapeConfig.SHARP_CHIN_CURVATURE_MAX ? 1.4f : 0.6f;
-        rawScores.put("Diamond", Math.max(0.001f, diamondForehead * diamondJaw * diamondChin));
+        // 6. DIAMOND: Cheekbones widest point, narrow forehead, narrow jaw, pointed V-line chin
+        float diamondScore = geomMean(
+                weightedGaussian(foreCheek, 0.75f, 0.07f, fW),
+                gaussian(jawCheek, 0.67f, 0.06f),
+                gaussian(chinCurv, 0.25f, 0.10f),
+                gaussian(lenW, 1.42f, 0.10f)
+        );
+        rawScores.put("Diamond", Math.max(0.001f, diamondScore));
 
-        // 7. TRIANGLE: Jaw wide, forehead narrow
-        float triForehead = metrics.foreheadToCheekRatio <= FaceShapeConfig.NARROW_FOREHEAD_TO_CHEEK_MAX ? 1.5f : 0.5f;
-        triForehead = (1.0f - fW) + (fW * triForehead);
-        float triJaw = metrics.jawToCheekRatio >= FaceShapeConfig.STRONG_JAW_TO_CHEEK_MIN ? 1.5f : 0.5f;
-        rawScores.put("Triangle", Math.max(0.001f, triForehead * triJaw));
+        // 7. TRIANGLE: Jaw is widest point, narrow forehead, broad/square chin base
+        float triJawBonus = (jawCheek >= 0.84f) ? 1.0f : 0.4f;
+        float triangleScore = geomMean(
+                gaussian(jawCheek, 0.90f, 0.06f),
+                weightedGaussian(foreCheek, 0.74f, 0.06f, fW),
+                gaussian(chinCurv, 0.68f, 0.14f),
+                gaussian(lenW, 1.32f, 0.10f)
+        ) * triJawBonus;
+        rawScores.put("Triangle", Math.max(0.001f, triangleScore));
 
         float sum = 0f;
         for (float s : rawScores.values()) sum += s;
@@ -89,6 +118,15 @@ public class RulesDecisionTreeClassifier implements FaceShapeClassifierStrategy 
         float conf = Math.max(0.70f, Math.min(0.98f, 0.86f + (primaryProb * 0.08f)));
 
         return new ClassificationResult(primaryShape, conf, runnerUpShape, runnerUpProb, isBorderline, probabilities, isBorderline ? "Borderline shape." : "");
+    }
+
+    private static float geomMean(float... values) {
+        if (values == null || values.length == 0) return 0f;
+        double prod = 1.0;
+        for (float v : values) {
+            prod *= Math.max(0.0001, (double) v);
+        }
+        return (float) Math.pow(prod, 1.0 / values.length);
     }
 
     private static float gaussian(float x, float mean, float std) {

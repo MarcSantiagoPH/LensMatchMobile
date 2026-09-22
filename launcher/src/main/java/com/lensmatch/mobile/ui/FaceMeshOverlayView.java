@@ -53,6 +53,10 @@ public class FaceMeshOverlayView extends View {
     private final Paint ovalGlowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint progressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint bracketPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint laserPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint laserGlowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final android.graphics.Path clipOvalPath = new android.graphics.Path();
+    private long animationStartTime = System.currentTimeMillis();
 
     private float dotRadius;
     private float haloRadius;
@@ -99,6 +103,14 @@ public class FaceMeshOverlayView extends View {
         bracketPaint.setStrokeWidth(dpToPx(2.5f));
         bracketPaint.setStrokeCap(Paint.Cap.ROUND);
         bracketPaint.setColor(Color.parseColor("#70FFFFFF"));
+
+        laserPaint.setStyle(Paint.Style.STROKE);
+        laserPaint.setStrokeWidth(dpToPx(2.2f));
+        laserPaint.setColor(Color.parseColor("#E066BB6A"));
+
+        laserGlowPaint.setStyle(Paint.Style.STROKE);
+        laserGlowPaint.setStrokeWidth(dpToPx(8.0f));
+        laserGlowPaint.setColor(Color.parseColor("#3566BB6A"));
     }
 
     public void updateState(List<Face> faces, GuideState state, int imgW, int imgH) {
@@ -196,6 +208,9 @@ public class FaceMeshOverlayView extends View {
         ovalPaint.setColor(ovalColor);
         ovalGlowPaint.setColor(glowColor);
         bracketPaint.setColor(ovalColor);
+        progressPaint.setColor(color);
+        laserPaint.setColor(color);
+        laserGlowPaint.setColor(halo);
     }
 
     /**
@@ -440,7 +455,11 @@ public class FaceMeshOverlayView extends View {
         }
 
         if (!guideBoundaryRect.isEmpty()) {
-            // Draw 4 subtle corner reticle brackets (no oval)
+            // 1. Draw subtle guide oval with glow
+            canvas.drawOval(guideBoundaryRect, ovalGlowPaint);
+            canvas.drawOval(guideBoundaryRect, ovalPaint);
+
+            // 2. Draw 4 subtle corner reticle brackets
             float bSize = dpToPx(20f);
             float pad = dpToPx(6f);
             float left = guideBoundaryRect.left - pad;
@@ -463,6 +482,31 @@ public class FaceMeshOverlayView extends View {
             // Bottom-Right corner bracket
             canvas.drawLine(right - bSize, bottom, right, bottom, bracketPaint);
             canvas.drawLine(right, bottom, right, bottom - bSize, bracketPaint);
+
+            // 3. Draw biometric circular progress arc clockwise around the oval from the top apex
+            if (scanProgress > 0.005f) {
+                canvas.drawArc(guideBoundaryRect, -90f, scanProgress * 360f, false, progressPaint);
+            }
+
+            // 4. Draw futuristic animated horizontal laser sweep beam while actively scanning
+            boolean isActivelyScanning = (guideState == GuideState.ALIGNED || guideState == GuideState.SCANNING || guideState == GuideState.SUCCESS) && scanProgress > 0.05f;
+            if (isActivelyScanning) {
+                long elapsed = System.currentTimeMillis() - animationStartTime;
+                float cycle = (float) ((Math.sin(elapsed * 0.003) + 1.0) / 2.0); // 0.0 to 1.0 oscillation
+                float sweepY = guideBoundaryRect.top + (cycle * guideBoundaryRect.height());
+
+                canvas.save();
+                clipOvalPath.reset();
+                clipOvalPath.addOval(guideBoundaryRect, android.graphics.Path.Direction.CW);
+                canvas.clipPath(clipOvalPath);
+
+                canvas.drawLine(guideBoundaryRect.left, sweepY, guideBoundaryRect.right, sweepY, laserGlowPaint);
+                canvas.drawLine(guideBoundaryRect.left, sweepY, guideBoundaryRect.right, sweepY, laserPaint);
+                canvas.restore();
+
+                // Request continuous redraw while laser is active
+                postInvalidateOnAnimation();
+            }
         }
 
         // Draw face mesh dots tracking facial contours

@@ -94,15 +94,16 @@ public class CameraActivity extends AppCompatActivity {
     private Face latestFace = null;
     private boolean isCapturing = false;
 
-    // Auto-capture progress tracking (~1.0s smooth biometric hold)
+    // Auto-capture progress tracking (~5.0s deliberate biometric hold)
     private float scanProgress = 0f;
-    private static final float SCAN_INCREMENT = 0.042f; // ~24 frames (~1.0s at 24-30fps)
-    private static final float SCAN_DECAY = 0.02f;      // Gentle decay on slight movement
+    private static final float SCAN_INCREMENT = 0.0068f; // ~147 frames (~5.0s at 30fps)
+    private static final float SCAN_DECAY = 0.0060f;      // Gentle decay on slight movement
 
-    // Multi-Frame Temporal Averaging buffer (15-30 frames over ~1.5s)
+    // Multi-Frame Temporal Averaging buffer
     private final List<Bitmap> temporalFrames = new ArrayList<>();
-    private int remainingTemporalSamples = 0;
-    private static final int TARGET_TEMPORAL_SAMPLES = 20;
+    private static final int TARGET_TEMPORAL_SAMPLES = 25;
+    private int lastHapticMilestone = 0;
+    private long lastFrameSampleTimestamp = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,31 +196,28 @@ public class CameraActivity extends AppCompatActivity {
     @TransformExperimental
     private void processImageProxy(ImageProxy imageProxy) {
         if (isCapturing) {
-            if (remainingTemporalSamples > 0) {
-                try {
-                    Bitmap bmp = imageProxy.toBitmap();
-                    if (bmp != null) {
-                        Matrix matrix = new Matrix();
-                        matrix.postRotate(imageProxy.getImageInfo().getRotationDegrees());
-                        matrix.postScale(-1f, 1f); // front camera horizontal mirror
-                        Bitmap orientedBmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
-                        synchronized (temporalFrames) {
-                            temporalFrames.add(orientedBmp);
-                            remainingTemporalSamples--;
-                            int collected = TARGET_TEMPORAL_SAMPLES - remainingTemporalSamples;
-                            runOnUiThread(() -> {
-                                if (tvScanningStatus != null) {
-                                    tvScanningStatus.setText("Scanning face contours (" + collected + "/" + TARGET_TEMPORAL_SAMPLES + " frames)...");
-                                }
-                            });
-                        }
-                    }
-                } catch (Throwable t) {
-                    remainingTemporalSamples = 0;
-                }
-            }
             imageProxy.close();
             return;
+        }
+
+        // Continuously buffer clean frames while holding alignment (progress >= 15%)
+        long now = System.currentTimeMillis();
+        if (scanProgress >= 0.15f && (now - lastFrameSampleTimestamp >= 160)) {
+            synchronized (temporalFrames) {
+                if (temporalFrames.size() < TARGET_TEMPORAL_SAMPLES) {
+                    try {
+                        Bitmap bmp = imageProxy.toBitmap();
+                        if (bmp != null) {
+                            Matrix matrix = new Matrix();
+                            matrix.postRotate(imageProxy.getImageInfo().getRotationDegrees());
+                            matrix.postScale(-1f, 1f); // front camera horizontal mirror
+                            Bitmap orientedBmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+                            temporalFrames.add(orientedBmp);
+                            lastFrameSampleTimestamp = now;
+                        }
+                    } catch (Throwable ignored) {}
+                }
+            }
         }
 
         if (imageProxy.getImage() != null) {
@@ -288,6 +286,12 @@ public class CameraActivity extends AppCompatActivity {
         if (faces.isEmpty()) {
             latestFace = null;
             scanProgress = Math.max(0f, scanProgress - 0.08f);
+            if (scanProgress <= 0.05f) {
+                lastHapticMilestone = 0;
+                synchronized (temporalFrames) {
+                    temporalFrames.clear();
+                }
+            }
             runOnUiThread(() -> {
                 Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(null, FaceMeshOverlayView.GuideState.SEARCHING, scanProgress, matrix, imageWidth, imageHeight);
@@ -313,7 +317,7 @@ public class CameraActivity extends AppCompatActivity {
 
         // 1. Luminance Quality Gate (Forgiving: 20 <= Y <= 245)
         if (luminance < 20f) {
-            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Lighting too dark — move to light", FaceMeshOverlayView.GuideState.MISALIGNED);
@@ -321,7 +325,7 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
         if (luminance > 245f) {
-            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Lighting too harsh — avoid direct glare", FaceMeshOverlayView.GuideState.MISALIGNED);
@@ -344,7 +348,7 @@ public class CameraActivity extends AppCompatActivity {
 
         // Size check against the oval (not the raw screen height)
         if (faceH < guideH * 0.60f) {
-            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Move slightly closer", FaceMeshOverlayView.GuideState.MISALIGNED);
@@ -352,7 +356,7 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
         if (faceH > guideH * 0.95f) {
-            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Move a little further back", FaceMeshOverlayView.GuideState.MISALIGNED);
@@ -362,7 +366,7 @@ public class CameraActivity extends AppCompatActivity {
 
         // Center position checks (providing directional feedback relative to the screen)
         if (faceCenterY < guideCenterY - toleranceY) {
-            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Move down", FaceMeshOverlayView.GuideState.MISALIGNED);
@@ -370,7 +374,7 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
         if (faceCenterY > guideCenterY + toleranceY) {
-            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Move up", FaceMeshOverlayView.GuideState.MISALIGNED);
@@ -378,7 +382,7 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
         if (faceCenterX < guideCenterX - toleranceX) {
-            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Move right", FaceMeshOverlayView.GuideState.MISALIGNED);
@@ -386,7 +390,7 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
         if (faceCenterX > guideCenterX + toleranceX) {
-            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Move left", FaceMeshOverlayView.GuideState.MISALIGNED);
@@ -397,7 +401,7 @@ public class CameraActivity extends AppCompatActivity {
         // 4. Face Contour Completeness Check
         FaceContour faceContour = face.getContour(FaceContour.FACE);
         if (faceContour == null || faceContour.getPoints() == null || faceContour.getPoints().size() < 20) {
-            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.MISALIGNED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Keep full face inside frame", FaceMeshOverlayView.GuideState.MISALIGNED);
@@ -411,7 +415,7 @@ public class CameraActivity extends AppCompatActivity {
         float roll = face.getHeadEulerAngleZ();  // Sideways ear-to-shoulder tilt
 
         if (Math.abs(yaw) > 30.0f) {
-            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Look straight at the camera", FaceMeshOverlayView.GuideState.TILTED);
@@ -419,7 +423,7 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
         if (Math.abs(pitch) > 30.0f) {
-            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Level your head", FaceMeshOverlayView.GuideState.TILTED);
@@ -427,7 +431,7 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
         if (Math.abs(roll) > 30.0f) {
-            scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+            applyScanDecay();
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.TILTED, scanProgress, matrix, imageWidth, imageHeight);
                 setInstruction("Keep head upright", FaceMeshOverlayView.GuideState.TILTED);
@@ -438,20 +442,62 @@ public class CameraActivity extends AppCompatActivity {
         // All quality & orientation checks passed! Face is ready for biometric capture
         scanProgress = Math.min(1.0f, scanProgress + SCAN_INCREMENT);
 
+        // Milestone haptic ticks for 20%, 40%, 60%, 80%, 100%
+        int percent = Math.round(scanProgress * 100f);
+        if (percent >= 20 && lastHapticMilestone < 20) {
+            lastHapticMilestone = 20;
+            triggerHapticFeedback(25);
+        } else if (percent >= 40 && lastHapticMilestone < 40) {
+            lastHapticMilestone = 40;
+            triggerHapticFeedback(25);
+        } else if (percent >= 60 && lastHapticMilestone < 60) {
+            lastHapticMilestone = 60;
+            triggerHapticFeedback(30);
+        } else if (percent >= 80 && lastHapticMilestone < 80) {
+            lastHapticMilestone = 80;
+            triggerHapticFeedback(35);
+        }
+
         if (scanProgress >= 1.0f) {
+            if (lastHapticMilestone < 100) {
+                lastHapticMilestone = 100;
+                triggerHapticFeedback(75);
+            }
             runOnUiThread(() -> {
                 faceMeshOverlay.updateState(faces, FaceMeshOverlayView.GuideState.SUCCESS, 1.0f, matrix, imageWidth, imageHeight);
-                setInstruction("Face aligned! Scanning...", FaceMeshOverlayView.GuideState.SUCCESS);
-                triggerHapticFeedback();
+                setInstruction("Biometric scan complete! Analyzing...", FaceMeshOverlayView.GuideState.SUCCESS);
                 captureAndProcessImage();
             });
         } else {
             final float currentProgress = scanProgress;
+            final String instructionText;
+            if (percent < 20) {
+                instructionText = "Aligning facial landmarks... (" + percent + "%)";
+            } else if (percent < 40) {
+                instructionText = "Scanning jawline & cheekbones (" + percent + "%)...";
+            } else if (percent < 60) {
+                instructionText = "Measuring facial proportions & symmetry (" + percent + "%)...";
+            } else if (percent < 80) {
+                instructionText = "Calibrating 3D face structure (" + percent + "%)...";
+            } else {
+                instructionText = "Optimizing multi-frame anthropometrics (" + percent + "%)...";
+            }
+
             runOnUiThread(() -> {
                 FaceMeshOverlayView.GuideState state = FaceMeshOverlayView.GuideState.ALIGNED;
                 faceMeshOverlay.updateState(faces, state, currentProgress, matrix, imageWidth, imageHeight);
-                setInstruction("Face centered — Hold still...", state);
+                setInstruction(instructionText, state);
             });
+        }
+    }
+
+    private void applyScanDecay() {
+        scanProgress = Math.max(0f, scanProgress - SCAN_DECAY);
+        if (scanProgress <= 0.05f) {
+            lastHapticMilestone = 0;
+            synchronized (temporalFrames) {
+                temporalFrames.clear();
+            }
         }
     }
 
@@ -483,12 +529,12 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    private void triggerHapticFeedback() {
+    private void triggerHapticFeedback(long durationMs) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                 if (vibrator != null && vibrator.hasVibrator()) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE));
+                    vibrator.vibrate(VibrationEffect.createOneShot(durationMs, VibrationEffect.DEFAULT_AMPLITUDE));
                 }
             } else if (viewFinder != null) {
                 viewFinder.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
@@ -500,17 +546,17 @@ public class CameraActivity extends AppCompatActivity {
         if (imageCapture == null || isCapturing) return;
 
         isCapturing = true;
+        int frameCount;
         synchronized (temporalFrames) {
-            temporalFrames.clear();
-            remainingTemporalSamples = TARGET_TEMPORAL_SAMPLES;
+            frameCount = temporalFrames.size();
         }
         if (layoutScanningIndicator != null) {
             layoutScanningIndicator.setVisibility(View.VISIBLE);
         }
         if (tvScanningStatus != null) {
-            tvScanningStatus.setText("Scanning face contours (1/" + TARGET_TEMPORAL_SAMPLES + " frames)...");
+            tvScanningStatus.setText("Biometric capture complete! Analyzing " + Math.max(frameCount, 1) + " frames...");
         }
-        tvInstruction.setText("Full face detected! Scanning...");
+        tvInstruction.setText("Biometric scan complete! Analyzing...");
         if (layoutInstructionPill != null) {
             layoutInstructionPill.setBackgroundResource(R.drawable.bg_instruction_pill_green);
         }
@@ -565,6 +611,10 @@ public class CameraActivity extends AppCompatActivity {
             public void onError(@NonNull ImageCaptureException exception) {
                 isCapturing = false;
                 scanProgress = 0f;
+                lastHapticMilestone = 0;
+                synchronized (temporalFrames) {
+                    temporalFrames.clear();
+                }
                 if (layoutScanningIndicator != null) {
                     layoutScanningIndicator.setVisibility(View.GONE);
                 }
@@ -574,22 +624,30 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void processFinalResult(String photoPath, String photoBase64, List<Bitmap> allFrames, Rect bounds) {
-        if (layoutScanningIndicator != null) {
-            layoutScanningIndicator.setVisibility(View.GONE);
-        }
+        cameraExecutor.execute(() -> {
+            TFLiteFaceDetector.FaceShapeResult result = tfliteDetector.processMultiFrame(allFrames, bounds);
 
-        TFLiteFaceDetector.FaceShapeResult result = tfliteDetector.processMultiFrame(allFrames, bounds);
-
-        // Recycle the intermediate preview frames to free native memory immediately
-        for (int i = 0; i < allFrames.size() - 1; i++) {
-            Bitmap bmp = allFrames.get(i);
-            if (bmp != null && !bmp.isRecycled()) {
-                bmp.recycle();
+            // Recycle intermediate preview frames to free native memory immediately
+            for (int i = 0; i < allFrames.size() - 1; i++) {
+                Bitmap bmp = allFrames.get(i);
+                if (bmp != null && !bmp.isRecycled()) {
+                    bmp.recycle();
+                }
             }
-        }
-        synchronized (temporalFrames) {
-            temporalFrames.clear();
-        }
+            synchronized (temporalFrames) {
+                temporalFrames.clear();
+            }
+
+            runOnUiThread(() -> {
+                if (layoutScanningIndicator != null) {
+                    layoutScanningIndicator.setVisibility(View.GONE);
+                }
+                finishWithScanResult(photoPath, photoBase64, result);
+            });
+        });
+    }
+
+    private void finishWithScanResult(String photoPath, String photoBase64, TFLiteFaceDetector.FaceShapeResult result) {
 
         AppState.getInstance().setLastImagePath(photoPath);
         AppState.getInstance().setLastDetectedShape(result.getShape());

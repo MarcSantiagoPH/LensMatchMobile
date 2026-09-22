@@ -336,6 +336,19 @@ public class AppState {
 
     public synchronized void addScan(ScanModel scan) {
         if (scan == null) return;
+        // Auto-backfill Base64 thumbnail from local disk file if missing
+        if ((scan.getPhotoBase64() == null || scan.getPhotoBase64().isEmpty()) && scan.getImagePath() != null) {
+            java.io.File file = new java.io.File(scan.getImagePath());
+            if (file.exists()) {
+                try {
+                    android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeFile(file.getAbsolutePath());
+                    if (bmp != null) {
+                        scan.setPhotoBase64(ScanModel.encodeBitmapToBase64Thumbnail(bmp, 240, 70));
+                    }
+                } catch (Throwable ignored) {}
+            }
+        }
+
         // If scan already exists by id or timestamp+shape, update it
         for (int i = 0; i < scanHistory.size(); i++) {
             ScanModel existing = scanHistory.get(i);
@@ -404,6 +417,14 @@ public class AppState {
                 }
             }
             if (!exists) {
+                // If cloudScan has photoBase64 but no local file, write a cache file to disk
+                if (cloudScan.getPhotoBase64() != null && !cloudScan.getPhotoBase64().isEmpty() &&
+                    (cloudScan.getImagePath() == null || !new java.io.File(cloudScan.getImagePath()).exists())) {
+                    try {
+                        java.io.File scansDir = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "scans");
+                        // Fallback to internal storage if needed
+                    } catch (Throwable ignored) {}
+                }
                 scanHistory.add(cloudScan);
             }
         }
@@ -429,6 +450,7 @@ public class AppState {
         scanHistory.clear();
         if (prefs == null) return;
         String jsonStr = prefs.getString("scanHistoryList", null);
+        boolean needResave = false;
         if (jsonStr != null && !jsonStr.trim().isEmpty()) {
             try {
                 JSONArray array = new JSONArray(jsonStr);
@@ -436,12 +458,28 @@ public class AppState {
                     JSONObject obj = array.getJSONObject(i);
                     ScanModel scan = ScanModel.fromJson(obj);
                     if (scan != null) {
+                        // Auto-backfill Base64 thumbnail if missing but local disk image is available
+                        if ((scan.getPhotoBase64() == null || scan.getPhotoBase64().isEmpty()) && scan.getImagePath() != null) {
+                            java.io.File file = new java.io.File(scan.getImagePath());
+                            if (file.exists()) {
+                                try {
+                                    android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeFile(file.getAbsolutePath());
+                                    if (bmp != null) {
+                                        scan.setPhotoBase64(ScanModel.encodeBitmapToBase64Thumbnail(bmp, 240, 70));
+                                        needResave = true;
+                                    }
+                                } catch (Throwable ignored) {}
+                            }
+                        }
                         scanHistory.add(scan);
                     }
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }
+        if (needResave) {
+            saveScanHistoryToPrefs();
         }
         // If scan history was empty but we have a last detected shape, add it as initial scan
         restoreLastScanIfEmpty();

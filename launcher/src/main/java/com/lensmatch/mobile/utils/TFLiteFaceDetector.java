@@ -186,11 +186,11 @@ public class TFLiteFaceDetector {
                     // Synergy bonus
                     combinedP = (0.50f * ruleP) + (0.50f * cnnP);
                 } else if (cnnAmbiguous) {
-                    // Trust geometry more if CNN is confused
-                    combinedP = (0.85f * ruleP) + (0.15f * cnnP);
+                    // Geometry holds slightly more weight if CNN is uncertain
+                    combinedP = (0.60f * ruleP) + (0.40f * cnnP);
                 } else {
-                    // Disagreement: Geometry holds slightly more weight as it is deterministic
-                    combinedP = (0.65f * ruleP) + (0.35f * cnnP);
+                    // Balanced fusion
+                    combinedP = (0.50f * ruleP) + (0.50f * cnnP);
                 }
                 combinedProbs.put(label, combinedP);
             }
@@ -204,11 +204,11 @@ public class TFLiteFaceDetector {
                 }
             }
 
-            // Determine top shapes
-            String primary = ruleResult.getPrimaryShape();
-            float primaryProb = combinedProbs.getOrDefault(primary, 0.5f);
-            String runnerUp = ruleResult.getRunnerUpShape();
-            float runnerUpProb = combinedProbs.getOrDefault(runnerUp, 0.2f);
+            // Determine top shapes from combined distribution
+            String primary = null;
+            float primaryProb = -1f;
+            String runnerUp = null;
+            float runnerUpProb = -1f;
 
             for (Map.Entry<String, Float> e : combinedProbs.entrySet()) {
                 if (e.getValue() > primaryProb) {
@@ -216,7 +216,7 @@ public class TFLiteFaceDetector {
                     runnerUpProb = primaryProb;
                     primary = e.getKey();
                     primaryProb = e.getValue();
-                } else if (!e.getKey().equals(primary) && e.getValue() > runnerUpProb) {
+                } else if (e.getValue() > runnerUpProb) {
                     runnerUp = e.getKey();
                     runnerUpProb = e.getValue();
                 }

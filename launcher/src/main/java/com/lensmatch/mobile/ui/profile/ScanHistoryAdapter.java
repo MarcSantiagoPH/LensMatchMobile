@@ -32,6 +32,8 @@ public class ScanHistoryAdapter extends RecyclerView.Adapter<ScanHistoryAdapter.
     private final List<ScanModel> scans;
     private final OnScanActionListener listener;
 
+    private static final androidx.collection.LruCache<String, Bitmap> BITMAP_CACHE = new androidx.collection.LruCache<>(30);
+
     public ScanHistoryAdapter(List<ScanModel> scans, OnScanActionListener listener) {
         this.scans = scans;
         this.listener = listener;
@@ -53,19 +55,65 @@ public class ScanHistoryAdapter extends RecyclerView.Adapter<ScanHistoryAdapter.
         holder.tvConfidence.setText(scan.getConfidencePercent() + "% Match");
         holder.tvStyles.setText(scan.getFormattedStylesSummary());
 
-        Bitmap bmp = null;
-        if (scan.getImagePath() != null && new File(scan.getImagePath()).exists()) {
-            try {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 4;
-                bmp = BitmapFactory.decodeFile(scan.getImagePath(), options);
-            } catch (Throwable ignored) {}
-        }
-        if (bmp == null && scan.getPhotoBase64() != null && !scan.getPhotoBase64().isEmpty()) {
-            try {
-                byte[] decoded = android.util.Base64.decode(scan.getPhotoBase64(), android.util.Base64.DEFAULT);
-                bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
-            } catch (Throwable ignored) {}
+        String cacheKey = (scan.getId() != null ? scan.getId() : "") + "_" + (scan.getTimestamp() != null ? scan.getTimestamp().getTime() : 0);
+        Bitmap bmp = BITMAP_CACHE.get(cacheKey);
+
+        if (bmp == null) {
+            // 1. Decode from persistent Base64 thumbnail
+            if (scan.getPhotoBase64() != null && !scan.getPhotoBase64().isEmpty()) {
+                try {
+                    byte[] decoded = android.util.Base64.decode(scan.getPhotoBase64(), android.util.Base64.DEFAULT);
+                    bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                } catch (Throwable ignored) {}
+            }
+
+            // 2. Decode from local file path if available
+            if (bmp == null && scan.getImagePath() != null && new File(scan.getImagePath()).exists()) {
+                try {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = 4;
+                    bmp = BitmapFactory.decodeFile(scan.getImagePath(), options);
+                    if (bmp != null && (scan.getPhotoBase64() == null || scan.getPhotoBase64().isEmpty())) {
+                        scan.setPhotoBase64(ScanModel.encodeBitmapToBase64Thumbnail(bmp, 240, 70));
+                    }
+                } catch (Throwable ignored) {}
+            }
+
+            // 3. Fallback: Search the local app files/scans directory for recent scan files
+            if (bmp == null) {
+                try {
+                    File scansDir = new File(holder.itemView.getContext().getFilesDir(), "scans");
+                    if (scansDir.exists()) {
+                        File[] files = scansDir.listFiles((dir, name) -> name.endsWith(".jpg"));
+                        if (files != null && files.length > 0) {
+                            // Find closest file by timestamp
+                            long targetTime = scan.getTimestamp() != null ? scan.getTimestamp().getTime() : System.currentTimeMillis();
+                            File closestFile = null;
+                            long minDiff = Long.MAX_VALUE;
+                            for (File f : files) {
+                                long diff = Math.abs(f.lastModified() - targetTime);
+                                if (diff < minDiff) {
+                                    minDiff = diff;
+                                    closestFile = f;
+                                }
+                            }
+                            if (closestFile != null && closestFile.exists()) {
+                                BitmapFactory.Options options = new BitmapFactory.Options();
+                                options.inSampleSize = 4;
+                                bmp = BitmapFactory.decodeFile(closestFile.getAbsolutePath(), options);
+                                if (bmp != null) {
+                                    scan.setImagePath(closestFile.getAbsolutePath());
+                                    scan.setPhotoBase64(ScanModel.encodeBitmapToBase64Thumbnail(bmp, 240, 70));
+                                }
+                            }
+                        }
+                    }
+                } catch (Throwable ignored) {}
+            }
+
+            if (bmp != null) {
+                BITMAP_CACHE.put(cacheKey, bmp);
+            }
         }
 
         if (bmp != null) {
