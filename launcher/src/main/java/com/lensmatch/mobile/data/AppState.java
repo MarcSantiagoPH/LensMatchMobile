@@ -286,35 +286,75 @@ public class AppState {
     public synchronized List<ScanModel> getScanHistory() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         List<ScanModel> filtered = new ArrayList<>();
-        if (user != null && user.getUid() != null) {
-            String currentUid = user.getUid();
-            for (ScanModel scan : scanHistory) {
-                if (scan != null && currentUid.equalsIgnoreCase(scan.getCustomerId())) {
-                    filtered.add(scan);
-                }
-            }
-        } else {
-            for (ScanModel scan : scanHistory) {
-                if (scan != null) {
-                    String cId = scan.getCustomerId();
-                    if (cId == null || cId.isEmpty() || "local".equalsIgnoreCase(cId) || "guest".equalsIgnoreCase(cId)) {
-                        filtered.add(scan);
+        String currentUid = user != null ? user.getUid() : null;
+        boolean modified = false;
+
+        for (ScanModel scan : scanHistory) {
+            if (scan == null) continue;
+            String cId = scan.getCustomerId();
+            if (currentUid != null) {
+                // Adopt any orphan/local/guest scans to the current authenticated user
+                if (cId == null || cId.isEmpty() || "local".equalsIgnoreCase(cId) || "guest".equalsIgnoreCase(cId)) {
+                    scan.setCustomerId(currentUid);
+                    if (scan.getCustomerName() == null || scan.getCustomerName().isEmpty() || "User".equals(scan.getCustomerName())) {
+                        scan.setCustomerName(userName);
                     }
+                    filtered.add(scan);
+                    modified = true;
+                } else if (currentUid.equalsIgnoreCase(cId)) {
+                    filtered.add(scan);
+                } else if (user.getEmail() != null && user.getEmail().equalsIgnoreCase(cId)) {
+                    scan.setCustomerId(currentUid);
+                    filtered.add(scan);
+                    modified = true;
                 }
+            } else {
+                // If unauthenticated, show all available local scans
+                filtered.add(scan);
             }
+        }
+        if (modified) {
+            saveScanHistoryToPrefs();
         }
         return filtered;
     }
 
-    public synchronized void addScan(ScanModel scan) {
-        if (scan == null) return;
-        // If scan already exists by id, update it
-        for (int i = 0; i < scanHistory.size(); i++) {
-            ScanModel existing = scanHistory.get(i);
-            if (scan.getId() != null && scan.getId().equals(existing.getId())) {
-                scanHistory.set(i, scan);
+    public synchronized List<ScanModel> getAllRawScans() {
+        return new ArrayList<>(scanHistory);
+    }
+
+    public synchronized void updateScanId(String oldId, String newId) {
+        if (oldId == null || newId == null) return;
+        for (ScanModel scan : scanHistory) {
+            if (scan != null && oldId.equals(scan.getId())) {
+                scan.setId(newId);
                 saveScanHistoryToPrefs();
                 return;
+            }
+        }
+    }
+
+    public synchronized void addScan(ScanModel scan) {
+        if (scan == null) return;
+        // If scan already exists by id or timestamp+shape, update it
+        for (int i = 0; i < scanHistory.size(); i++) {
+            ScanModel existing = scanHistory.get(i);
+            if (existing != null) {
+                if (scan.getId() != null && scan.getId().equals(existing.getId())) {
+                    scanHistory.set(i, scan);
+                    saveScanHistoryToPrefs();
+                    return;
+                }
+                if (scan.getTimestamp() != null && existing.getTimestamp() != null
+                        && Math.abs(scan.getTimestamp().getTime() - existing.getTimestamp().getTime()) < 5000
+                        && scan.getFaceShape().equalsIgnoreCase(existing.getFaceShape())) {
+                    if (existing.getId() != null && !existing.getId().startsWith("scan_")) {
+                        scan.setId(existing.getId());
+                    }
+                    scanHistory.set(i, scan);
+                    saveScanHistoryToPrefs();
+                    return;
+                }
             }
         }
         // Add new scan at top (newest first)
@@ -334,30 +374,31 @@ public class AppState {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String currentUid = user != null ? user.getUid() : null;
 
-        // Exclude local in-memory scans belonging to a different authenticated UID
-        if (currentUid != null) {
-            scanHistory.removeIf(s -> s != null && s.getCustomerId() != null
-                    && !s.getCustomerId().isEmpty()
-                    && !"local".equalsIgnoreCase(s.getCustomerId())
-                    && !"guest".equalsIgnoreCase(s.getCustomerId())
-                    && !currentUid.equalsIgnoreCase(s.getCustomerId()));
-        }
-
         for (ScanModel cloudScan : cloudScans) {
             if (cloudScan == null) continue;
             // Do not merge cloud scans belonging to another user
             if (currentUid != null && cloudScan.getCustomerId() != null
                     && !cloudScan.getCustomerId().isEmpty()
+                    && !"local".equalsIgnoreCase(cloudScan.getCustomerId())
+                    && !"guest".equalsIgnoreCase(cloudScan.getCustomerId())
                     && !currentUid.equalsIgnoreCase(cloudScan.getCustomerId())) {
                 continue;
             }
 
             boolean exists = false;
-            for (ScanModel local : scanHistory) {
+            for (int i = 0; i < scanHistory.size(); i++) {
+                ScanModel local = scanHistory.get(i);
                 if (local != null && ((cloudScan.getId() != null && cloudScan.getId().equals(local.getId())) ||
                     (cloudScan.getTimestamp() != null && local.getTimestamp() != null &&
                      Math.abs(cloudScan.getTimestamp().getTime() - local.getTimestamp().getTime()) < 5000 &&
-                     cloudScan.getFaceShape().equals(local.getFaceShape())))) {
+                     cloudScan.getFaceShape().equalsIgnoreCase(local.getFaceShape())))) {
+                    if (local.getImagePath() != null && new java.io.File(local.getImagePath()).exists()) {
+                        cloudScan.setImagePath(local.getImagePath());
+                    }
+                    if (cloudScan.getPhotoBase64() == null || cloudScan.getPhotoBase64().isEmpty()) {
+                        cloudScan.setPhotoBase64(local.getPhotoBase64());
+                    }
+                    scanHistory.set(i, cloudScan);
                     exists = true;
                     break;
                 }
@@ -381,7 +422,7 @@ public class AppState {
         for (ScanModel scan : scanHistory) {
             array.put(scan.toJson());
         }
-        prefs.edit().putString("scanHistoryList", array.toString()).apply();
+        prefs.edit().putString("scanHistoryList", array.toString()).commit();
     }
 
     private synchronized void loadScanHistoryFromPrefs() {
@@ -403,7 +444,17 @@ public class AppState {
             }
         }
         // If scan history was empty but we have a last detected shape, add it as initial scan
+        restoreLastScanIfEmpty();
+    }
+
+    public synchronized void restoreLastScanIfEmpty() {
         if (scanHistory.isEmpty() && lastDetectedShape != null && !lastDetectedShape.isEmpty() && !"Unknown".equalsIgnoreCase(lastDetectedShape)) {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            String cId = user != null ? user.getUid() : "local";
+            String cName = (userName != null && !userName.isEmpty() && !"John Doe".equals(userName))
+                    ? userName
+                    : (user != null && user.getDisplayName() != null && !user.getDisplayName().isEmpty() ? user.getDisplayName() : "Customer");
+
             FaceShapeDetector.ShapeRecommendation rec = FaceShapeDetector.getRecommendation(lastDetectedShape);
             List<String> recStyles = new ArrayList<>();
             List<String> avoidStyles = new ArrayList<>();
@@ -412,11 +463,11 @@ public class AppState {
                 if (rec.secondary != null) avoidStyles.addAll(rec.secondary);
             }
             ScanModel initialScan = new ScanModel(
-                    "scan_initial",
-                    "local",
-                    userName,
+                    "scan_initial_" + System.currentTimeMillis(),
+                    cId,
+                    cName,
                     lastDetectedShape,
-                    lastConfidence,
+                    lastConfidence > 0 ? lastConfidence : 0.94f,
                     lastIsBorderline,
                     lastRunnerUpShape,
                     lastNotes,
@@ -426,8 +477,14 @@ public class AppState {
                     "",
                     new Date()
             );
-            if (lastImagePath != null) {
+            if (lastImagePath != null && new java.io.File(lastImagePath).exists()) {
                 initialScan.setImagePath(lastImagePath);
+                try {
+                    android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeFile(lastImagePath);
+                    if (bmp != null) {
+                        initialScan.setPhotoBase64(ScanModel.encodeBitmapToBase64Thumbnail(bmp, 240, 70));
+                    }
+                } catch (Throwable ignored) {}
             }
             scanHistory.add(initialScan);
             saveScanHistoryToPrefs();

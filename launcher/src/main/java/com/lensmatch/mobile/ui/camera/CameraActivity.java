@@ -533,6 +533,8 @@ public class CameraActivity extends AppCompatActivity {
                 InputImage image = InputImage.fromBitmap(bitmap, 0);
                 final Bitmap finalBitmap = bitmap;
                 
+                final String photoBase64 = ScanModel.encodeBitmapToBase64Thumbnail(finalBitmap, 240, 70);
+
                 faceDetector.process(image)
                         .addOnSuccessListener(faces -> {
                             Rect bounds = faces.isEmpty() ? 
@@ -545,7 +547,7 @@ public class CameraActivity extends AppCompatActivity {
                             }
                             allFrames.add(finalBitmap); // Anchor high-res photo
 
-                            processFinalResult(photoFile.getAbsolutePath(), allFrames, bounds);
+                            processFinalResult(photoFile.getAbsolutePath(), photoBase64, allFrames, bounds);
                         })
                         .addOnFailureListener(e -> {
                             Rect bounds = new Rect(0, 0, finalBitmap.getWidth(), finalBitmap.getHeight());
@@ -555,7 +557,7 @@ public class CameraActivity extends AppCompatActivity {
                             }
                             allFrames.add(finalBitmap);
 
-                            processFinalResult(photoFile.getAbsolutePath(), allFrames, bounds);
+                            processFinalResult(photoFile.getAbsolutePath(), photoBase64, allFrames, bounds);
                         });
             }
 
@@ -571,7 +573,7 @@ public class CameraActivity extends AppCompatActivity {
         });
     }
 
-    private void processFinalResult(String photoPath, List<Bitmap> allFrames, Rect bounds) {
+    private void processFinalResult(String photoPath, String photoBase64, List<Bitmap> allFrames, Rect bounds) {
         if (layoutScanningIndicator != null) {
             layoutScanningIndicator.setVisibility(View.GONE);
         }
@@ -633,19 +635,20 @@ public class CameraActivity extends AppCompatActivity {
                 recReason,
                 avoidReason,
                 photoPath,
+                photoBase64,
                 new Date()
         );
 
         // ALWAYS SAVE TO LOCAL HISTORY IMMEDIATELY! EVERY SCAN ACCUMULATES ("SAVE AND SAVE SAVE SAVE")
         AppState.getInstance().addScan(scan);
 
+        final String finalScanId = scanId;
         FirestoreService.saveScanResult(scan, new FirestoreService.Callback<String>() {
             @Override
             public void onSuccess(String resultId) {
                 Log.d(TAG, "Scan record saved to Firebase Firestore: " + resultId);
                 if (resultId != null) {
-                    scan.setId(resultId);
-                    AppState.getInstance().addScan(scan);
+                    AppState.getInstance().updateScanId(finalScanId, resultId);
                 }
             }
 

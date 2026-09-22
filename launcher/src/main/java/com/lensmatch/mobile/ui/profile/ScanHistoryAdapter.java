@@ -53,22 +53,26 @@ public class ScanHistoryAdapter extends RecyclerView.Adapter<ScanHistoryAdapter.
         holder.tvConfidence.setText(scan.getConfidencePercent() + "% Match");
         holder.tvStyles.setText(scan.getFormattedStylesSummary());
 
+        Bitmap bmp = null;
         if (scan.getImagePath() != null && new File(scan.getImagePath()).exists()) {
             try {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inSampleSize = 4;
-                Bitmap bmp = BitmapFactory.decodeFile(scan.getImagePath(), options);
-                if (bmp != null) {
-                    holder.ivScanPhoto.setImageTintList(null);
-                    holder.ivScanPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                    holder.ivScanPhoto.setPadding(0, 0, 0, 0);
-                    holder.ivScanPhoto.setImageBitmap(bmp);
-                } else {
-                    showDefaultScanIcon(holder.ivScanPhoto);
-                }
-            } catch (Throwable t) {
-                showDefaultScanIcon(holder.ivScanPhoto);
-            }
+                bmp = BitmapFactory.decodeFile(scan.getImagePath(), options);
+            } catch (Throwable ignored) {}
+        }
+        if (bmp == null && scan.getPhotoBase64() != null && !scan.getPhotoBase64().isEmpty()) {
+            try {
+                byte[] decoded = android.util.Base64.decode(scan.getPhotoBase64(), android.util.Base64.DEFAULT);
+                bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+            } catch (Throwable ignored) {}
+        }
+
+        if (bmp != null) {
+            holder.ivScanPhoto.setImageTintList(null);
+            holder.ivScanPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            holder.ivScanPhoto.setPadding(0, 0, 0, 0);
+            holder.ivScanPhoto.setImageBitmap(bmp);
         } else {
             showDefaultScanIcon(holder.ivScanPhoto);
         }

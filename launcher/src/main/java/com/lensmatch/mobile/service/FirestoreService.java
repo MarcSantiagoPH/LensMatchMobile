@@ -460,19 +460,33 @@ public class FirestoreService {
 
     public static void saveScanResult(ScanModel scan, Callback<String> callback) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String customerId = user != null ? user.getUid() : "guest";
-        String customerName = user != null && user.getDisplayName() != null && !user.getDisplayName().isEmpty()
+        if (user == null || user.getUid() == null) {
+            if (callback != null) callback.onError("User is not signed in to Firebase");
+            return;
+        }
+
+        String customerId = user.getUid();
+        String customerName = user.getDisplayName() != null && !user.getDisplayName().isEmpty()
                 ? user.getDisplayName() : AppState.getInstance().getUserName();
+        String customerEmail = user.getEmail() != null ? user.getEmail() : "";
+
+        scan.setCustomerId(customerId);
+        scan.setCustomerName(customerName != null ? customerName : "Customer");
 
         Map<String, Object> map = scan.toMap();
         map.put("customerId", customerId);
-        map.put("customerName", customerName != null ? customerName : "Customer");
+        map.put("userId", customerId);
+        map.put("customerName", scan.getCustomerName());
+        if (!customerEmail.isEmpty()) {
+            map.put("customerEmail", customerEmail);
+        }
 
         getDb().collection(COLLECTION_SCAN_HISTORY)
                 .add(map)
                 .addOnSuccessListener(documentReference -> {
-                    scan.setId(documentReference.getId());
-                    if (callback != null) callback.onSuccess(documentReference.getId());
+                    String resultId = documentReference.getId();
+                    scan.setId(resultId);
+                    if (callback != null) callback.onSuccess(resultId);
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to save scan history: " + e.getMessage(), e);
@@ -482,28 +496,50 @@ public class FirestoreService {
 
     public static void getUserScanHistory(Callback<List<ScanModel>> callback) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String customerId = user != null ? user.getUid() : "guest";
+        if (user == null || user.getUid() == null) {
+            if (callback != null) callback.onSuccess(new ArrayList<>());
+            return;
+        }
 
+        final String customerId = user.getUid();
+        final String customerEmail = user.getEmail() != null ? user.getEmail().trim() : "";
+
+        // Query by authenticated customerId
         getDb().collection(COLLECTION_SCAN_HISTORY)
                 .whereEqualTo("customerId", customerId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<ScanModel> list = new ArrayList<>();
+                    Map<String, ScanModel> scanMap = new HashMap<>();
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
                         Map<String, Object> data = doc.getData();
                         if (data != null) {
-                            list.add(ScanModel.fromMap(data, doc.getId()));
+                            ScanModel sm = ScanModel.fromMap(data, doc.getId());
+                            scanMap.put(doc.getId(), sm);
                         }
                     }
 
-                    Collections.sort(list, (a, b) -> {
-                        if (a.getTimestamp() == null && b.getTimestamp() == null) return 0;
-                        if (a.getTimestamp() == null) return 1;
-                        if (b.getTimestamp() == null) return -1;
-                        return b.getTimestamp().compareTo(a.getTimestamp());
-                    });
-
-                    if (callback != null) callback.onSuccess(list);
+                    // If user has email, also check for any scans saved by email (legacy or multi-login)
+                    if (!customerEmail.isEmpty()) {
+                        getDb().collection(COLLECTION_SCAN_HISTORY)
+                                .whereEqualTo("customerEmail", customerEmail)
+                                .get()
+                                .addOnSuccessListener(emailSnapshots -> {
+                                    for (DocumentSnapshot doc : emailSnapshots) {
+                                        Map<String, Object> data = doc.getData();
+                                        if (data != null && !scanMap.containsKey(doc.getId())) {
+                                            ScanModel sm = ScanModel.fromMap(data, doc.getId());
+                                            scanMap.put(doc.getId(), sm);
+                                        }
+                                    }
+                                    deliverScanResults(scanMap, callback);
+                                })
+                                .addOnFailureListener(e -> {
+                                    // If email query fails (e.g. index/rules), return the customerId results
+                                    deliverScanResults(scanMap, callback);
+                                });
+                    } else {
+                        deliverScanResults(scanMap, callback);
+                    }
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error fetching user scan history: " + e.getMessage(), e);
@@ -511,8 +547,78 @@ public class FirestoreService {
                 });
     }
 
+    private static void deliverScanResults(Map<String, ScanModel> scanMap, Callback<List<ScanModel>> callback) {
+        List<ScanModel> list = new ArrayList<>(scanMap.values());
+        Collections.sort(list, (a, b) -> {
+            if (a.getTimestamp() == null && b.getTimestamp() == null) return 0;
+            if (a.getTimestamp() == null) return 1;
+            if (b.getTimestamp() == null) return -1;
+            return b.getTimestamp().compareTo(a.getTimestamp());
+        });
+        if (callback != null) callback.onSuccess(list);
+    }
+
+    public static void syncPendingScans(Callback<Integer> callback) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || user.getUid() == null) {
+            if (callback != null) callback.onSuccess(0);
+            return;
+        }
+
+        String uid = user.getUid();
+        List<ScanModel> allScans = AppState.getInstance().getAllRawScans();
+        List<ScanModel> pendingScans = new ArrayList<>();
+
+        for (ScanModel scan : allScans) {
+            if (scan == null) continue;
+            // Identify scans that have not yet been confirmed in Firestore
+            String id = scan.getId();
+            String cId = scan.getCustomerId();
+            if (id != null && (id.startsWith("scan_") || cId == null || cId.isEmpty() || "local".equalsIgnoreCase(cId) || "guest".equalsIgnoreCase(cId))) {
+                pendingScans.add(scan);
+            }
+        }
+
+        if (pendingScans.isEmpty()) {
+            if (callback != null) callback.onSuccess(0);
+            return;
+        }
+
+        final int total = pendingScans.size();
+        final java.util.concurrent.atomic.AtomicInteger completed = new java.util.concurrent.atomic.AtomicInteger(0);
+        final java.util.concurrent.atomic.AtomicInteger uploaded = new java.util.concurrent.atomic.AtomicInteger(0);
+
+        for (ScanModel scan : pendingScans) {
+            final String oldId = scan.getId();
+            scan.setCustomerId(uid);
+            if (scan.getCustomerName() == null || scan.getCustomerName().isEmpty() || "User".equals(scan.getCustomerName())) {
+                scan.setCustomerName(AppState.getInstance().getUserName());
+            }
+
+            saveScanResult(scan, new Callback<String>() {
+                @Override
+                public void onSuccess(String resultId) {
+                    if (resultId != null) {
+                        AppState.getInstance().updateScanId(oldId, resultId);
+                        uploaded.incrementAndGet();
+                    }
+                    if (completed.incrementAndGet() == total) {
+                        if (callback != null) callback.onSuccess(uploaded.get());
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    if (completed.incrementAndGet() == total) {
+                        if (callback != null) callback.onSuccess(uploaded.get());
+                    }
+                }
+            });
+        }
+    }
+
     public static void deleteScanHistoryItem(String scanId, Callback<Void> callback) {
-        if (scanId == null || scanId.trim().isEmpty()) {
+        if (scanId == null || scanId.trim().isEmpty() || scanId.startsWith("scan_")) {
             if (callback != null) callback.onSuccess(null);
             return;
         }

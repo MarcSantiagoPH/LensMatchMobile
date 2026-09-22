@@ -95,8 +95,9 @@ public class MainActivity extends AppCompatActivity {
 
         handleIncomingIntent(getIntent());
 
-        // Sync latest customer profile details from Firestore in background
+        // Sync latest customer profile details and any pending scan records from Firestore
         com.lensmatch.mobile.service.FirestoreService.loadCustomerProfile(null);
+        com.lensmatch.mobile.service.FirestoreService.syncPendingScans(null);
 
         fabCamera.setOnClickListener(v -> openCameraScan());
 

@@ -190,6 +190,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void handleLogin() {
+        com.lensmatch.mobile.service.FirestoreService.syncPendingScans(null);
         Intent intent = new Intent(this, com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

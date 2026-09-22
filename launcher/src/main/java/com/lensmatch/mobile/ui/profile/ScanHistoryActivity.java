@@ -112,6 +112,9 @@ public class ScanHistoryActivity extends AppCompatActivity {
     }
 
     private void loadScanHistory() {
+        // 0. Ensure any un-indexed previous scan in AppState is recovered
+        AppState.getInstance().restoreLastScanIfEmpty();
+
         // 1. Immediately load all local scans from persistent AppState
         List<ScanModel> localScans = AppState.getInstance().getScanHistory();
         scanList.clear();
@@ -119,7 +122,21 @@ public class ScanHistoryActivity extends AppCompatActivity {
         if (adapter != null) adapter.notifyDataSetChanged();
         updateUIState();
 
-        // 2. Sync with cloud in the background if possible
+        // 2. Sync any pending un-uploaded local scans to Firestore, then refresh from cloud
+        FirestoreService.syncPendingScans(new FirestoreService.Callback<Integer>() {
+            @Override
+            public void onSuccess(Integer count) {
+                fetchCloudScanHistory();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                fetchCloudScanHistory();
+            }
+        });
+    }
+
+    private void fetchCloudScanHistory() {
         FirestoreService.getUserScanHistory(new FirestoreService.Callback<List<ScanModel>>() {
             @Override
             public void onSuccess(List<ScanModel> result) {
@@ -166,9 +183,23 @@ public class ScanHistoryActivity extends AppCompatActivity {
         state.setLastIsBorderline(scan.isBorderline());
         state.setLastRunnerUpShape(scan.getRunnerUpShape());
         state.setLastNotes(scan.getNotes());
-        if (scan.getImagePath() != null) {
+
+        if (scan.getImagePath() != null && new java.io.File(scan.getImagePath()).exists()) {
             state.setLastImagePath(scan.getImagePath());
+        } else if (scan.getPhotoBase64() != null && !scan.getPhotoBase64().isEmpty()) {
+            try {
+                java.io.File scansDir = new java.io.File(getFilesDir(), "scans");
+                if (!scansDir.exists()) scansDir.mkdirs();
+                java.io.File restoredFile = new java.io.File(scansDir, "restored_scan_" + (scan.getId() != null ? scan.getId() : System.currentTimeMillis()) + ".jpg");
+                byte[] bytes = android.util.Base64.decode(scan.getPhotoBase64(), android.util.Base64.DEFAULT);
+                try (java.io.FileOutputStream fos = new java.io.FileOutputStream(restoredFile)) {
+                    fos.write(bytes);
+                }
+                scan.setImagePath(restoredFile.getAbsolutePath());
+                state.setLastImagePath(restoredFile.getAbsolutePath());
+            } catch (Exception ignored) {}
         }
+
         state.setLastActiveTab(R.id.nav_result);
 
         Toast.makeText(this, "Loaded " + scan.getFaceShape() + " recommendations", Toast.LENGTH_SHORT).show();
@@ -202,7 +233,7 @@ public class ScanHistoryActivity extends AppCompatActivity {
                     }
 
                     // Delete from Firestore if it has a remote ID
-                    if (scan.getId() != null && !scan.getId().startsWith("scan_local") && !scan.getId().startsWith("scan_initial")) {
+                    if (scan.getId() != null && !scan.getId().startsWith("scan_")) {
                         FirestoreService.deleteScanHistoryItem(scan.getId(), new FirestoreService.Callback<Void>() {
                             @Override
                             public void onSuccess(Void result) {

@@ -119,11 +119,16 @@ service cloud.firestore {
     // ==========================================
     match /SCAN_HISTORY/{scanId} {
       allow create: if request.auth != null
-        && request.resource.data.customerId == request.auth.uid;
+        && (
+          request.resource.data.customerId == request.auth.uid
+          || ('customerEmail' in request.resource.data && request.resource.data.customerEmail == request.auth.token.email)
+        );
 
       allow read, update, delete: if request.auth != null
         && (
           resource.data.customerId == request.auth.uid
+          || ('customerEmail' in resource.data && resource.data.customerEmail == request.auth.token.email)
+          || ('userId' in resource.data && resource.data.userId == request.auth.uid)
           || isStaff()
         );
     }

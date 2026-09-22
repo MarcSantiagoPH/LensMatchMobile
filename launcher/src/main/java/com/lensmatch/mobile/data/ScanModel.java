@@ -1,5 +1,8 @@
 package com.lensmatch.mobile.data;
 
+import android.graphics.Bitmap;
+import android.util.Base64;
+
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FieldValue;
 
@@ -7,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,6 +34,7 @@ public class ScanModel implements Serializable {
     private String recommendedReason;
     private String avoidedReason;
     private String imagePath;
+    private String photoBase64;
     private Date timestamp;
 
     public ScanModel() {
@@ -43,13 +48,21 @@ public class ScanModel implements Serializable {
                      List<String> recommendedStyles, List<String> avoidedStyles,
                      String recommendedReason, String avoidedReason, Date timestamp) {
         this(id, customerId, customerName, faceShape, confidence, isBorderline, runnerUpShape, notes,
-                recommendedStyles, avoidedStyles, recommendedReason, avoidedReason, null, timestamp);
+                recommendedStyles, avoidedStyles, recommendedReason, avoidedReason, null, null, timestamp);
     }
 
     public ScanModel(String id, String customerId, String customerName, String faceShape,
                      float confidence, boolean isBorderline, String runnerUpShape, String notes,
                      List<String> recommendedStyles, List<String> avoidedStyles,
                      String recommendedReason, String avoidedReason, String imagePath, Date timestamp) {
+        this(id, customerId, customerName, faceShape, confidence, isBorderline, runnerUpShape, notes,
+                recommendedStyles, avoidedStyles, recommendedReason, avoidedReason, imagePath, null, timestamp);
+    }
+
+    public ScanModel(String id, String customerId, String customerName, String faceShape,
+                     float confidence, boolean isBorderline, String runnerUpShape, String notes,
+                     List<String> recommendedStyles, List<String> avoidedStyles,
+                     String recommendedReason, String avoidedReason, String imagePath, String photoBase64, Date timestamp) {
         this.id = id;
         this.customerId = customerId;
         this.customerName = customerName;
@@ -63,6 +76,7 @@ public class ScanModel implements Serializable {
         this.recommendedReason = recommendedReason != null ? recommendedReason : "";
         this.avoidedReason = avoidedReason != null ? avoidedReason : "";
         this.imagePath = imagePath;
+        this.photoBase64 = photoBase64;
         this.timestamp = timestamp != null ? timestamp : new Date();
     }
 
@@ -70,9 +84,19 @@ public class ScanModel implements Serializable {
         if (data == null) return new ScanModel();
 
         String id = docId != null ? docId : (String) data.get("id");
-        String cId = data.containsKey("customerId") ? String.valueOf(data.get("customerId")) : "";
-        String cName = data.containsKey("customerName") ? String.valueOf(data.get("customerName")) : "";
-        String shape = data.containsKey("faceShape") ? String.valueOf(data.get("faceShape")) : "Unknown";
+        String cId = "";
+        if (data.containsKey("customerId") && data.get("customerId") != null) {
+            cId = String.valueOf(data.get("customerId"));
+        } else if (data.containsKey("userId") && data.get("userId") != null) {
+            cId = String.valueOf(data.get("userId"));
+        } else if (data.containsKey("uid") && data.get("uid") != null) {
+            cId = String.valueOf(data.get("uid"));
+        } else if (data.containsKey("customerEmail") && data.get("customerEmail") != null) {
+            cId = String.valueOf(data.get("customerEmail"));
+        }
+
+        String cName = data.containsKey("customerName") && data.get("customerName") != null ? String.valueOf(data.get("customerName")) : "";
+        String shape = data.containsKey("faceShape") && data.get("faceShape") != null ? String.valueOf(data.get("faceShape")) : "Unknown";
 
         float conf = 0.92f;
         if (data.containsKey("confidence")) {
@@ -123,8 +147,9 @@ public class ScanModel implements Serializable {
         }
 
         String imgPath = data.containsKey("imagePath") && data.get("imagePath") != null ? String.valueOf(data.get("imagePath")) : null;
+        String photoB64 = data.containsKey("photoBase64") && data.get("photoBase64") != null ? String.valueOf(data.get("photoBase64")) : null;
 
-        return new ScanModel(id, cId, cName, shape, conf, borderline, runnerUp, nts, recStyles, avStyles, recReason, avoidReason, imgPath, time);
+        return new ScanModel(id, cId, cName, shape, conf, borderline, runnerUp, nts, recStyles, avStyles, recReason, avoidReason, imgPath, photoB64, time);
     }
 
     public Map<String, Object> toMap() {
@@ -143,7 +168,14 @@ public class ScanModel implements Serializable {
         if (imagePath != null && !imagePath.isEmpty()) {
             map.put("imagePath", imagePath);
         }
-        map.put("timestamp", FieldValue.serverTimestamp());
+        if (photoBase64 != null && !photoBase64.isEmpty()) {
+            map.put("photoBase64", photoBase64);
+        }
+        if (timestamp != null) {
+            map.put("timestamp", new Timestamp(timestamp));
+        } else {
+            map.put("timestamp", FieldValue.serverTimestamp());
+        }
         return map;
     }
 
@@ -161,6 +193,7 @@ public class ScanModel implements Serializable {
             json.put("recommendedReason", recommendedReason != null ? recommendedReason : "");
             json.put("avoidedReason", avoidedReason != null ? avoidedReason : "");
             json.put("imagePath", imagePath != null ? imagePath : "");
+            json.put("photoBase64", photoBase64 != null ? photoBase64 : "");
             json.put("timestamp", timestamp != null ? timestamp.getTime() : System.currentTimeMillis());
 
             JSONArray recArr = new JSONArray();
@@ -194,6 +227,10 @@ public class ScanModel implements Serializable {
         scan.imagePath = json.optString("imagePath", null);
         if (scan.imagePath != null && scan.imagePath.isEmpty()) {
             scan.imagePath = null;
+        }
+        scan.photoBase64 = json.optString("photoBase64", null);
+        if (scan.photoBase64 != null && scan.photoBase64.isEmpty()) {
+            scan.photoBase64 = null;
         }
 
         long time = json.optLong("timestamp", System.currentTimeMillis());
@@ -266,5 +303,30 @@ public class ScanModel implements Serializable {
             if (i < recommendedStyles.size() - 1) sb.append(", ");
         }
         return sb.toString();
+    }
+
+    public String getPhotoBase64() { return photoBase64; }
+    public void setPhotoBase64(String photoBase64) { this.photoBase64 = photoBase64; }
+
+    public static String encodeBitmapToBase64Thumbnail(Bitmap source, int maxDimension, int quality) {
+        if (source == null) return null;
+        try {
+            int width = source.getWidth();
+            int height = source.getHeight();
+            float scale = Math.min((float) maxDimension / width, (float) maxDimension / height);
+            if (scale > 1.0f) scale = 1.0f;
+            int scaledWidth = Math.max(1, Math.round(width * scale));
+            int scaledHeight = Math.max(1, Math.round(height * scale));
+            Bitmap scaled = Bitmap.createScaledBitmap(source, scaledWidth, scaledHeight, true);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            scaled.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+            if (scaled != source && !scaled.isRecycled()) {
+                scaled.recycle();
+            }
+            byte[] byteArray = baos.toByteArray();
+            return Base64.encodeToString(byteArray, Base64.NO_WRAP);
+        } catch (Throwable t) {
+            return null;
+        }
     }
 }
