@@ -9,6 +9,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -37,6 +38,7 @@ public class FrameCatalogFragment extends Fragment {
     private ProgressBar progressCatalog;
     private TextView tvEmptyCatalog;
     private ChipGroup chipGroupFilter;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh;
 
     private LinearLayout layoutTitleRow;
     private LinearLayout layoutSearchRow;
@@ -49,6 +51,7 @@ public class FrameCatalogFragment extends Fragment {
     private String selectedStyle = "All";
     private String searchQuery = "";
     private int selectedSortIndex = 0;
+    private boolean isSyncingChips = false;
     private final String[] sortOptions = {
             "Default",
             "New Arrivals First",
@@ -66,6 +69,15 @@ public class FrameCatalogFragment extends Fragment {
         progressCatalog = root.findViewById(R.id.progress_catalog);
         tvEmptyCatalog = root.findViewById(R.id.tv_empty_catalog);
         chipGroupFilter = root.findViewById(R.id.chip_group_style_filter);
+        swipeRefresh = root.findViewById(R.id.swipe_refresh_catalog);
+
+        if (swipeRefresh != null) {
+            swipeRefresh.setColorSchemeColors(
+                    androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange),
+                    androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange_dark)
+            );
+            swipeRefresh.setOnRefreshListener(this::loadCatalogFrames);
+        }
 
         layoutTitleRow = root.findViewById(R.id.layout_title_row);
         layoutSearchRow = root.findViewById(R.id.layout_search_row);
@@ -81,16 +93,18 @@ public class FrameCatalogFragment extends Fragment {
         rvFrames.setLayoutManager(new GridLayoutManager(requireContext(), 2));
 
         chipGroupFilter.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (isSyncingChips) return;
             if (!checkedIds.isEmpty()) {
                 Chip chip = group.findViewById(checkedIds.get(0));
-                if (chip != null) {
-                    selectedStyle = chip.getText().toString();
+                if (chip != null && chip.getText() != null) {
+                    selectedStyle = chip.getText().toString().trim();
                 } else {
                     selectedStyle = "All";
                 }
             } else {
                 selectedStyle = "All";
             }
+            com.lensmatch.mobile.data.AppState.getInstance().setPendingCatalogStyle(selectedStyle);
             updateChipStyles();
             applyLocalFilters();
         });
@@ -129,6 +143,11 @@ public class FrameCatalogFragment extends Fragment {
             });
         }
 
+        String pending = com.lensmatch.mobile.data.AppState.getInstance().getPendingCatalogStyle();
+        if (pending != null && !pending.trim().isEmpty()) {
+            selectedStyle = pending.trim();
+        }
+
         syncChipWithSelectedStyle();
         updateChipStyles();
         loadCatalogFrames();
@@ -138,12 +157,21 @@ public class FrameCatalogFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        String pending = com.lensmatch.mobile.data.AppState.getInstance().getPendingCatalogStyle();
+        if (pending != null && !pending.trim().isEmpty()) {
+            this.selectedStyle = pending.trim();
+            if (chipGroupFilter != null) {
+                syncChipWithSelectedStyle();
+                updateChipStyles();
+            }
+        }
         loadCatalogFrames();
     }
 
     public void setInitialStyle(String style) {
         if (style == null || style.trim().isEmpty()) return;
         this.selectedStyle = style.trim();
+        com.lensmatch.mobile.data.AppState.getInstance().setPendingCatalogStyle(this.selectedStyle);
         if (chipGroupFilter != null && rvFrames != null) {
             syncChipWithSelectedStyle();
             updateChipStyles();
@@ -152,25 +180,52 @@ public class FrameCatalogFragment extends Fragment {
     }
 
     private void syncChipWithSelectedStyle() {
-        if (chipGroupFilter == null || selectedStyle == null || selectedStyle.trim().isEmpty()) return;
+        if (chipGroupFilter == null) return;
+        String targetStyle = (selectedStyle == null || selectedStyle.trim().isEmpty()) ? "All" : selectedStyle.trim();
+        int targetChipId = R.id.chip_filter_all;
+
         for (int i = 0; i < chipGroupFilter.getChildCount(); i++) {
             View child = chipGroupFilter.getChildAt(i);
             if (child instanceof Chip chip) {
-                if (chip.getText() != null && chip.getText().toString().equalsIgnoreCase(this.selectedStyle.trim())) {
-                    chip.setChecked(true);
+                if (chip.getText() != null && chip.getText().toString().trim().equalsIgnoreCase(targetStyle)) {
+                    targetChipId = chip.getId();
+                    this.selectedStyle = chip.getText().toString().trim();
                     break;
                 }
             }
         }
+
+        isSyncingChips = true;
+        try {
+            chipGroupFilter.clearCheck();
+            chipGroupFilter.check(targetChipId);
+        } finally {
+            isSyncingChips = false;
+        }
+
+        final int finalTargetId = targetChipId;
+        chipGroupFilter.post(() -> {
+            View selectedChip = chipGroupFilter.findViewById(finalTargetId);
+            if (selectedChip != null && chipGroupFilter.getParent() instanceof HorizontalScrollView hsv) {
+                int scrollX = selectedChip.getLeft() - (hsv.getWidth() / 4);
+                hsv.smoothScrollTo(Math.max(0, scrollX), 0);
+            }
+        });
     }
 
     private void updateChipStyles() {
         if (chipGroupFilter == null || getContext() == null) return;
         int activeCheckedId = chipGroupFilter.getCheckedChipId();
         if (activeCheckedId == View.NO_ID) {
-            Chip allChip = chipGroupFilter.findViewById(R.id.chip_filter_all);
-            if (allChip != null) {
-                allChip.setChecked(true);
+            for (int i = 0; i < chipGroupFilter.getChildCount(); i++) {
+                View child = chipGroupFilter.getChildAt(i);
+                if (child instanceof Chip chip && chip.getText() != null &&
+                        chip.getText().toString().trim().equalsIgnoreCase(selectedStyle)) {
+                    activeCheckedId = chip.getId();
+                    break;
+                }
+            }
+            if (activeCheckedId == View.NO_ID) {
                 activeCheckedId = R.id.chip_filter_all;
             }
         }
@@ -216,12 +271,15 @@ public class FrameCatalogFragment extends Fragment {
     }
 
     private void loadCatalogFrames() {
-        if (progressCatalog != null) progressCatalog.setVisibility(View.VISIBLE);
+        if (swipeRefresh == null || !swipeRefresh.isRefreshing()) {
+            if (progressCatalog != null) progressCatalog.setVisibility(View.VISIBLE);
+        }
         if (tvEmptyCatalog != null) tvEmptyCatalog.setVisibility(View.GONE);
 
         FirestoreService.getFrames(new FirestoreService.Callback<List<FrameModel>>() {
             @Override
             public void onSuccess(List<FrameModel> frames) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
                 if (!isAdded() || getContext() == null) return;
                 if (progressCatalog != null) progressCatalog.setVisibility(View.GONE);
 
@@ -234,6 +292,7 @@ public class FrameCatalogFragment extends Fragment {
 
             @Override
             public void onError(String errorMessage) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
                 if (!isAdded() || getContext() == null) return;
                 if (progressCatalog != null) progressCatalog.setVisibility(View.GONE);
 
@@ -249,6 +308,13 @@ public class FrameCatalogFragment extends Fragment {
         });
     }
 
+    private boolean matchesStyle(String frameStyle, String targetStyle) {
+        if (frameStyle == null || targetStyle == null) return false;
+        String f = frameStyle.trim().toLowerCase().replace("-", "").replace(" ", "");
+        String t = targetStyle.trim().toLowerCase().replace("-", "").replace(" ", "");
+        return f.equals(t) || f.contains(t) || t.contains(f);
+    }
+
     private void applyLocalFilters() {
         List<FrameModel> filtered = new ArrayList<>();
         String q = searchQuery != null ? searchQuery.trim().toLowerCase() : "";
@@ -257,7 +323,7 @@ public class FrameCatalogFragment extends Fragment {
             boolean styleMatches = false;
             if ("All".equalsIgnoreCase(selectedStyle) || selectedStyle == null || selectedStyle.trim().isEmpty()) {
                 styleMatches = true;
-            } else if (frame.getFrameStyle() != null && frame.getFrameStyle().equalsIgnoreCase(selectedStyle.trim())) {
+            } else if (matchesStyle(frame.getFrameStyle(), selectedStyle)) {
                 styleMatches = true;
             }
 

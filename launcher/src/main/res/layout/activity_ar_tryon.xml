@@ -83,7 +83,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Recommended"
-                    android:textColor="@color/accentGold"
+                    android:textColor="@color/primary_orange"
                     android:textSize="15sp"
                     android:textStyle="bold" />
 
@@ -92,7 +92,7 @@
                     android:layout_width="100dp"
                     android:layout_height="3dp"
                     android:layout_marginTop="4dp"
-                    android:background="@color/accentGold" />
+                    android:background="@color/primary_orange" />
             </LinearLayout>
 
             <LinearLayout

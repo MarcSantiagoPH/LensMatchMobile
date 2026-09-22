@@ -1,10 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/scan_history_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/surface_white"
+    android:background="@color/primary_orange_dark"
     android:orientation="vertical">
 
     <!-- Top Toolbar -->
@@ -12,16 +12,17 @@
         android:id="@+id/toolbar_scan_history"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/surface_white"
+        android:background="@color/primary_orange_dark"
         app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="@color/text_primary"
+        app:navigationIconTint="@color/surface_white"
         app:title="Scan History"
-        app:titleTextColor="@color/text_primary" />
+        app:titleTextColor="@color/surface_white" />
 
     <!-- Subtitle summary header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/surface_white"
         android:paddingHorizontal="20dp"
         android:paddingTop="14dp"
         android:paddingBottom="6dp"
@@ -49,86 +50,96 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <FrameLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_scan_history"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:background="@color/surface_white">
 
-        <!-- Progress Loading -->
-        <ProgressBar
-            android:id="@+id/progress_scan_history"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminateTint="@color/primary_orange"
-            android:visibility="visible" />
-
-        <!-- RecyclerView for multiple scans -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_scan_history"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingTop="4dp"
-            android:paddingBottom="16dp"
-            android:visibility="gone" />
+            android:layout_height="match_parent">
 
-        <!-- Empty State -->
-        <LinearLayout
-            android:id="@+id/layout_empty_scan_history"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:paddingHorizontal="32dp"
-            android:visibility="gone">
-
-            <FrameLayout
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:background="@drawable/bg_avatar_circle"
-                android:layout_marginBottom="16dp">
-
-                <ImageView
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_scan"
-                    app:tint="@color/secondary_teal" />
-            </FrameLayout>
-
-            <TextView
+            <!-- Progress Loading -->
+            <ProgressBar
+                android:id="@+id/progress_scan_history"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No Scan History Yet"
-                android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="6dp" />
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/primary_orange"
+                android:visibility="visible" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <!-- RecyclerView for multiple scans -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_scan_history"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingTop="4dp"
+                android:paddingBottom="16dp"
+                android:visibility="gone" />
+
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/layout_empty_scan_history"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:gravity="center"
-                android:text="Scan your face with our AI analyzer to get personalized frame recommendations. All scans will be securely saved here."
-                android:textColor="#777777"
-                android:textSize="13sp"
-                android:lineSpacingExtra="2dp"
-                android:layout_marginBottom="24dp" />
+                android:orientation="vertical"
+                android:paddingHorizontal="32dp"
+                android:visibility="gone">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_empty_start_scan"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:text="ðŸ“·   START AI FACE SCAN"
-                android:textColor="@color/surface_white"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                app:backgroundTint="@color/primary_orange"
-                app:cornerRadius="12dp"
-                android:paddingHorizontal="24dp" />
-        </LinearLayout>
-    </FrameLayout>
+                <FrameLayout
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:background="@drawable/bg_avatar_circle"
+                    android:layout_marginBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_scan"
+                        app:tint="@color/secondary_teal" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No Scan History Yet"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Scan your face with our AI analyzer to get personalized frame recommendations. All scans will be securely saved here."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="2dp"
+                    android:layout_marginBottom="24dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_empty_start_scan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:text="START AI FACE SCAN"
+                    android:textColor="@color/surface_white"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    app:icon="@drawable/ic_camera"
+                    app:iconTint="@color/surface_white"
+                    app:iconGravity="textStart"
+                    app:backgroundTint="@color/primary_orange"
+                    app:cornerRadius="12dp"
+                    android:paddingHorizontal="24dp" />
+            </LinearLayout>
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <!-- Bottom Sticky Button to take new scan -->
     <LinearLayout
@@ -144,11 +155,14 @@
             android:id="@+id/btn_scan_again"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:text="ðŸ“·   TAKE NEW FACE SCAN"
+            android:text="TAKE NEW FACE SCAN"
             android:textColor="@color/surface_white"
             android:textSize="13sp"
             android:textStyle="bold"
             android:letterSpacing="0.04"
+            app:icon="@drawable/ic_camera"
+            app:iconTint="@color/surface_white"
+            app:iconGravity="textStart"
             app:backgroundTint="@color/primary_orange"
             app:cornerRadius="12dp"
             app:elevation="2dp" />

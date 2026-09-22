@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -33,12 +34,12 @@ public class ReservationDetailActivity extends AppCompatActivity {
             StatusBarUtils.applyWindowInsets(root);
         }
 
-        getWindow().setStatusBarColor(android.graphics.Color.WHITE);
+        getWindow().setStatusBarColor(androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange_dark));
         getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
         androidx.core.view.WindowInsetsControllerCompat insetsController =
                 androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         if (insetsController != null) {
-            insetsController.setAppearanceLightStatusBars(true);
+            insetsController.setAppearanceLightStatusBars(false);
             insetsController.setAppearanceLightNavigationBars(true);
         }
 
@@ -97,7 +98,7 @@ public class ReservationDetailActivity extends AppCompatActivity {
                 tvStatus.setTextColor(Color.parseColor("#2196F3"));
                 tvStatusMessage.setText("Your reservation has been completed. Thank you for choosing Franselle Optical Clinic!");
             } else { // Pending
-                tvStatus.setTextColor(getColor(R.color.accentGold));
+                tvStatus.setTextColor(ContextCompat.getColor(this, R.color.primary_orange));
                 tvStatusMessage.setText("Your reservation request has been received.\n\nOur staff is currently reviewing your request. We'll update the status once the review is complete.");
             }
 

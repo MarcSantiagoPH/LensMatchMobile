@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Brand Colors -->
-    <color name="brandOrange">#FF8C00</color>
+    <color name="brandOrange">#F4A261</color>
     <color name="brandOrangeDark">#E07000</color>
     <color name="brandOrangeLight">#FFB347</color>
-    <color name="brandBlue">#FF8C00</color>
+    <color name="brandBlue">#F4A261</color>
     <color name="brandBlueDark">#E07000</color>
     <color name="brandBlueLight">#FFB347</color>
 
@@ -17,50 +17,50 @@
 
     <!-- Two-Tone Bottom Navigation Bar & FAB (Night) -->
     <color name="bottomBarBackground">#1A0A00</color>
-    <color name="bottomNavIconActive">#FF8C00</color>
+    <color name="bottomNavIconActive">#F4A261</color>
     <color name="bottomNavIconInactive">#9E6020</color>
-    <color name="fabBackground">#FF8C00</color>
+    <color name="fabBackground">#F4A261</color>
     <color name="fabIconTint">#1A0A00</color>
 
     <!-- Standout Hero Cards & Banners (Night) -->
     <color name="heroCardBg">#2B1500</color>
-    <color name="heroCardStroke">#FF8C00</color>
+    <color name="heroCardStroke">#F4A261</color>
     <color name="heroCardTitle">#FFFFFF</color>
     <color name="heroCardSubtitle">#FFCC88</color>
-    <color name="heroCardBtnBg">#FF8C00</color>
+    <color name="heroCardBtnBg">#F4A261</color>
     <color name="heroCardBtnText">#FFFFFF</color>
 
     <!-- Avatar & Icon Circle Container (Night) -->
     <color name="avatarBg">#3D2200</color>
-    <color name="avatarStroke">#FF8C00</color>
-    <color name="avatarIconTint">#FF8C00</color>
+    <color name="avatarStroke">#F4A261</color>
+    <color name="avatarIconTint">#F4A261</color>
 
     <!-- Logo Card Surface (Night) -->
     <color name="logoCardBg">#1A0A00</color>
-    <color name="logoCardStroke">#FF8C00</color>
+    <color name="logoCardStroke">#F4A261</color>
 
     <!-- Category Filter Chips (Night) -->
-    <color name="chipSelectedBg">#FF8C00</color>
+    <color name="chipSelectedBg">#F4A261</color>
     <color name="chipSelectedText">#FFFFFF</color>
     <color name="chipUnselectedBg">#2B1500</color>
     <color name="chipUnselectedText">#FFCC88</color>
-    <color name="chipStrokeSelected">#FF8C00</color>
+    <color name="chipStrokeSelected">#F4A261</color>
     <color name="chipStrokeUnselected">#5C3300</color>
 
     <!-- Badges & Chips (Night) -->
     <color name="badgeBg">#3D2200</color>
-    <color name="badgeText">#FF8C00</color>
+    <color name="badgeText">#F4A261</color>
 
     <!-- Typography (Night) -->
     <color name="textPrimary">#FFFFFF</color>
     <color name="textSecondary">#FFCC88</color>
-    <color name="textBrand">#FF8C00</color>
-    <color name="toolbarIconTint">#FF8C00</color>
+    <color name="textBrand">#F4A261</color>
+    <color name="toolbarIconTint">#F4A261</color>
 
     <!-- Brand Accent Aliases -->
-    <color name="accentGold">#FF8C00</color>
-    <color name="accentOrange">#FF8C00</color>
-    <color name="accentBlue">#FF8C00</color>
+    <color name="accentGold">#F4A261</color>
+    <color name="accentOrange">#F4A261</color>
+    <color name="accentBlue">#F4A261</color>
 
     <!-- Utility Colors -->
     <color name="black">#000000</color>
@@ -76,10 +76,10 @@
 
     <!-- AR Try-On Dynamic Theming (Night) -->
     <color name="arBtnContinueBg">#CC1A0A00</color>
-    <color name="arBtnContinueStroke">#FF8C00</color>
-    <color name="arBtnContinueText">#FF8C00</color>
+    <color name="arBtnContinueStroke">#F4A261</color>
+    <color name="arBtnContinueText">#F4A261</color>
     <color name="arBackBtnBg">#801A0A00</color>
-    <color name="arBackBtnStroke">#33FF8C00</color>
+    <color name="arBackBtnStroke">#33F4A261</color>
     <color name="arBottomGradientCenter">#CC1A0A00</color>
     <color name="arBottomGradientEnd">#FA1A0A00</color>
     <color name="arCircleUnselectedBg">#802B1500</color>

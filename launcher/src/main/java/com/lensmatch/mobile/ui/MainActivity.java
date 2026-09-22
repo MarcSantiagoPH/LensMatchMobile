@@ -95,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
 
         handleIncomingIntent(getIntent());
 
+        // Sync latest customer profile details from Firestore in background
+        com.lensmatch.mobile.service.FirestoreService.loadCustomerProfile(null);
+
         fabCamera.setOnClickListener(v -> openCameraScan());
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -119,8 +122,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleIncomingIntent(Intent intent) {
         if (intent == null) return;
+        String style = null;
         if (intent.hasExtra("selectedStyle")) {
-            String style = intent.getStringExtra("selectedStyle");
+            style = intent.getStringExtra("selectedStyle");
+        }
+        if (style == null || style.trim().isEmpty()) {
+            style = AppState.getInstance().getPendingCatalogStyle();
+        }
+        if (style != null && !style.trim().isEmpty()) {
+            AppState.getInstance().setPendingCatalogStyle(style);
             if (catalogFragment instanceof FrameCatalogFragment) {
                 ((FrameCatalogFragment) catalogFragment).setInitialStyle(style);
             }
@@ -203,6 +213,13 @@ public class MainActivity extends AppCompatActivity {
 
         if (tabId == R.id.nav_result) {
             resultFragment.updateUI();
+        } else if (tabId == R.id.nav_frame) {
+            String pending = AppState.getInstance().getPendingCatalogStyle();
+            if (pending != null && !pending.trim().isEmpty()) {
+                if (catalogFragment instanceof FrameCatalogFragment) {
+                    ((FrameCatalogFragment) catalogFragment).setInitialStyle(pending);
+                }
+            }
         }
     }
 
@@ -219,25 +236,14 @@ public class MainActivity extends AppCompatActivity {
         androidx.core.view.WindowInsetsControllerCompat controller = 
                 androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         int orangeColor = androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange_dark);
-        int whiteColor = android.graphics.Color.WHITE;
 
         getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        if (tabId == R.id.nav_home || tabId == R.id.nav_profile) {
-            getWindow().setStatusBarColor(orangeColor);
-            if (coordinator != null) {
-                coordinator.setBackgroundColor(orangeColor);
-            }
-            if (controller != null) {
-                controller.setAppearanceLightStatusBars(false);
-            }
-        } else {
-            getWindow().setStatusBarColor(whiteColor);
-            if (coordinator != null) {
-                coordinator.setBackgroundColor(whiteColor);
-            }
-            if (controller != null) {
-                controller.setAppearanceLightStatusBars(true);
-            }
+        getWindow().setStatusBarColor(orangeColor);
+        if (coordinator != null) {
+            coordinator.setBackgroundColor(orangeColor);
+        }
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(false);
         }
     }
 }

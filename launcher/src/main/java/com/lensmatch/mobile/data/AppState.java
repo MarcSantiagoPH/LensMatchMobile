@@ -29,6 +29,7 @@ public class AppState {
     private String lastRunnerUpShape = "Round";
     private String lastNotes = null;
     private int lastActiveTab = 0;
+    private String pendingCatalogStyle = null;
 
     private String userName = "John Doe";
     private String userEmail = "johndoe@example.com";
@@ -39,6 +40,7 @@ public class AppState {
     private String themeMode = "dark";
     private boolean hasAcceptedEula = false;
     private long eulaAcceptanceTimestamp = 0;
+    private boolean hasSeenGuidelines = false;
 
     private AppState() {}
 
@@ -59,6 +61,7 @@ public class AppState {
         state.lastRunnerUpShape = prefs.getString("lastRunnerUpShape", "Round");
         state.lastNotes = prefs.getString("lastNotes", null);
         state.lastActiveTab = prefs.getInt("lastActiveTab", 0);
+        state.pendingCatalogStyle = prefs.getString("pendingCatalogStyle", null);
         state.userName = prefs.getString("userName", "John Doe");
         state.userEmail = prefs.getString("userEmail", "johndoe@example.com");
         state.userPhone = prefs.getString("userPhone", "");
@@ -68,6 +71,7 @@ public class AppState {
         state.themeMode = prefs.getString("themeMode", "dark");
         state.hasAcceptedEula = prefs.getBoolean("hasAcceptedEula", false);
         state.eulaAcceptanceTimestamp = prefs.getLong("eulaAcceptanceTimestamp", 0);
+        state.hasSeenGuidelines = prefs.getBoolean("hasSeenGuidelines", false);
         state.applyThemeMode();
         state.loadScanHistoryFromPrefs();
     }
@@ -99,6 +103,32 @@ public class AppState {
                 .putBoolean("hasAcceptedEula", this.hasAcceptedEula)
                 .putLong("eulaAcceptanceTimestamp", this.eulaAcceptanceTimestamp)
                 .apply();
+        }
+    }
+
+    public boolean hasSeenGuidelines() { return hasSeenGuidelines; }
+
+    public void setHasSeenGuidelines(boolean seen) {
+        this.hasSeenGuidelines = seen;
+        if (prefs != null) {
+            prefs.edit()
+                .putBoolean("hasSeenGuidelines", this.hasSeenGuidelines)
+                .apply();
+        }
+    }
+
+    public String getPendingCatalogStyle() {
+        return pendingCatalogStyle;
+    }
+
+    public void setPendingCatalogStyle(String style) {
+        this.pendingCatalogStyle = style;
+        if (prefs != null) {
+            if (style != null) {
+                prefs.edit().putString("pendingCatalogStyle", style).apply();
+            } else {
+                prefs.edit().remove("pendingCatalogStyle").apply();
+            }
         }
     }
 
@@ -230,6 +260,7 @@ public class AppState {
 
     public void logout() {
         this.isLoggedIn = false;
+        this.hasSeenGuidelines = false;
         this.userName = "John Doe";
         this.userEmail = "johndoe@example.com";
         this.userPhone = "";
@@ -240,6 +271,7 @@ public class AppState {
         if (prefs != null) {
             prefs.edit()
                     .putBoolean("isLoggedIn", false)
+                    .putBoolean("hasSeenGuidelines", false)
                     .remove("userName")
                     .remove("userEmail")
                     .remove("userPhone")

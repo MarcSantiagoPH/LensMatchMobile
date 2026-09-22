@@ -48,6 +48,7 @@ public class AccountDetailsActivity extends AppCompatActivity {
     private TextInputEditText etNewPassword;
     private TextInputEditText etConfirmPassword;
     private MaterialButton btnLinkPassword;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,12 +58,12 @@ public class AccountDetailsActivity extends AppCompatActivity {
         View root = findViewById(R.id.account_details_root);
         StatusBarUtils.applyWindowInsets(root);
 
-        getWindow().setStatusBarColor(android.graphics.Color.WHITE);
+        getWindow().setStatusBarColor(androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange_dark));
         getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
         androidx.core.view.WindowInsetsControllerCompat insetsController =
                 androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         if (insetsController != null) {
-            insetsController.setAppearanceLightStatusBars(true);
+            insetsController.setAppearanceLightStatusBars(false);
             insetsController.setAppearanceLightNavigationBars(true);
         }
 
@@ -92,6 +93,18 @@ public class AccountDetailsActivity extends AppCompatActivity {
         etConfirmPassword = findViewById(R.id.et_account_confirm_password);
         btnLinkPassword = findViewById(R.id.btn_link_password);
 
+        swipeRefresh = findViewById(R.id.swipe_refresh_account_details);
+        if (swipeRefresh != null) {
+            swipeRefresh.setColorSchemeColors(
+                    androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange),
+                    androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange_dark)
+            );
+            swipeRefresh.setOnRefreshListener(() -> {
+                loadUserData();
+                setupPasswordLinking();
+            });
+        }
+
         loadUserData();
         setupRealtimeHeaderUpdates();
         setupPasswordLinking();
@@ -110,6 +123,42 @@ public class AccountDetailsActivity extends AppCompatActivity {
         etEmail.setText(email);
 
         updateHeader(name, email);
+
+        // Fetch latest data from Firestore CUSTOMERS collection to ensure it's always in sync
+        FirestoreService.loadCustomerProfile(new FirestoreService.Callback<java.util.Map<String, Object>>() {
+            @Override
+            public void onSuccess(java.util.Map<String, Object> data) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (data != null && !isFinishing() && !isDestroyed()) {
+                    String firestoreName = data.containsKey("fullName") && data.get("fullName") != null
+                            ? String.valueOf(data.get("fullName")).trim() : "";
+                    String firestorePhone = data.containsKey("phoneNumber") && data.get("phoneNumber") != null
+                            ? String.valueOf(data.get("phoneNumber")).trim() : "";
+                    String firestoreEmail = data.containsKey("email") && data.get("email") != null
+                            ? String.valueOf(data.get("email")).trim() : "";
+
+                    if (!firestoreName.isEmpty()) {
+                        etName.setText(firestoreName);
+                    }
+                    if (!firestorePhone.isEmpty()) {
+                        etPhone.setText(firestorePhone);
+                    }
+                    if (!firestoreEmail.isEmpty()) {
+                        etEmail.setText(firestoreEmail);
+                    }
+                    updateHeader(
+                            !firestoreName.isEmpty() ? firestoreName : state.getUserName(),
+                            !firestoreEmail.isEmpty() ? firestoreEmail : state.getUserEmail()
+                    );
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                // Keep local cached state if offline
+            }
+        });
     }
 
     private void updateHeader(String name, String email) {

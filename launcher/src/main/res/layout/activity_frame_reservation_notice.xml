@@ -1,10 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/notice_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/surface_white"
+    android:background="@color/primary_orange_dark"
     android:orientation="vertical">
 
     <!-- Top Toolbar -->
@@ -12,16 +12,17 @@
         android:id="@+id/toolbar_notice"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/surface_white"
+        android:background="@color/primary_orange_dark"
         app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="@color/text_primary"
+        app:navigationIconTint="@color/surface_white"
         app:title="Reservation Information"
-        app:titleTextColor="@color/text_primary" />
+        app:titleTextColor="@color/surface_white" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:background="@color/surface_white"
         android:fillViewport="true"
         android:scrollbars="none">
 
@@ -96,8 +97,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Color: Original Black"
-                            android:textColor="#777777"
+                            android:text="Color: Black"
+                            android:textColor="@color/text_secondary"
                             android:textSize="13sp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -210,7 +211,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
                                 android:text="The physical frame you choose will be reserved and held under your name."
-                                android:textColor="#777777"
+                                android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
                         </LinearLayout>
                     </LinearLayout>
@@ -249,7 +250,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
                                 android:text="Our optometrist will measure your exact vision grade and recommend tailored lenses."
-                                android:textColor="#777777"
+                                android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
                         </LinearLayout>
                     </LinearLayout>
@@ -288,7 +289,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
                                 android:text="Choose Blue Light, Photochromic, Single Vision, or Progressive lenses during your clinic visit."
-                                android:textColor="#777777"
+                                android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
                         </LinearLayout>
                     </LinearLayout>
@@ -386,12 +387,12 @@
             android:layout_height="52dp"
             android:text="Proceed to Frame Catalog"
             android:textAllCaps="false"
-            android:textColor="@color/surface_white"
+            android:textColor="@color/btn_primary_text_selector"
             android:textSize="15sp"
             android:textStyle="bold"
-            app:backgroundTint="@color/primary_orange"
+            app:backgroundTint="@color/btn_primary_orange_selector"
             app:cornerRadius="14dp"
-            app:elevation="2dp" />
+            app:elevation="0dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_back_to_preview"

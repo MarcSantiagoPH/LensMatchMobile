@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
@@ -87,7 +88,7 @@ public class ScanHistoryAdapter extends RecyclerView.Adapter<ScanHistoryAdapter.
         iv.setPadding(p, p, p, p);
         iv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         iv.setImageResource(R.drawable.ic_scan);
-        iv.setImageTintList(ColorStateList.valueOf(Color.parseColor("#D97745")));
+        iv.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(iv.getContext(), R.color.secondary_teal)));
     }
 
     @Override

@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -63,7 +64,7 @@ public class ReservationAdapter extends RecyclerView.Adapter<ReservationAdapter.
         } else if ("Cancelled".equalsIgnoreCase(status)) {
             holder.tvStatus.setTextColor(Color.parseColor("#F44336"));
         } else {
-            holder.tvStatus.setTextColor(context.getColor(R.color.accentGold));
+            holder.tvStatus.setTextColor(ContextCompat.getColor(context, R.color.primary_orange));
         }
 
         if (item.getImageUrl() != null && !item.getImageUrl().trim().isEmpty()) {

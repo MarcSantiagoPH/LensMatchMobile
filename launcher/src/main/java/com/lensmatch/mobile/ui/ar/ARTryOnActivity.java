@@ -70,8 +70,8 @@ public class ARTryOnActivity extends AppCompatActivity {
     );
 
     private final List<ColorOption> colorOptions = Arrays.asList(
-            new ColorOption("Original", "#141414", Color.parseColor("#141414")),
-            new ColorOption("Gold", "#FFD700", Color.parseColor("#FFD700")),
+            new ColorOption("Black",  "#141414", Color.parseColor("#141414")),
+            new ColorOption("Gold",   "#FFD700", Color.parseColor("#FFD700")),
             new ColorOption("Silver", "#C0C0C0", Color.parseColor("#C0C0C0"))
     );
 
@@ -205,15 +205,15 @@ public class ARTryOnActivity extends AppCompatActivity {
 
     private void updateTabs() {
         if (selectedTabIndex == 0) {
-            tvTabRecommended.setTextColor(getColor(R.color.accentGold));
+            tvTabRecommended.setTextColor(getColor(R.color.primary_orange));
             tvTabAllFrames.setTextColor(getColor(R.color.textSecondary));
-            indicatorRecommended.setBackgroundColor(getColor(R.color.accentGold));
+            indicatorRecommended.setBackgroundColor(getColor(R.color.primary_orange));
             indicatorAllFrames.setBackgroundColor(getColor(R.color.transparent));
         } else {
             tvTabRecommended.setTextColor(getColor(R.color.textSecondary));
-            tvTabAllFrames.setTextColor(getColor(R.color.accentGold));
+            tvTabAllFrames.setTextColor(getColor(R.color.primary_orange));
             indicatorRecommended.setBackgroundColor(getColor(R.color.transparent));
-            indicatorAllFrames.setBackgroundColor(getColor(R.color.accentGold));
+            indicatorAllFrames.setBackgroundColor(getColor(R.color.primary_orange));
         }
     }
 
@@ -248,7 +248,7 @@ public class ARTryOnActivity extends AppCompatActivity {
             boolean isSelected = frame.equalsIgnoreCase(selectedFrameStyle);
             if (isSelected) {
                 circleBg.setBackgroundResource(R.drawable.bg_ar_circle_selected);
-                tvLabel.setTextColor(getColor(R.color.accentGold));
+                tvLabel.setTextColor(getColor(R.color.primary_orange));
             } else {
                 circleBg.setBackgroundResource(R.drawable.bg_ar_circle_unselected);
                 tvLabel.setTextColor(getColor(R.color.white));
@@ -276,7 +276,7 @@ public class ARTryOnActivity extends AppCompatActivity {
             boolean isSelected = option.hex.equalsIgnoreCase(selectedFrameColor);
             if (isSelected) {
                 chip.setBackgroundResource(R.drawable.bg_confidence_chip);
-                chip.setTextColor(getColor(R.color.accentGold));
+                chip.setTextColor(getColor(R.color.primary_orange));
             } else {
                 chip.setBackgroundResource(R.drawable.bg_color_chip_unselected);
                 chip.setTextColor(getColor(R.color.textSecondary));
@@ -320,21 +320,22 @@ public class ARTryOnActivity extends AppCompatActivity {
             return;
         }
 
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle("Frame Reservation Notice")
-                .setIcon(R.drawable.ic_eyeglasses)
-                .setMessage("Please note: You are selecting and reserving the eyeglass frame only.\n\nPrescription lens options, lens fitting, and custom physical adjustments will be finalized and paid during your visit at Franselle Optical Clinic.")
-                .setPositiveButton("Proceed to Catalog", (dialog, which) -> {
-                    String targetStyle = normalizeCatalogStyle(rawStyle);
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.putExtra("open_tab", R.id.nav_frame);
-                    intent.putExtra("selectedStyle", targetStyle);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    startActivity(intent);
-                    finish();
-                })
-                .setNegativeButton("Keep Previewing", (dialog, which) -> dialog.dismiss())
-                .show();
+        String targetStyle = normalizeCatalogStyle(rawStyle);
+        com.lensmatch.mobile.data.AppState.getInstance().setPendingCatalogStyle(targetStyle);
+        Intent intent = new Intent(this, com.lensmatch.mobile.ui.catalog.FrameReservationNoticeActivity.class);
+        intent.putExtra("frameStyle", targetStyle);
+        String colorName = "Black";
+        for (ColorOption opt : colorOptions) {
+            if (opt.hex.equalsIgnoreCase(selectedFrameColor)) {
+                colorName = opt.name;
+                break;
+            }
+        }
+        intent.putExtra("colorVariant", colorName);
+        if (recommendedFrames != null) {
+            intent.putStringArrayListExtra("recommendedFrames", recommendedFrames);
+        }
+        startActivity(intent);
     }
 
     private String normalizeCatalogStyle(String raw) {

@@ -39,6 +39,7 @@ public class ResultFragment extends Fragment {
     private MaterialButton btnTryFramesOn;
     private View cardBorderlineNotice;
     private TextView tvBorderlineNotes;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh;
 
     private String currentShape = "Oval";
     private static Bitmap cachedFaceBitmap = null;
@@ -51,6 +52,15 @@ public class ResultFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_result, container, false);
+
+        swipeRefresh = root.findViewById(R.id.swipe_refresh_result);
+        if (swipeRefresh != null) {
+            swipeRefresh.setColorSchemeColors(
+                    androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange),
+                    androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange_dark)
+            );
+            swipeRefresh.setOnRefreshListener(this::refreshResultData);
+        }
 
         ivFaceCrop = root.findViewById(R.id.iv_face_crop);
         tvDetectedShape = root.findViewById(R.id.tv_detected_shape);
@@ -72,6 +82,32 @@ public class ResultFragment extends Fragment {
         return root;
     }
 
+    private void refreshResultData() {
+        if (swipeRefresh != null) {
+            swipeRefresh.setRefreshing(true);
+        }
+        com.lensmatch.mobile.service.FirestoreService.getUserScanHistory(new com.lensmatch.mobile.service.FirestoreService.Callback<java.util.List<com.lensmatch.mobile.data.ScanModel>>() {
+            @Override
+            public void onSuccess(java.util.List<com.lensmatch.mobile.data.ScanModel> scans) {
+                if (scans != null && !scans.isEmpty()) {
+                    AppState.getInstance().syncScanHistory(scans);
+                }
+                if (isAdded()) {
+                    updateUI();
+                }
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                if (isAdded()) {
+                    updateUI();
+                }
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+            }
+        });
+    }
+
     /** Launches the Unity AR activity for frame try-on. */
     private void startUnityAR(String frameStyle, ArrayList<String> frames) {
         if (getContext() == null) return;
@@ -91,7 +127,7 @@ public class ResultFragment extends Fragment {
         super.onResume();
         if (btnTryFramesOn != null) {
             btnTryFramesOn.setEnabled(true);
-            btnTryFramesOn.setText("Preview Frames");
+            btnTryFramesOn.setText("Preview Frame");
         }
         updateUI();
     }
@@ -196,14 +232,14 @@ public class ResultFragment extends Fragment {
             Chip chip = new Chip(requireContext());
             chip.setText(item);
             chip.setChipIconResource(R.drawable.ic_check);
-            chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#D97745")));
+            chip.setChipIconTint(ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange)));
             chip.setChipIconSize(36f);
             chip.setIconStartPadding(12f);
-            chip.setChipBackgroundColorResource(R.color.bgCardSelected);
-            chip.setTextColor(Color.parseColor("#1A1A1A"));
+            chip.setChipBackgroundColorResource(R.color.primary_orange_tint);
+            chip.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_primary));
             chip.setTextSize(13f);
             chip.setTypeface(null, Typeface.BOLD);
-            chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor("#D97745")));
+            chip.setChipStrokeColor(ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange)));
             chip.setChipStrokeWidth(3f);
             chip.setChipCornerRadius(32f);
             chip.setOnClickListener(v -> startUnityAR(item, recommendedList));
@@ -213,14 +249,14 @@ public class ResultFragment extends Fragment {
         for (String item : rec.secondary) {
             Chip chip = new Chip(requireContext());
             chip.setText(item);
-            chip.setChipIconResource(R.drawable.ic_check);
-            chip.setChipIconTint(ColorStateList.valueOf(Color.parseColor("#D97745")));
+            chip.setChipIconResource(R.drawable.ic_close);
+            chip.setChipIconTint(ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_secondary)));
             chip.setChipIconSize(32f);
             chip.setIconStartPadding(12f);
-            chip.setChipBackgroundColor(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
-            chip.setTextColor(Color.parseColor("#777777"));
+            chip.setChipBackgroundColor(ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.surface_white)));
+            chip.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_secondary));
             chip.setTextSize(13f);
-            chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor("#FFD199")));
+            chip.setChipStrokeColor(ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.border_light)));
             chip.setChipStrokeWidth(2f);
             chip.setChipCornerRadius(32f);
             chipGroupAvoided.addView(chip);

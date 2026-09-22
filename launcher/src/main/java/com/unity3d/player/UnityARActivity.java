@@ -28,7 +28,7 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
     private UnityPlayerForActivityOrService mUnityPlayer;
 
     private String selectedFrameStyle = "Wayfarer";
-    private String selectedColorVariant = "Original"; // "Original", "Gold", "Silver"
+    private String selectedColorVariant = "Black"; // "Black", "Gold", "Silver"
     private ArrayList<String> recommendedFrames = new ArrayList<>();
     private int selectedTabIndex = 0;
 
@@ -54,9 +54,9 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
     }
 
     private final List<ColorOption> colorOptions = Arrays.asList(
-            new ColorOption("Original", ""),
-            new ColorOption("Gold",     "Gold "),
-            new ColorOption("Silver",   "Silver ")
+            new ColorOption("Black",  ""),
+            new ColorOption("Gold",   "Gold "),
+            new ColorOption("Silver", "Silver ")
     );
 
     /**
@@ -132,20 +132,19 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
         View btnContinue = overlay.findViewById(R.id.btn_continue_unity_ar);
         if (btnContinue != null) {
             btnContinue.setOnClickListener(v -> {
-                new androidx.appcompat.app.AlertDialog.Builder(this)
-                        .setTitle("Notice")
-                        .setMessage("You are only reserving the selected frame. The reservation does not mean that the frame has been purchased or that you have confirmed an order.")
-                        .setPositiveButton("Got it", (dialog, which) -> {
-                            Intent intent = new Intent(this, com.lensmatch.mobile.ui.catalog.FrameReservationNoticeActivity.class);
-                            intent.putExtra("frameStyle", selectedFrameStyle);
-                            intent.putExtra("colorVariant", selectedColorVariant);
-                            if (recommendedFrames != null) {
-                                intent.putStringArrayListExtra("recommendedFrames", recommendedFrames);
-                            }
-                            startActivity(intent);
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .show();
+                if (selectedFrameStyle == null || "none".equalsIgnoreCase(selectedFrameStyle.trim())) {
+                    android.widget.Toast.makeText(this, "Please select a frame shape first", android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String targetStyle = toCatalogStyleName(selectedFrameStyle);
+                com.lensmatch.mobile.data.AppState.getInstance().setPendingCatalogStyle(targetStyle);
+                Intent intent = new Intent(this, com.lensmatch.mobile.ui.catalog.FrameReservationNoticeActivity.class);
+                intent.putExtra("frameStyle", targetStyle);
+                intent.putExtra("colorVariant", selectedColorVariant);
+                if (recommendedFrames != null) {
+                    intent.putStringArrayListExtra("recommendedFrames", recommendedFrames);
+                }
+                startActivity(intent);
             });
         }
 
@@ -188,7 +187,7 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
     }
 
     private void updateTabs() {
-        int orange = Color.parseColor("#D97745");
+        int orange = Color.parseColor("#F4A261");
         int muted = Color.parseColor("#CCAA80");
         if (tvTabRecommended == null || tvTabAllFrames == null) return;
         if (selectedTabIndex == 0) {
@@ -229,7 +228,7 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
 
             boolean sel = frame.equalsIgnoreCase(selectedFrameStyle);
             circleBg.setBackgroundResource(sel ? R.drawable.bg_ar_circle_selected : R.drawable.bg_ar_circle_unselected);
-            label.setTextColor(sel ? Color.parseColor("#D97745") : Color.WHITE);
+            label.setTextColor(sel ? Color.parseColor("#F4A261") : Color.WHITE);
 
             item.setOnClickListener(v -> {
                 selectedFrameStyle = frame;
@@ -252,7 +251,7 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
 
             boolean sel = opt.label.equalsIgnoreCase(selectedColorVariant);
             chip.setBackgroundResource(sel ? R.drawable.bg_confidence_chip : R.drawable.bg_color_chip_unselected);
-            chip.setTextColor(sel ? Color.parseColor("#D97745") : Color.parseColor("#77716C"));
+            chip.setTextColor(sel ? Color.parseColor("#F4A261") : Color.parseColor("#77716C"));
 
             chip.setOnClickListener(v -> {
                 selectedColorVariant = opt.label;
@@ -354,5 +353,19 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
     @Override
     public void onUnityPlayerQuitted() {
         finish();
+    }
+
+    private String toCatalogStyleName(String raw) {
+        if (raw == null) return "Wayfarer";
+        String lower = raw.trim().toLowerCase();
+        if (lower.contains("aviator")) return "Aviator";
+        if (lower.contains("bowline") || lower.contains("browline")) return "Browline";
+        if (lower.contains("cat")) return "Cat-Eye";
+        if (lower.contains("geometric")) return "Geometric";
+        if (lower.contains("oval")) return "Oval";
+        if (lower.contains("rect")) return "Rectangle";
+        if (lower.contains("round")) return "Round";
+        if (lower.contains("square")) return "Square";
+        return "Wayfarer";
     }
 }

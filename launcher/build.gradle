@@ -101,6 +101,7 @@ dependencies {
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
     implementation 'androidx.fragment:fragment:1.8.1'
     implementation 'androidx.activity:activity:1.9.1'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.games:games-activity:4.4.2'
 
     // CameraX

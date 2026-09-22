@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipe_refresh_home"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/surface_white"
-    android:fillViewport="true"
-    android:clipToPadding="false"
-    android:scrollbars="none">
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/home_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/surface_white"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:scrollbars="none">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -469,12 +475,23 @@
                 android:letterSpacing="0.10"
                 android:fontFamily="sans-serif-medium" />
 
-            <!-- Dynamic Announcements Container -->
-            <LinearLayout
-                android:id="@+id/layout_announcements_container"
+            <!-- Dynamic Announcements Container with seamless invisible scrollable box capped at 2 items -->
+            <com.lensmatch.mobile.utils.MaxHeightNestedScrollView
+                android:id="@+id/scroll_announcements_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                app:maxHeight="360dp"
+                android:maxHeight="360dp">
+
+                <LinearLayout
+                    android:id="@+id/layout_announcements_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </com.lensmatch.mobile.utils.MaxHeightNestedScrollView>
 
             <!-- 3. RESERVATION STATUS SECTION -->
             <TextView
@@ -482,211 +499,98 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="26dp"
                 android:layout_marginBottom="10dp"
-                android:text="RESERVATION STATUS"
+                android:text="RESERVATION STATUS &amp; TRANSACTIONS"
                 android:textColor="@color/text_secondary"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.10"
                 android:fontFamily="sans-serif-medium" />
 
+            <!-- Fallback State: No Reservations -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_reservation_status"
+                android:id="@+id/card_no_reservation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
                 app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="18dp"
                 app:strokeColor="@color/border_light"
                 app:strokeWidth="1.5dp"
                 app:cardElevation="2dp">
 
-                <FrameLayout
+                <LinearLayout
+                    android:id="@+id/layout_no_reservation"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
 
-                    <!-- STATE A: Active Reservation Loaded -->
-                    <LinearLayout
-                        android:id="@+id/layout_active_reservation"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp"
-                        android:visibility="gone">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:id="@+id/tv_res_status_frame_name"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Classic Aviator"
-                                android:textColor="@color/text_primary"
-                                android:textSize="16sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tv_res_status_badge"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/bg_confidence_chip"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="4dp"
-                                android:text="Pending"
-                                android:textColor="@color/primary_orange"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <com.google.android.material.card.MaterialCardView
-                                android:layout_width="56dp"
-                                android:layout_height="56dp"
-                                app:cardCornerRadius="12dp"
-                                app:cardBackgroundColor="@color/surface_white"
-                                app:strokeWidth="0dp"
-                                app:cardElevation="0dp">
-
-                                <ImageView
-                                    android:id="@+id/iv_res_status_image"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:padding="6dp"
-                                    android:scaleType="centerInside"
-                                    android:src="@drawable/ic_eyeglasses" />
-                            </com.google.android.material.card.MaterialCardView>
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/tv_res_status_style"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Aviator - Metal"
-                                    android:textColor="@color/text_secondary"
-                                    android:textSize="13sp" />
-
-                                <TextView
-                                    android:id="@+id/tv_res_status_price"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:text="₱9,500.00"
-                                    android:textColor="@color/primary_orange"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:id="@+id/tv_res_status_date"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:text="Requested: Oct 24, 2024"
-                                    android:textColor="@color/text_secondary"
-                                    android:textSize="11sp" />
-                            </LinearLayout>
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginVertical="12dp"
-                            android:background="@color/border_light" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:id="@+id/tv_res_status_hint"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Clinic reviewing request for in-store fitting."
-                                android:textColor="@color/text_secondary"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Details →"
-                                android:textColor="@color/primary_orange"
-                                android:textSize="13sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <!-- STATE B: No Active Reservation -->
-                    <LinearLayout
-                        android:id="@+id/layout_no_reservation"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:padding="16dp"
-                        android:gravity="center_vertical">
-
-                        <FrameLayout
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:background="@drawable/bg_avatar_circle">
-
-                            <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_calendar"
-                                app:tint="@color/secondary_teal" />
-                        </FrameLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="No Active Reservations"
-                                android:textColor="@color/text_primary"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tv_reservations_count"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="Reserve a frame to schedule an in-store fitting"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="12sp" />
-                        </LinearLayout>
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_avatar_circle">
 
                         <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/ic_chevron_right"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_calendar"
                             app:tint="@color/secondary_teal" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="No Reservations Yet"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_reservations_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Reserve a frame to schedule an in-store fitting"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
                     </LinearLayout>
-                </FrameLayout>
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/secondary_teal" />
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Dynamic Reservations Container with seamless invisible scrollable box capped at 2 items -->
+            <com.lensmatch.mobile.utils.MaxHeightNestedScrollView
+                android:id="@+id/scroll_reservations_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                android:visibility="gone"
+                app:maxHeight="360dp"
+                android:maxHeight="360dp">
+
+                <LinearLayout
+                    android:id="@+id/layout_reservations_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </com.lensmatch.mobile.utils.MaxHeightNestedScrollView>
 
             <!-- 5. FACE SHAPE & EYEWEAR GUIDE -->
             <LinearLayout
@@ -712,7 +616,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Optical Rules"
-                    android:textColor="@color/primary_orange"
+                    android:textColor="@color/secondary_teal_dark"
                     android:textSize="11sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -794,20 +698,47 @@
                         android:layout_marginVertical="12dp"
                         android:background="@color/border_light" />
 
-                    <!-- See More Button -->
-                    <TextView
-                        android:id="@+id/btn_see_more_guide"
-                        android:layout_width="wrap_content"
+                    <!-- Guide Buttons Row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="See More"
-                        android:textColor="#3D7A7C"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:padding="8dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackgroundBorderless" />
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/btn_see_more_guide"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Optical Guide"
+                            android:textColor="#3D7A7C"
+                            android:textSize="13.5sp"
+                            android:textStyle="bold"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="8dp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackgroundBorderless" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="16dp"
+                            android:layout_marginHorizontal="8dp"
+                            android:background="@color/border_light" />
+
+                        <TextView
+                            android:id="@+id/btn_home_app_guidelines"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="App Guidelines"
+                            android:textColor="#3D7A7C"
+                            android:textSize="13.5sp"
+                            android:textStyle="bold"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="8dp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackgroundBorderless" />
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -1177,5 +1108,6 @@
 
         </LinearLayout>
     </LinearLayout>
-</ScrollView>
+    </androidx.core.widget.NestedScrollView>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

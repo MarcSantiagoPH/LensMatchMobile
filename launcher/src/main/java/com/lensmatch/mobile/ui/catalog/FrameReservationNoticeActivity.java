@@ -8,6 +8,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -29,7 +30,7 @@ public class FrameReservationNoticeActivity extends AppCompatActivity {
     public static final String EXTRA_COLOR_VARIANT = "colorVariant";
 
     private String frameStyle = "Wayfarer";
-    private String colorVariant = "Original Black";
+    private String colorVariant = "Black";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +44,13 @@ public class FrameReservationNoticeActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_frame_reservation_notice);
 
-        getWindow().setStatusBarColor(Color.WHITE);
+        getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.primary_orange_dark));
         getWindow().setNavigationBarColor(Color.WHITE);
 
         WindowInsetsControllerCompat insetsController =
                 WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         if (insetsController != null) {
-            insetsController.setAppearanceLightStatusBars(true);
+            insetsController.setAppearanceLightStatusBars(false);
             insetsController.setAppearanceLightNavigationBars(true);
             insetsController.show(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
         }
@@ -149,14 +150,17 @@ public class FrameReservationNoticeActivity extends AppCompatActivity {
         });
 
         MaterialButton btnProceed = findViewById(R.id.btn_proceed_to_catalog);
-        btnProceed.setEnabled(false);
+        updateProceedButtonState(btnProceed, false);
 
         MaterialCheckBox cbAgree = findViewById(R.id.cb_agree_notice);
         if (cbAgree != null) {
-            cbAgree.setOnCheckedChangeListener((buttonView, isChecked) -> btnProceed.setEnabled(isChecked));
+            cbAgree.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                updateProceedButtonState(btnProceed, isChecked);
+            });
         }
 
         btnProceed.setOnClickListener(v -> {
+            com.lensmatch.mobile.data.AppState.getInstance().setPendingCatalogStyle(frameStyle);
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra("open_tab", R.id.nav_frame);
             intent.putExtra("selectedStyle", frameStyle);
@@ -167,6 +171,20 @@ public class FrameReservationNoticeActivity extends AppCompatActivity {
 
         MaterialButton btnBackPreview = findViewById(R.id.btn_back_to_preview);
         btnBackPreview.setOnClickListener(v -> finish());
+    }
+
+    private void updateProceedButtonState(MaterialButton button, boolean isChecked) {
+        if (button == null) return;
+        button.setEnabled(isChecked);
+        if (isChecked) {
+            button.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.primary_orange_dark));
+            button.setTextColor(ContextCompat.getColor(this, R.color.surface_white));
+            button.setElevation(getResources().getDisplayMetrics().density * 2);
+        } else {
+            button.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.border_light));
+            button.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
+            button.setElevation(0);
+        }
     }
 
     private String toCatalogStyleName(String raw) {
@@ -184,10 +202,11 @@ public class FrameReservationNoticeActivity extends AppCompatActivity {
     }
 
     private String formatColorVariant(String raw) {
-        if (raw == null) return "Original Black";
+        if (raw == null) return "Black";
         String lower = raw.trim().toLowerCase();
         if (lower.contains("gold")) return "Gold Accent";
         if (lower.contains("silver")) return "Silver Accent";
-        return "Original Black";
+        if (lower.contains("black") || lower.contains("orig")) return "Black";
+        return "Black";
     }
 }

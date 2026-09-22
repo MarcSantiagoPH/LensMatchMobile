@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFF8F2"
+    android:background="@color/surface_white"
     android:orientation="vertical">
 
     <!-- A handle for the bottom sheet -->
@@ -12,7 +12,7 @@
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="12dp"
-        android:background="#E0E0E0" />
+        android:background="@color/border_light" />
 
     <TextView
         android:layout_width="match_parent"
@@ -20,7 +20,7 @@
         android:layout_marginTop="16dp"
         android:paddingHorizontal="20dp"
         android:text="Face Shape &amp; Frame Guide"
-        android:textColor="#2E2E2E"
+        android:textColor="@color/text_primary"
         android:textSize="20sp"
         android:textStyle="bold" />
 
@@ -42,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Contrast Rule"
-                android:textColor="#2E2E2E"
+                android:textColor="@color/text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Eyeglass frames can create visual balance by using shapes that contrast with the natural structure of the face."
-                android:textColor="#757575"
+                android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
 
             <TextView
@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="• Softer or rounder faces may work well with more angular frames.\n• Stronger or more angular faces may work well with softer or curved frames.\n• Longer faces may benefit from frames with more vertical depth.\n• Wider jawlines may be balanced with frames that add more visual emphasis to the upper face."
-                android:textColor="#757575"
+                android:textColor="@color/text_secondary"
                 android:textSize="14sp"
                 android:lineSpacingExtra="2dp" />
 
@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:text="These recommendations are only a guide. Personal style, comfort, and preference should still be considered when choosing frames."
-                android:textColor="#5F9EA0"
+                android:textColor="@color/secondary_teal"
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
@@ -76,16 +76,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginVertical="20dp"
-                android:background="#E0E0E0" />
+                android:background="@color/border_light" />
 
             <!-- The Face Shapes -->
             <!-- 1. Oval -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="12dp"
-                app:strokeColor="#E0E0E0"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1dp"
                 app:cardElevation="0dp"
                 android:layout_marginBottom="12dp">
@@ -100,7 +100,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Oval"
-                        android:textColor="#2E2E2E"
+                        android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold" />
                         
@@ -109,7 +109,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Recommended: Rectangle, Wayfarer, Square, Geometric, Browline"
-                        android:textColor="#3D7A7C"
+                        android:textColor="@color/secondary_teal_dark"
                         android:textSize="14sp"
                         android:textStyle="bold" />
                         
@@ -118,7 +118,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Balanced facial proportions work well with many structured frame styles."
-                        android:textColor="#757575"
+                        android:textColor="@color/text_secondary"
                         android:textSize="13sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -127,16 +127,16 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="12dp"
-                app:strokeColor="#E0E0E0"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1dp"
                 app:cardElevation="0dp"
                 android:layout_marginBottom="12dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Round" android:textColor="#2E2E2E" android:textSize="16sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Recommended: Rectangle, Square, Geometric, Browline, Wayfarer" android:textColor="#3D7A7C" android:textSize="14sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Angular frames can add contrast to softer facial curves." android:textColor="#757575" android:textSize="13sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Round" android:textColor="@color/text_primary" android:textSize="16sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Recommended: Rectangle, Square, Geometric, Browline, Wayfarer" android:textColor="@color/secondary_teal_dark" android:textSize="14sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Angular frames can add contrast to softer facial curves." android:textColor="@color/text_secondary" android:textSize="13sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -144,16 +144,16 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="12dp"
-                app:strokeColor="#E0E0E0"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1dp"
                 app:cardElevation="0dp"
                 android:layout_marginBottom="12dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Square" android:textColor="#2E2E2E" android:textSize="16sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Recommended: Round, Oval, Aviator" android:textColor="#3D7A7C" android:textSize="14sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Curved frames can create visual balance with a stronger or more angular jawline." android:textColor="#757575" android:textSize="13sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Square" android:textColor="@color/text_primary" android:textSize="16sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Recommended: Round, Oval, Aviator" android:textColor="@color/secondary_teal_dark" android:textSize="14sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Curved frames can create visual balance with a stronger or more angular jawline." android:textColor="@color/text_secondary" android:textSize="13sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -161,16 +161,16 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="12dp"
-                app:strokeColor="#E0E0E0"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1dp"
                 app:cardElevation="0dp"
                 android:layout_marginBottom="12dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Oblong" android:textColor="#2E2E2E" android:textSize="16sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Recommended: Round, Oval, Aviator, Browline" android:textColor="#3D7A7C" android:textSize="14sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Frames with more height and visual depth can balance longer facial proportions." android:textColor="#757575" android:textSize="13sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Oblong" android:textColor="@color/text_primary" android:textSize="16sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Recommended: Round, Oval, Aviator, Browline" android:textColor="@color/secondary_teal_dark" android:textSize="14sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Frames with more height and visual depth can balance longer facial proportions." android:textColor="@color/text_secondary" android:textSize="13sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -178,16 +178,16 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="12dp"
-                app:strokeColor="#E0E0E0"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1dp"
                 app:cardElevation="0dp"
                 android:layout_marginBottom="12dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Heart" android:textColor="#2E2E2E" android:textSize="16sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Recommended: Round, Oval, Cat-Eye, Aviator" android:textColor="#3D7A7C" android:textSize="14sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Softer and balanced frame shapes may complement a wider upper face and narrower jaw." android:textColor="#757575" android:textSize="13sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Heart" android:textColor="@color/text_primary" android:textSize="16sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Recommended: Round, Oval, Cat-Eye, Aviator" android:textColor="@color/secondary_teal_dark" android:textSize="14sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Softer and balanced frame shapes may complement a wider upper face and narrower jaw." android:textColor="@color/text_secondary" android:textSize="13sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -195,16 +195,16 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="12dp"
-                app:strokeColor="#E0E0E0"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1dp"
                 app:cardElevation="0dp"
                 android:layout_marginBottom="12dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Diamond" android:textColor="#2E2E2E" android:textSize="16sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Recommended: Oval, Round, Cat-Eye, Browline" android:textColor="#3D7A7C" android:textSize="14sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Soft curves and upper-emphasized styles can complement prominent cheekbones." android:textColor="#757575" android:textSize="13sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Diamond" android:textColor="@color/text_primary" android:textSize="16sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Recommended: Oval, Round, Cat-Eye, Browline" android:textColor="@color/secondary_teal_dark" android:textSize="14sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Soft curves and upper-emphasized styles can complement prominent cheekbones." android:textColor="@color/text_secondary" android:textSize="13sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -212,16 +212,16 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/surface_white"
                 app:cardCornerRadius="12dp"
-                app:strokeColor="#E0E0E0"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1dp"
                 app:cardElevation="0dp"
                 android:layout_marginBottom="12dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Triangle" android:textColor="#2E2E2E" android:textSize="16sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Recommended: Browline, Cat-Eye, Aviator, Wayfarer" android:textColor="#3D7A7C" android:textSize="14sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Frames with more visual weight along the upper rim can help balance a wider jaw." android:textColor="#757575" android:textSize="13sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Triangle" android:textColor="@color/text_primary" android:textSize="16sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Recommended: Browline, Cat-Eye, Aviator, Wayfarer" android:textColor="@color/secondary_teal_dark" android:textSize="14sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Frames with more visual weight along the upper rim can help balance a wider jaw." android:textColor="@color/text_secondary" android:textSize="13sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

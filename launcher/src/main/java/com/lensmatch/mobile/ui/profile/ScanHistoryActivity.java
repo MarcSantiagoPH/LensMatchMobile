@@ -40,6 +40,7 @@ public class ScanHistoryActivity extends AppCompatActivity {
 
     private ScanHistoryAdapter adapter;
     private final List<ScanModel> scanList = new ArrayList<>();
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +50,12 @@ public class ScanHistoryActivity extends AppCompatActivity {
         View root = findViewById(R.id.scan_history_root);
         StatusBarUtils.applyWindowInsets(root);
 
-        getWindow().setStatusBarColor(android.graphics.Color.WHITE);
+        getWindow().setStatusBarColor(androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange_dark));
         getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
         androidx.core.view.WindowInsetsControllerCompat insetsController =
                 androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         if (insetsController != null) {
-            insetsController.setAppearanceLightStatusBars(true);
+            insetsController.setAppearanceLightStatusBars(false);
             insetsController.setAppearanceLightNavigationBars(true);
         }
 
@@ -67,6 +68,17 @@ public class ScanHistoryActivity extends AppCompatActivity {
         tvScanCount = findViewById(R.id.tv_scan_count);
         btnScanAgain = findViewById(R.id.btn_scan_again);
         btnEmptyStartScan = findViewById(R.id.btn_empty_start_scan);
+        swipeRefresh = findViewById(R.id.swipe_refresh_scan_history);
+
+        if (swipeRefresh != null) {
+            swipeRefresh.setColorSchemeColors(
+                    androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange),
+                    androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange_dark)
+            );
+            swipeRefresh.setOnRefreshListener(this::loadScanHistory);
+            swipeRefresh.setOnChildScrollUpCallback((parent, child) ->
+                    rvScanHistory != null && rvScanHistory.getVisibility() == View.VISIBLE && rvScanHistory.canScrollVertically(-1));
+        }
 
         rvScanHistory.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ScanHistoryAdapter(scanList, new ScanHistoryAdapter.OnScanActionListener() {
@@ -131,6 +143,7 @@ public class ScanHistoryActivity extends AppCompatActivity {
     }
 
     private void updateUIState() {
+        if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
         if (progressScanHistory != null) progressScanHistory.setVisibility(View.GONE);
         if (scanList.isEmpty()) {
             if (rvScanHistory != null) rvScanHistory.setVisibility(View.GONE);

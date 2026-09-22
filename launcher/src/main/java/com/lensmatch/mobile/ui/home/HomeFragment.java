@@ -34,6 +34,7 @@ import com.lensmatch.mobile.ui.profile.ReservationDetailActivity;
 import com.lensmatch.mobile.ui.profile.ReservationsActivity;
 import com.lensmatch.mobile.ui.profile.ScanHistoryActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -41,37 +42,32 @@ public class HomeFragment extends Fragment {
     private TextView tvReservationsCount;
     private ImageView ivHomeLogo;
     private LinearLayout layoutAnnouncementsContainer;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh;
 
     // Reservation Status UI components
-    private MaterialCardView cardReservationStatus;
-    private LinearLayout layoutActiveReservation;
-    private LinearLayout layoutNoReservation;
-    private TextView tvResStatusFrameName;
-    private TextView tvResStatusBadge;
-    private TextView tvResStatusStyle;
-    private TextView tvResStatusPrice;
-    private TextView tvResStatusDate;
-    private TextView tvResStatusHint;
-    private ImageView ivResStatusImage;
-
-    private ReservationModel activeReservation = null;
+    private MaterialCardView cardNoReservation;
+    private com.lensmatch.mobile.utils.MaxHeightNestedScrollView scrollReservationsContainer;
+    private LinearLayout layoutReservationsContainer;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
 
+        swipeRefresh = root.findViewById(R.id.swipe_refresh_home);
+        if (swipeRefresh != null) {
+            swipeRefresh.setColorSchemeColors(
+                    androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange),
+                    androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange_dark)
+            );
+            swipeRefresh.setOnRefreshListener(this::refreshHomeData);
+        }
+
         MaterialButton btnScanFace = root.findViewById(R.id.btn_scan_face);
-        cardReservationStatus = root.findViewById(R.id.card_reservation_status);
-        layoutActiveReservation = root.findViewById(R.id.layout_active_reservation);
-        layoutNoReservation = root.findViewById(R.id.layout_no_reservation);
-        tvResStatusFrameName = root.findViewById(R.id.tv_res_status_frame_name);
-        tvResStatusBadge = root.findViewById(R.id.tv_res_status_badge);
-        tvResStatusStyle = root.findViewById(R.id.tv_res_status_style);
-        tvResStatusPrice = root.findViewById(R.id.tv_res_status_price);
-        tvResStatusDate = root.findViewById(R.id.tv_res_status_date);
-        tvResStatusHint = root.findViewById(R.id.tv_res_status_hint);
-        ivResStatusImage = root.findViewById(R.id.iv_res_status_image);
+        cardNoReservation = root.findViewById(R.id.card_no_reservation);
+        scrollReservationsContainer = root.findViewById(R.id.scroll_reservations_container);
+        layoutReservationsContainer = root.findViewById(R.id.layout_reservations_container);
+        tvReservationsCount = root.findViewById(R.id.tv_reservations_count);
 
         ivHomeLogo = root.findViewById(R.id.iv_home_logo);
 
@@ -81,16 +77,10 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        if (cardReservationStatus != null) {
-            cardReservationStatus.setOnClickListener(v -> {
-                if (activeReservation != null) {
-                    Intent intent = new Intent(requireContext(), ReservationDetailActivity.class);
-                    intent.putExtra("reservation", activeReservation);
-                    startActivity(intent);
-                } else {
-                    Intent intent = new Intent(requireContext(), ReservationsActivity.class);
-                    startActivity(intent);
-                }
+        if (cardNoReservation != null) {
+            cardNoReservation.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), ReservationsActivity.class);
+                startActivity(intent);
             });
         }
 
@@ -126,6 +116,15 @@ public class HomeFragment extends Fragment {
             btnSeeMoreGuide.setOnClickListener(v -> {
                 FullGuideBottomSheet bottomSheet = new FullGuideBottomSheet();
                 bottomSheet.show(getChildFragmentManager(), "FullGuideBottomSheet");
+            });
+        }
+
+        View btnHomeAppGuidelines = root.findViewById(R.id.btn_home_app_guidelines);
+        if (btnHomeAppGuidelines != null) {
+            btnHomeAppGuidelines.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.class);
+                intent.putExtra(com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.EXTRA_FROM_SUPPORT, true);
+                startActivity(intent);
             });
         }
 
@@ -180,6 +179,24 @@ public class HomeFragment extends Fragment {
         loadAnnouncements();
     }
 
+    private void refreshHomeData() {
+        if (swipeRefresh != null) {
+            swipeRefresh.setRefreshing(true);
+        }
+        updateLogoForTheme();
+        com.lensmatch.mobile.service.FirestoreService.loadCustomerProfile(null);
+        updateQuickLinks();
+        loadAnnouncements();
+
+        if (getView() != null) {
+            getView().postDelayed(() -> {
+                if (swipeRefresh != null && isAdded()) {
+                    swipeRefresh.setRefreshing(false);
+                }
+            }, 1200);
+        }
+    }
+
     private void updateLogoForTheme() {
         if (ivHomeLogo == null || getContext() == null) return;
         boolean isNight = "dark".equalsIgnoreCase(AppState.getInstance().getThemeMode()) ||
@@ -199,98 +216,108 @@ public class HomeFragment extends Fragment {
             public void onSuccess(List<ReservationModel> list) {
                 if (!isAdded() || getContext() == null) return;
 
-                int activeCount = 0;
-                ReservationModel latestActive = null;
-
+                List<ReservationModel> allReservations = new ArrayList<>();
                 if (list != null) {
-                    for (ReservationModel item : list) {
-                        if (FirestoreService.isActiveStatus(item.getStatus())) {
-                            activeCount++;
-                            if (latestActive == null) {
-                                latestActive = item;
-                            }
-                        }
-                    }
+                    allReservations.addAll(list);
                 }
-
-                activeReservation = latestActive;
 
                 if (tvReservationsCount != null) {
-                    tvReservationsCount.setText(activeCount == 0 ? "Reserve a frame to schedule an in-store fitting"
-                            : activeCount + (activeCount == 1 ? " active frame reserved" : " active frames reserved"));
+                    tvReservationsCount.setText(allReservations.isEmpty()
+                            ? "Reserve a frame to schedule an in-store fitting"
+                            : allReservations.size() + (allReservations.size() == 1 ? " reservation transaction" : " reservation transactions"));
                 }
 
-                // Update Live Reservation Status Card
-                if (latestActive != null && layoutActiveReservation != null && layoutNoReservation != null) {
-                    layoutActiveReservation.setVisibility(View.VISIBLE);
-                    layoutNoReservation.setVisibility(View.GONE);
+                if (allReservations.isEmpty()) {
+                    if (cardNoReservation != null) cardNoReservation.setVisibility(View.VISIBLE);
+                    if (scrollReservationsContainer != null) scrollReservationsContainer.setVisibility(View.GONE);
+                } else {
+                    if (cardNoReservation != null) cardNoReservation.setVisibility(View.GONE);
+                    if (scrollReservationsContainer != null) scrollReservationsContainer.setVisibility(View.VISIBLE);
+                    if (layoutReservationsContainer != null) {
+                        layoutReservationsContainer.removeAllViews();
+                        LayoutInflater inflater = LayoutInflater.from(requireContext());
 
-                    if (tvResStatusFrameName != null) {
-                        tvResStatusFrameName.setText(latestActive.getFrameName());
-                    }
+                        for (ReservationModel item : allReservations) {
+                            View card = inflater.inflate(R.layout.item_home_reservation_card, layoutReservationsContainer, false);
+                            TextView tvFrameName = card.findViewById(R.id.tv_home_res_frame_name);
+                            TextView tvBadge = card.findViewById(R.id.tv_home_res_badge);
+                            TextView tvStyle = card.findViewById(R.id.tv_home_res_style);
+                            TextView tvPrice = card.findViewById(R.id.tv_home_res_price);
+                            TextView tvDate = card.findViewById(R.id.tv_home_res_date);
+                            TextView tvHint = card.findViewById(R.id.tv_home_res_hint);
+                            ImageView ivImage = card.findViewById(R.id.iv_home_res_image);
 
-                    if (tvResStatusBadge != null) {
-                        String status = latestActive.getStatus();
-                        tvResStatusBadge.setText(status);
-                        if ("Confirmed".equalsIgnoreCase(status) || "Approved".equalsIgnoreCase(status)) {
-                            tvResStatusBadge.setTextColor(Color.parseColor("#10B981"));
-                        } else if ("Cancelled".equalsIgnoreCase(status)) {
-                            tvResStatusBadge.setTextColor(Color.parseColor("#EF4444"));
-                        } else {
-                            tvResStatusBadge.setTextColor(Color.parseColor("#D97745"));
+                            if (tvFrameName != null) tvFrameName.setText(item.getFrameName());
+                            String status = item.getStatus() != null && !item.getStatus().trim().isEmpty() ? item.getStatus() : "Pending";
+                            if (tvBadge != null) {
+                                tvBadge.setText(status);
+                                if ("Confirmed".equalsIgnoreCase(status) || "Approved".equalsIgnoreCase(status) || "Completed".equalsIgnoreCase(status)) {
+                                    tvBadge.setTextColor(Color.parseColor("#10B981"));
+                                } else if ("Cancelled".equalsIgnoreCase(status) || "Declined".equalsIgnoreCase(status) || "Rejected".equalsIgnoreCase(status)) {
+                                    tvBadge.setTextColor(Color.parseColor("#EF4444"));
+                                } else {
+                                    tvBadge.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange));
+                                }
+                            }
+
+                            if (tvStyle != null) {
+                                String brand = item.getBrand() != null && !item.getBrand().isEmpty() ? item.getBrand() : "LensMatch";
+                                String style = item.getFrameStyle() != null && !item.getFrameStyle().isEmpty() ? item.getFrameStyle() : "Eyewear";
+                                tvStyle.setText(brand + " · " + style);
+                            }
+
+                            if (tvPrice != null) {
+                                tvPrice.setText(item.getFormattedPrice());
+                            }
+
+                            if (tvDate != null) {
+                                tvDate.setText("Requested: " + item.getFormattedDate());
+                            }
+
+                            if (tvHint != null) {
+                                if ("Confirmed".equalsIgnoreCase(status) || "Approved".equalsIgnoreCase(status)) {
+                                    tvHint.setText("✓ Confirmed! Held at Franselle Optical Clinic for your visit.");
+                                } else if ("Completed".equalsIgnoreCase(status)) {
+                                    tvHint.setText("✓ Fitting completed at Franselle Optical Clinic.");
+                                } else if ("Cancelled".equalsIgnoreCase(status) || "Declined".equalsIgnoreCase(status) || "Rejected".equalsIgnoreCase(status)) {
+                                    tvHint.setText("This reservation was cancelled.");
+                                } else {
+                                    tvHint.setText("Clinic staff is reviewing your reservation for in-store fitting.");
+                                }
+                            }
+
+                            if (ivImage != null) {
+                                if (item.getImageUrl() != null && !item.getImageUrl().trim().isEmpty()) {
+                                    ivImage.setImageTintList(null);
+                                    Glide.with(requireContext())
+                                            .load(item.getImageUrl())
+                                            .placeholder(R.drawable.ic_eyeglasses)
+                                            .error(R.drawable.ic_eyeglasses)
+                                            .into(ivImage);
+                                } else {
+                                    ivImage.setImageResource(R.drawable.ic_eyeglasses);
+                                }
+                            }
+
+                            card.setOnClickListener(v -> {
+                                Intent intent = new Intent(requireContext(), ReservationDetailActivity.class);
+                                intent.putExtra("reservation", item);
+                                startActivity(intent);
+                            });
+
+                            layoutReservationsContainer.addView(card);
                         }
                     }
-
-                    if (tvResStatusStyle != null) {
-                        String brand = latestActive.getBrand() != null && !latestActive.getBrand().isEmpty() ? latestActive.getBrand() : "LensMatch";
-                        String style = latestActive.getFrameStyle() != null && !latestActive.getFrameStyle().isEmpty() ? latestActive.getFrameStyle() : "Eyewear";
-                        tvResStatusStyle.setText(brand + " · " + style);
-                    }
-
-                    if (tvResStatusPrice != null) {
-                        tvResStatusPrice.setText(latestActive.getFormattedPrice());
-                    }
-
-                    if (tvResStatusDate != null) {
-                        tvResStatusDate.setText("Requested: " + latestActive.getFormattedDate());
-                    }
-
-                    if (tvResStatusHint != null) {
-                        String status = latestActive.getStatus();
-                        if ("Confirmed".equalsIgnoreCase(status)) {
-                            tvResStatusHint.setText("✓ Confirmed! Held at Franselle Optical Clinic for your visit.");
-                        } else {
-                            tvResStatusHint.setText("Clinic staff is reviewing your reservation for in-store fitting.");
-                        }
-                    }
-
-                    if (ivResStatusImage != null) {
-                        if (latestActive.getImageUrl() != null && !latestActive.getImageUrl().trim().isEmpty()) {
-                            ivResStatusImage.setImageTintList(null);
-                            Glide.with(requireContext())
-                                    .load(latestActive.getImageUrl())
-                                    .placeholder(R.drawable.ic_eyeglasses)
-                                    .error(R.drawable.ic_eyeglasses)
-                                    .into(ivResStatusImage);
-                        } else {
-                            ivResStatusImage.setImageResource(R.drawable.ic_eyeglasses);
-                        }
-                    }
-                } else if (layoutActiveReservation != null && layoutNoReservation != null) {
-                    layoutActiveReservation.setVisibility(View.GONE);
-                    layoutNoReservation.setVisibility(View.VISIBLE);
                 }
             }
 
             @Override
             public void onError(String errorMessage) {
                 if (!isAdded() || getContext() == null) return;
+                if (cardNoReservation != null) cardNoReservation.setVisibility(View.VISIBLE);
+                if (scrollReservationsContainer != null) scrollReservationsContainer.setVisibility(View.GONE);
                 if (tvReservationsCount != null) {
                     tvReservationsCount.setText("Check your reservations history");
-                }
-                if (layoutActiveReservation != null && layoutNoReservation != null) {
-                    layoutActiveReservation.setVisibility(View.GONE);
-                    layoutNoReservation.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -302,7 +329,7 @@ public class HomeFragment extends Fragment {
         layoutAnnouncementsContainer.removeAllViews();
 
         ProgressBar pb = new ProgressBar(requireContext());
-        pb.setIndeterminateTintList(ColorStateList.valueOf(Color.parseColor("#D97745")));
+        pb.setIndeterminateTintList(ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange)));
         LinearLayout.LayoutParams pbParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         pbParams.gravity = Gravity.CENTER_HORIZONTAL;
@@ -337,7 +364,7 @@ public class HomeFragment extends Fragment {
                     if ("NEW ARRIVALS".equals(category)) {
                         if (tvBadge != null) {
                             tvBadge.setBackgroundResource(R.drawable.bg_new_badge);
-                            tvBadge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#D97745")));
+                            tvBadge.setBackgroundTintList(ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange)));
                             tvBadge.setTextColor(Color.parseColor("#FFFFFF"));
                         }
                         if (ivFooterIcon != null) ivFooterIcon.setImageResource(R.drawable.ic_eyeglasses);
@@ -374,10 +401,12 @@ public class HomeFragment extends Fragment {
 
                     layoutAnnouncementsContainer.addView(card);
                 }
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
             }
 
             @Override
             public void onError(String errorMessage) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
                 if (!isAdded() || getContext() == null || layoutAnnouncementsContainer == null) return;
                 Log.e(TAG, "Error loading announcements: " + errorMessage);
                 showFallbackAnnouncementCard();

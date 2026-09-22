@@ -270,9 +270,20 @@ public class LandingActivity extends AppCompatActivity {
         // If user is already authenticated in Firebase, go straight to MainActivity (Homepage)
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
-            String name = currentUser.getDisplayName() != null && !currentUser.getDisplayName().isEmpty()
-                    ? currentUser.getDisplayName() : "User";
+            String savedName = AppState.getInstance().getUserName();
+            String name = (savedName != null && !savedName.trim().isEmpty() && !"John Doe".equals(savedName) && !"User".equals(savedName))
+                    ? savedName
+                    : (currentUser.getDisplayName() != null && !currentUser.getDisplayName().isEmpty() ? currentUser.getDisplayName() : "User");
             AppState.getInstance().setUserProfile(name, currentUser.getEmail(), null);
+
+            if (!AppState.getInstance().hasSeenGuidelines()) {
+                Intent intent = new Intent(this, com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+                finish();
+                return;
+            }
 
             // Reopening and swiping up must always return cleanly to the Homepage
             AppState.getInstance().setLastActiveTab(R.id.nav_home);

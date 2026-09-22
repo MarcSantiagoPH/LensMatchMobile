@@ -1,10 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/account_details_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/surface_white"
+    android:background="@color/primary_orange_dark"
     android:orientation="vertical">
 
     <!-- Top Navigation Toolbar -->
@@ -12,13 +12,20 @@
         android:id="@+id/toolbar_account_details"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/primary_orange"
+        android:background="@color/primary_orange_dark"
         app:navigationIcon="@drawable/ic_chevron_left"
         app:navigationIconTint="@color/surface_white"
         app:title="Account Details"
         app:titleTextColor="@color/surface_white" />
 
-    <ScrollView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_account_details"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/surface_white">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_account_details"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
@@ -108,7 +115,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="Full Name"
-                android:textColorHint="#AAAAAA"
+                android:textColorHint="@color/text_secondary"
                 app:hintTextColor="@color/primary_orange"
                 app:boxBackgroundColor="@color/surface_white"
                 app:boxCornerRadiusBottomEnd="14dp"
@@ -125,7 +132,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPersonName"
                     android:textColor="@color/text_primary"
-                    android:textColorHint="#AAAAAA"
+                    android:textColorHint="@color/text_secondary"
                     android:textSize="15sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -137,7 +144,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="Phone Number"
-                android:textColorHint="#AAAAAA"
+                android:textColorHint="@color/text_secondary"
                 app:hintTextColor="@color/primary_orange"
                 app:boxBackgroundColor="@color/surface_white"
                 app:boxCornerRadiusBottomEnd="14dp"
@@ -154,7 +161,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="phone"
                     android:textColor="@color/text_primary"
-                    android:textColorHint="#AAAAAA"
+                    android:textColorHint="@color/text_secondary"
                     android:textSize="15sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -166,7 +173,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
                 android:hint="Email Address"
-                android:textColorHint="#AAAAAA"
+                android:textColorHint="@color/text_secondary"
                 app:hintTextColor="@color/primary_orange"
                 app:boxBackgroundColor="@color/surface_white"
                 app:boxCornerRadiusBottomEnd="14dp"
@@ -183,7 +190,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textEmailAddress"
                     android:textColor="@color/text_primary"
-                    android:textColorHint="#AAAAAA"
+                    android:textColorHint="@color/text_secondary"
                     android:textSize="15sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -231,7 +238,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="@string/hint_new_password"
-                android:textColorHint="#AAAAAA"
+                android:textColorHint="@color/text_secondary"
                 app:hintTextColor="@color/primary_orange"
                 app:boxBackgroundColor="@color/surface_white"
                 app:boxCornerRadiusBottomEnd="14dp"
@@ -248,7 +255,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:textColor="@color/text_primary"
-                    android:textColorHint="#AAAAAA"
+                    android:textColorHint="@color/text_secondary"
                     android:textSize="15sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -260,7 +267,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="@string/hint_confirm_new_password"
-                android:textColorHint="#AAAAAA"
+                android:textColorHint="@color/text_secondary"
                 app:hintTextColor="@color/primary_orange"
                 app:boxBackgroundColor="@color/surface_white"
                 app:boxCornerRadiusBottomEnd="14dp"
@@ -277,7 +284,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:textColor="@color/text_primary"
-                    android:textColorHint="#AAAAAA"
+                    android:textColorHint="@color/text_secondary"
                     android:textSize="15sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -295,6 +302,7 @@
                 app:cornerRadius="14dp" />
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>
 

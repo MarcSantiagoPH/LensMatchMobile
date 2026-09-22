@@ -5,7 +5,7 @@
     <color name="primary_orange_light">#F6BD8A</color>
     <color name="primary_orange_tint">#FDEBDD</color>
     <color name="primary_orange_text">#B0561B</color>
-    <color name="primary_orange_dark">#2E2E2E</color>
+    <color name="primary_orange_dark">#D17A4A</color>
 
     <!-- Core Secondary (Teal) -->
     <color name="secondary_teal">#5F9EA0</color>
@@ -73,10 +73,10 @@
     <color name="logoCardStroke">@color/border_light</color>
 
     <color name="chipSelectedBg">@color/primary_orange</color>
-    <color name="chipSelectedText">@color/text_primary</color>
+    <color name="chipSelectedText">@color/surface_white</color>
     <color name="chipUnselectedBg">@color/surface_white</color>
     <color name="chipUnselectedText">@color/text_secondary</color>
-    <color name="chipStrokeSelected">@color/primary_orange_dark</color>
+    <color name="chipStrokeSelected">@color/primary_orange</color>
     <color name="chipStrokeUnselected">@color/border_light</color>
 
     <color name="badgeBg">@color/secondary_teal_tint</color>
@@ -87,7 +87,7 @@
     <color name="textBrand">@color/primary_orange_text</color>
     <color name="toolbarIconTint">@color/text_primary</color>
 
-    <color name="accentGold">@color/warning</color>
+    <color name="accentGold">@color/primary_orange</color>
     <color name="accentOrange">@color/primary_orange</color>
     <color name="accentBlue">@color/secondary_teal</color>
 

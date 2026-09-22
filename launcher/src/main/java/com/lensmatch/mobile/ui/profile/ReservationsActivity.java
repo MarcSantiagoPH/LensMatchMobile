@@ -23,6 +23,7 @@ public class ReservationsActivity extends AppCompatActivity {
     private RecyclerView rvReservations;
     private ProgressBar progressReservations;
     private TextView tvEmptyReservations;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,12 +35,12 @@ public class ReservationsActivity extends AppCompatActivity {
             StatusBarUtils.applyWindowInsets(root);
         }
 
-        getWindow().setStatusBarColor(android.graphics.Color.WHITE);
+        getWindow().setStatusBarColor(androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange_dark));
         getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
         androidx.core.view.WindowInsetsControllerCompat insetsController =
                 androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         if (insetsController != null) {
-            insetsController.setAppearanceLightStatusBars(true);
+            insetsController.setAppearanceLightStatusBars(false);
             insetsController.setAppearanceLightNavigationBars(true);
         }
 
@@ -49,6 +50,17 @@ public class ReservationsActivity extends AppCompatActivity {
         rvReservations = findViewById(R.id.rv_reservations);
         progressReservations = findViewById(R.id.progress_reservations);
         tvEmptyReservations = findViewById(R.id.tv_empty_reservations);
+        swipeRefresh = findViewById(R.id.swipe_refresh_reservations);
+
+        if (swipeRefresh != null) {
+            swipeRefresh.setColorSchemeColors(
+                    androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange),
+                    androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange_dark)
+            );
+            swipeRefresh.setOnRefreshListener(this::loadReservations);
+            swipeRefresh.setOnChildScrollUpCallback((parent, child) ->
+                    rvReservations != null && rvReservations.getVisibility() == View.VISIBLE && rvReservations.canScrollVertically(-1));
+        }
 
         rvReservations.setLayoutManager(new LinearLayoutManager(this));
 
@@ -62,13 +74,16 @@ public class ReservationsActivity extends AppCompatActivity {
     }
 
     private void loadReservations() {
-        if (progressReservations != null) progressReservations.setVisibility(View.VISIBLE);
+        if (swipeRefresh == null || !swipeRefresh.isRefreshing()) {
+            if (progressReservations != null) progressReservations.setVisibility(View.VISIBLE);
+        }
         if (tvEmptyReservations != null) tvEmptyReservations.setVisibility(View.GONE);
 
         FirestoreService.getUserReservations(new FirestoreService.Callback<List<ReservationModel>>() {
             @Override
             public void onSuccess(List<ReservationModel> list) {
                 if (isFinishing() || isDestroyed()) return;
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
                 if (progressReservations != null) progressReservations.setVisibility(View.GONE);
 
                 if (list == null || list.isEmpty()) {
@@ -87,6 +102,7 @@ public class ReservationsActivity extends AppCompatActivity {
             @Override
             public void onError(String errorMessage) {
                 if (isFinishing() || isDestroyed()) return;
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
                 if (progressReservations != null) progressReservations.setVisibility(View.GONE);
                 if (tvEmptyReservations != null) {
                     tvEmptyReservations.setText("No active reservations.");

@@ -255,11 +255,54 @@ public class FirestoreService {
                 .document(user.getUid())
                 .set(updateData, SetOptions.merge())
                 .addOnSuccessListener(aVoid -> {
+                    if (fullName != null && !fullName.trim().isEmpty()) {
+                        com.google.firebase.auth.UserProfileChangeRequest profileUpdates =
+                                new com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                                        .setDisplayName(fullName.trim())
+                                        .build();
+                        user.updateProfile(profileUpdates);
+                    }
                     if (callback != null) callback.onSuccess(null);
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error updating customer profile: " + e.getMessage(), e);
                     if (callback != null) callback.onError("Failed to update profile: " + e.getMessage());
+                });
+    }
+
+    public static void loadCustomerProfile(Callback<Map<String, Object>> callback) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            if (callback != null) callback.onError("Not authenticated");
+            return;
+        }
+
+        getDb().collection(COLLECTION_CUSTOMERS)
+                .document(user.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists() && documentSnapshot.getData() != null) {
+                        Map<String, Object> data = documentSnapshot.getData();
+                        String fullName = data.containsKey("fullName") && data.get("fullName") != null
+                                ? String.valueOf(data.get("fullName")).trim() : "";
+                        String phone = data.containsKey("phoneNumber") && data.get("phoneNumber") != null
+                                ? String.valueOf(data.get("phoneNumber")).trim() : "";
+                        String address = data.containsKey("address") && data.get("address") != null
+                                ? String.valueOf(data.get("address")).trim() : "";
+                        String email = data.containsKey("email") && data.get("email") != null
+                                ? String.valueOf(data.get("email")).trim() : (user.getEmail() != null ? user.getEmail() : "");
+
+                        if (!fullName.isEmpty()) {
+                            AppState.getInstance().updateAccountDetails(fullName, phone, address, email);
+                        }
+                        if (callback != null) callback.onSuccess(data);
+                    } else {
+                        if (callback != null) callback.onSuccess(null);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error fetching customer profile: " + e.getMessage(), e);
+                    if (callback != null) callback.onError(e.getMessage());
                 });
     }
 
@@ -304,6 +347,20 @@ public class FirestoreService {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
+                        Map<String, Object> data = documentSnapshot.getData();
+                        if (data != null) {
+                            String name = data.containsKey("fullName") && data.get("fullName") != null
+                                    ? String.valueOf(data.get("fullName")).trim() : "";
+                            String phone = data.containsKey("phoneNumber") && data.get("phoneNumber") != null
+                                    ? String.valueOf(data.get("phoneNumber")).trim() : "";
+                            String address = data.containsKey("address") && data.get("address") != null
+                                    ? String.valueOf(data.get("address")).trim() : "";
+                            String mail = data.containsKey("email") && data.get("email") != null
+                                    ? String.valueOf(data.get("email")).trim() : (user.getEmail() != null ? user.getEmail() : "");
+                            if (!name.isEmpty()) {
+                                AppState.getInstance().updateAccountDetails(name, phone, address, mail);
+                            }
+                        }
                         if (callback != null) callback.onSuccess(null);
                     } else {
                         Map<String, Object> initialData = new HashMap<>();

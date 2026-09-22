@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "2770988839-puf5t2v60o363782gqr9a8qktjmhf8gk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.franselle.lensmatch.lensmatch",
+            "certificate_hash": "4389df812c6f23ef2541c82215fbbf54c9f6444d"
+          }
+        },
+        {
           "client_id": "2770988839-ojjsu9eb754jdfo6li1ej565n1actj2g.apps.googleusercontent.com",
           "client_type": 3
         }

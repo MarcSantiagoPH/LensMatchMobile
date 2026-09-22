@@ -61,8 +61,14 @@ public class GoogleAuthHelper {
             }
             return;
         }
-        Intent signInIntent = googleSignInClient.getSignInIntent();
-        launcher.launch(signInIntent);
+        // Sign out of previous Google session first to ensure Google Play Services
+        // always shows the Account Chooser dialog ("Choose an account") every time,
+        // rather than automatically logging in with the previously selected account.
+        googleSignInClient.signOut().addOnCompleteListener(activity, task -> {
+            if (activity.isFinishing() || activity.isDestroyed()) return;
+            Intent signInIntent = googleSignInClient.getSignInIntent();
+            launcher.launch(signInIntent);
+        });
     }
 
     public void handleSignInResult(Intent data) {

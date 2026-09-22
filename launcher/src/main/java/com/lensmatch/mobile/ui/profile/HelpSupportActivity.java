@@ -27,12 +27,12 @@ public class HelpSupportActivity extends AppCompatActivity {
         View root = findViewById(R.id.help_support_root);
         StatusBarUtils.applyWindowInsets(root);
 
-        getWindow().setStatusBarColor(android.graphics.Color.WHITE);
+        getWindow().setStatusBarColor(androidx.core.content.ContextCompat.getColor(this, R.color.primary_orange_dark));
         getWindow().setNavigationBarColor(android.graphics.Color.WHITE);
         androidx.core.view.WindowInsetsControllerCompat insetsController =
                 androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         if (insetsController != null) {
-            insetsController.setAppearanceLightStatusBars(true);
+            insetsController.setAppearanceLightStatusBars(false);
             insetsController.setAppearanceLightNavigationBars(true);
         }
 
@@ -42,6 +42,15 @@ public class HelpSupportActivity extends AppCompatActivity {
         TextView tvClinicName = findViewById(R.id.tv_support_clinic_name);
         TextView tvSubtitle = findViewById(R.id.tv_support_subtitle);
         MaterialButton btnContact = findViewById(R.id.btn_contact_support);
+        View cardGuidelines = findViewById(R.id.card_view_guidelines);
+
+        if (cardGuidelines != null) {
+            cardGuidelines.setOnClickListener(v -> {
+                Intent intent = new Intent(this, com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.class);
+                intent.putExtra(com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.EXTRA_FROM_SUPPORT, true);
+                startActivity(intent);
+            });
+        }
 
         FirestoreService.getClinicInformation(new FirestoreService.Callback<ClinicModel>() {
             @Override

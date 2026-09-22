@@ -36,7 +36,10 @@ public class LoginActivity extends AppCompatActivity {
         // Check if user is already logged in via Firebase
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
-            String name = current.getDisplayName() != null && !current.getDisplayName().isEmpty() ? current.getDisplayName() : "User";
+            String savedName = AppState.getInstance().getUserName();
+            String name = (savedName != null && !savedName.trim().isEmpty() && !"John Doe".equals(savedName) && !"User".equals(savedName))
+                    ? savedName
+                    : (current.getDisplayName() != null && !current.getDisplayName().isEmpty() ? current.getDisplayName() : "User");
             AppState.getInstance().setUserProfile(name, current.getEmail(), null);
             handleLogin();
             return;
@@ -187,9 +190,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void handleLogin() {
-        AppState.getInstance().setLastActiveTab(R.id.nav_home);
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("open_tab", R.id.nav_home);
+        Intent intent = new Intent(this, com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

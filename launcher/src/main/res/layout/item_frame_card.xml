@@ -58,7 +58,7 @@
             android:paddingHorizontal="8dp"
             android:paddingVertical="2dp"
             android:text="Aviator"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/secondary_teal_dark"
             android:textSize="11sp" />
 
         <TextView

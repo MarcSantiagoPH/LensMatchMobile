@@ -217,9 +217,7 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private void proceedToMain() {
-        AppState.getInstance().setLastActiveTab(R.id.nav_home);
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("open_tab", R.id.nav_home);
+        Intent intent = new Intent(this, com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

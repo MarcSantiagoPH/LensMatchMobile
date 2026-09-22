@@ -52,7 +52,7 @@ public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.ViewHolder> 
             holder.tvShapeBadge.setTextColor(context.getColor(R.color.textSecondary));
             holder.itemView.setAlpha(0.6f);
         } else {
-            holder.tvShapeBadge.setTextColor(context.getColor(R.color.accentGold));
+            holder.tvShapeBadge.setTextColor(context.getColor(R.color.secondary_teal_dark));
             holder.itemView.setAlpha(1.0f);
         }
 
