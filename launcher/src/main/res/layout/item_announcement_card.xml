@@ -7,9 +7,9 @@
     android:layout_marginBottom="12dp"
     android:clickable="true"
     android:focusable="true"
-    app:cardBackgroundColor="@color/surface_white"
+    app:cardBackgroundColor="@color/primary_orange_tint"
     app:cardCornerRadius="18dp"
-    app:strokeColor="@color/border_light"
+    app:strokeColor="@color/primary_orange"
     app:strokeWidth="1.5dp"
     app:cardElevation="2dp">
 
@@ -67,14 +67,14 @@
             android:layout_marginTop="4dp"
             android:lineSpacingExtra="2dp"
             android:text="Announcement description text goes here."
-            android:textColor="@color/text_secondary"
+            android:textColor="@color/text_primary"
             android:textSize="13sp" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginVertical="12dp"
-            android:background="@color/border_light" />
+            android:background="@color/primary_orange" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -87,7 +87,7 @@
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:src="@drawable/ic_location"
-                app:tint="@color/secondary_teal" />
+                app:tint="@color/text_primary" />
 
             <TextView
                 android:id="@+id/tv_announcement_footer_label"
@@ -96,7 +96,7 @@
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:text="Franselle Optical Clinic"
-                android:textColor="@color/text_secondary"
+                android:textColor="@color/text_primary"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
@@ -105,7 +105,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="View Details →"
-                android:textColor="@color/secondary_teal_dark"
+                android:textColor="@color/text_primary"
                 android:textSize="12sp"
                 android:textStyle="bold" />
         </LinearLayout>

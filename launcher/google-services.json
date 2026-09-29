@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "2770988839-0deae35qqlo3hu8oqvl7pbabbtqlddja.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.franselle.lensmatch.lensmatch",
+            "certificate_hash": "cb594d9730f06d2f6d53693c0bdce48b8fa438ba"
+          }
+        },
+        {
           "client_id": "2770988839-alv3hi6m53dmdc7u6d3bclv80iaeui79.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

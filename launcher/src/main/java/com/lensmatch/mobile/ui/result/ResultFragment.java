@@ -33,12 +33,13 @@ public class ResultFragment extends Fragment {
     private TextView tvDetectedShape;
     private TextView tvConfidenceMatch;
     private TextView tvAiDescription;
-    private TextView tvRecommendedReason;
     private ChipGroup chipGroupRecommended;
     private ChipGroup chipGroupAvoided;
     private MaterialButton btnTryFramesOn;
     private View cardBorderlineNotice;
     private TextView tvBorderlineNotes;
+    private TextView tvRecommendedDesc;
+    private TextView tvAvoidDesc;
     private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh;
 
     private String currentShape = "Oval";
@@ -68,9 +69,10 @@ public class ResultFragment extends Fragment {
         cardBorderlineNotice = root.findViewById(R.id.card_borderline_notice);
         tvBorderlineNotes = root.findViewById(R.id.tv_borderline_notes);
         tvAiDescription = root.findViewById(R.id.tv_ai_description);
-        tvRecommendedReason = root.findViewById(R.id.tv_recommended_reason);
         chipGroupRecommended = root.findViewById(R.id.chip_group_recommended);
         chipGroupAvoided = root.findViewById(R.id.chip_group_avoided);
+        tvRecommendedDesc = root.findViewById(R.id.tv_recommended_desc);
+        tvAvoidDesc = root.findViewById(R.id.tv_avoid_desc);
         btnTryFramesOn = root.findViewById(R.id.btn_try_frames_on);
 
         btnTryFramesOn.setOnClickListener(v -> {
@@ -216,12 +218,12 @@ public class ResultFragment extends Fragment {
         if (tvAiDescription != null) {
             tvAiDescription.setText(rec.explanation);
         }
-
-        if (tvRecommendedReason != null) {
-            tvRecommendedReason.setText("Flattering frame silhouettes that balance your unique facial geometry.");
+        if (tvRecommendedDesc != null && rec.primaryExplanation != null) {
+            tvRecommendedDesc.setText(rec.primaryExplanation);
         }
-
-        // tvAvoidedReason has been removed from the layout, so we no longer try to set it.
+        if (tvAvoidDesc != null && rec.secondaryExplanation != null) {
+            tvAvoidDesc.setText(rec.secondaryExplanation);
+        }
 
         chipGroupRecommended.removeAllViews();
         chipGroupAvoided.removeAllViews();

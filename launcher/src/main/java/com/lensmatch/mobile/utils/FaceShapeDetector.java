@@ -10,11 +10,15 @@ public class FaceShapeDetector {
         public final List<String> primary;
         public final List<String> secondary;
         public final String explanation;
+        public final String primaryExplanation;
+        public final String secondaryExplanation;
 
-        public ShapeRecommendation(List<String> primary, List<String> secondary, String explanation) {
+        public ShapeRecommendation(List<String> primary, List<String> secondary, String explanation, String primaryExplanation, String secondaryExplanation) {
             this.primary = primary;
             this.secondary = secondary;
             this.explanation = explanation;
+            this.primaryExplanation = primaryExplanation;
+            this.secondaryExplanation = secondaryExplanation;
         }
     }
 
@@ -162,6 +166,40 @@ public class FaceShapeDetector {
             secondary.remove(secondary.size() - 1);
         }
 
-        return new ShapeRecommendation(primary, secondary, explanation);
+        String primaryExplanation = "These frames complement your face shape by balancing your natural features.";
+        String secondaryExplanation = "These frames might exaggerate your facial contours in less flattering ways.";
+
+        switch (shape) {
+            case "Oval":
+                primaryExplanation = "Angular frames add structure while maintaining your natural balance.";
+                secondaryExplanation = "Oversized or overly round frames may overwhelm your balanced proportions.";
+                break;
+            case "Round":
+                primaryExplanation = "Angular frame shapes add definition and contrast to your softer facial contours.";
+                secondaryExplanation = "Round frames emphasize the roundness of your face and offer little contrast.";
+                break;
+            case "Square":
+                primaryExplanation = "Rounded and curved frames provide visual balance against a stronger or more angular jawline.";
+                secondaryExplanation = "Angular frames can make your face look overly sharp or rigid.";
+                break;
+            case "Oblong":
+                primaryExplanation = "Frames with more height and visual depth complement your longer facial proportions.";
+                secondaryExplanation = "Narrow frames make your face look longer rather than balanced.";
+                break;
+            case "Heart":
+                primaryExplanation = "Frames with softer curves and balanced proportions complement your wider upper face and tapered jaw.";
+                secondaryExplanation = "Top-heavy frames emphasize the upper part of your face, unbalancing your jaw.";
+                break;
+            case "Diamond":
+                primaryExplanation = "Soft curves and upper-emphasized styles complement your prominent cheekbones and balanced facial structure.";
+                secondaryExplanation = "Narrow frames can make your cheekbones look wider and disrupt your natural balance.";
+                break;
+            case "Triangle":
+                primaryExplanation = "Frames with more visual weight around the upper rim help balance a stronger or wider jawline.";
+                secondaryExplanation = "Bottom-heavy frames draw too much attention to your jaw, causing visual imbalance.";
+                break;
+        }
+
+        return new ShapeRecommendation(primary, secondary, explanation, primaryExplanation, secondaryExplanation);
     }
 }

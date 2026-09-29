@@ -58,15 +58,16 @@ public class FrameAdapter extends RecyclerView.Adapter<FrameAdapter.ViewHolder> 
 
         holder.ivFrame.setImageTintList(null);
         String imageUrl = frame.getImageUrl();
+        int frameIcon = com.lensmatch.mobile.utils.IconMapper.getFrameIcon(frame.getDisplayFrameStyle());
         if (imageUrl != null && !imageUrl.trim().isEmpty()) {
             Glide.with(context)
                     .load(imageUrl)
                     .fitCenter()
-                    .placeholder(R.drawable.ic_eyeglasses)
-                    .error(R.drawable.ic_eyeglasses)
+                    .placeholder(frameIcon)
+                    .error(frameIcon)
                     .into(holder.ivFrame);
         } else {
-            holder.ivFrame.setImageResource(R.drawable.ic_eyeglasses);
+            holder.ivFrame.setImageResource(frameIcon);
         }
 
         if (holder.tvNewBadge != null) {

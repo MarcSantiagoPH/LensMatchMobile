@@ -281,7 +281,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Reason for Cancellation"
-                            android:textColor="#D32F2F"
+                            android:textColor="@color/redError"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -311,7 +311,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/label_rejection_reason"
-                            android:textColor="#D32F2F"
+                            android:textColor="@color/redError"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -498,14 +498,14 @@
                 android:layout_height="52dp"
                 android:layout_marginTop="24dp"
                 android:text="Cancel Reservation"
-                android:textColor="#D32F2F"
+                android:textColor="@color/redError"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:cornerRadius="14dp"
                 app:icon="@drawable/ic_close"
                 app:iconGravity="textStart"
-                app:iconTint="#D32F2F"
-                app:strokeColor="#D32F2F"
+                app:iconTint="@color/redError"
+                app:strokeColor="@color/redError"
                 app:strokeWidth="1.5dp" />
 
         </LinearLayout>

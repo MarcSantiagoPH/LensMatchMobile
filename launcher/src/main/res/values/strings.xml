@@ -53,4 +53,21 @@
     <string name="label_reservation_deadline">Reservation Deadline</string>
     <string name="label_rejection_reason">Reason for Rejection</string>
     <string name="preview_rejection_reason">Frame unavailable</string>
+    <string name="placeholder_name">John Doe</string>
+    <string name="placeholder_initials">JD</string>
+    <string name="placeholder_email">johndoe@example.com</string>
+    <string name="personal_info_title">PERSONAL INFORMATION</string>
+    <string name="btn_save_changes">Save Changes</string>
+    <string name="lensmatch_guide">LensMatch Guide</string>
+    <string name="btn_skip">Skip</string>
+    <string name="btn_next">Next</string>
+    <string name="btn_back">Back</string>
+    <string name="label_recommended">Recommended</string>
+    <string name="label_all_frames">All Frames</string>
+    <string name="label_color_variations">Color Variations:</string>
+    <string name="msg_preparing_3d">Preparing 3D Frame Preview</string>
+    <string name="msg_calibrating_face">Calibrating face tracking sensors...</string>
+    <string name="msg_keep_face_visible">Center your face.</string>
+    <string name="msg_scanning_face">Scanning...</string>
+    <string name="placeholder_frame_name">Classic Aviator</string>
 </resources>

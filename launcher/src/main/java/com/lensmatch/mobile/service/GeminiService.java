@@ -60,7 +60,9 @@ public class GeminiService {
                     + "return ONLY a single valid JSON object with exactly these keys:\n"
                     + "\"primary\": array of up to 3 strings\n"
                     + "\"secondary\": array of up to 2 strings\n"
-                    + "\"explanation\": string, 1-2 sentences (max 200 characters)\n\n"
+                    + "\"explanation\": string, 1-2 sentences (max 200 characters)\n"
+                    + "\"primaryExplanation\": string, 1 sentence explaining why primary frames suit the face shape\n"
+                    + "\"secondaryExplanation\": string, 1 sentence explaining why secondary frames should be avoided\n\n"
                     + "Both arrays must choose only from this exact list: "
                     + "[\"Round\", \"Cat-Eye\", \"Rectangle\", \"Wayfarer\", \"Square\", \"Aviator\", \"Geometric\", \"Browline\", \"Oval\"]. "
                     + "No frame shape may appear in both arrays.\n\n"
@@ -120,6 +122,8 @@ public class GeminiService {
                             String[] primaryArr = gson.fromJson(parsed.getAsJsonArray("primary"), String[].class);
                             String[] secondaryArr = gson.fromJson(parsed.getAsJsonArray("secondary"), String[].class);
                             String explanation = parsed.has("explanation") ? parsed.get("explanation").getAsString() : "";
+                            String primaryExplanation = parsed.has("primaryExplanation") ? parsed.get("primaryExplanation").getAsString() : "These frames highlight your best features.";
+                            String secondaryExplanation = parsed.has("secondaryExplanation") ? parsed.get("secondaryExplanation").getAsString() : "These frames may clash with your facial contours.";
 
                             List<String> rawPrimary = primaryArr != null ? Arrays.asList(primaryArr) : new ArrayList<>();
                             List<String> rawSecondary = secondaryArr != null ? Arrays.asList(secondaryArr) : new ArrayList<>();
@@ -150,7 +154,7 @@ public class GeminiService {
                                 return;
                             }
 
-                            FaceShapeDetector.ShapeRecommendation rec = new FaceShapeDetector.ShapeRecommendation(validPrimary, validSecondary, explanation);
+                            FaceShapeDetector.ShapeRecommendation rec = new FaceShapeDetector.ShapeRecommendation(validPrimary, validSecondary, explanation, primaryExplanation, secondaryExplanation);
                             handler.post(() -> callback.onSuccess(rec));
                         } else {
                             handler.post(() -> callback.onError("Model did not return JSON:\n" + rawText));

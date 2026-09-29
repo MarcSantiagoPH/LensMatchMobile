@@ -9,7 +9,7 @@
         android:id="@+id/profile_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/surface_white"
+        android:background="@color/background_main"
         android:fillViewport="true"
         android:clipToPadding="false"
         android:scrollbars="none">
@@ -176,7 +176,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="View past face analysis results"
+                                android:text="View past scans"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
                         </LinearLayout>
@@ -235,7 +235,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="Manage your reserved frames"
+                                android:text="Manage reservations"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
                         </LinearLayout>
@@ -292,7 +292,7 @@
 
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="14dp" android:layout_weight="1" android:orientation="vertical">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Account Details" android:textColor="@color/text_primary" android:textSize="15sp" android:textStyle="bold" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="Update your personal info" android:textColor="@color/text_secondary" android:textSize="12sp" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="Edit info" android:textColor="@color/text_secondary" android:textSize="12sp" />
                         </LinearLayout>
 
                         <ImageView android:layout_width="14dp" android:layout_height="14dp" android:src="@drawable/ic_chevron_right" app:tint="@color/secondary_teal" />

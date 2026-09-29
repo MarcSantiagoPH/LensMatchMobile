@@ -122,7 +122,7 @@ public class ScanHistoryAdapter extends RecyclerView.Adapter<ScanHistoryAdapter.
             holder.ivScanPhoto.setPadding(0, 0, 0, 0);
             holder.ivScanPhoto.setImageBitmap(bmp);
         } else {
-            showDefaultScanIcon(holder.ivScanPhoto);
+            showDefaultScanIcon(holder.ivScanPhoto, scan.getFaceShape());
         }
 
         holder.btnViewResult.setOnClickListener(v -> {
@@ -134,12 +134,12 @@ public class ScanHistoryAdapter extends RecyclerView.Adapter<ScanHistoryAdapter.
         });
     }
 
-    private void showDefaultScanIcon(ImageView iv) {
+    private void showDefaultScanIcon(ImageView iv, String shape) {
         if (iv == null) return;
         int p = (int) (8 * iv.getContext().getResources().getDisplayMetrics().density);
         iv.setPadding(p, p, p, p);
         iv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        iv.setImageResource(R.drawable.ic_scan);
+        iv.setImageResource(com.lensmatch.mobile.utils.IconMapper.getFaceIcon(shape));
         iv.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(iv.getContext(), R.color.secondary_teal)));
     }
 

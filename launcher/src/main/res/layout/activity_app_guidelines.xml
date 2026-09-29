@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-black"
                 android:letterSpacing="0.04"
-                android:text="LensMatch Guide"
+                android:text="@string/lensmatch_guide"
                 android:textColor="@color/text_primary"
                 android:textSize="17sp" />
         </LinearLayout>
