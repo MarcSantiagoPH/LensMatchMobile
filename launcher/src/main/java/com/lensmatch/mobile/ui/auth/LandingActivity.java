@@ -23,6 +23,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.ui.MainActivity;
+import com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity;
 import com.lensmatch.mobile.utils.StatusBarUtils;
 
 /**
@@ -267,7 +268,7 @@ public class LandingActivity extends AppCompatActivity {
         if (isNavigating) return;
         isNavigating = true;
 
-        // If user is already authenticated in Firebase, go straight to MainActivity (Homepage)
+        // If user is already authenticated in Firebase, check OTP status
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             String savedName = AppState.getInstance().getUserName();
@@ -276,8 +277,18 @@ public class LandingActivity extends AppCompatActivity {
                     : (currentUser.getDisplayName() != null && !currentUser.getDisplayName().isEmpty() ? currentUser.getDisplayName() : "User");
             AppState.getInstance().setUserProfile(name, currentUser.getEmail(), null);
 
+            if (!AppState.getInstance().isOtpVerifiedForCurrentUser()) {
+                Intent intent = new Intent(this, OtpVerificationActivity.class);
+                intent.putExtra("auto_send_otp", true);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);
+                finish();
+                return;
+            }
+
             if (!AppState.getInstance().hasSeenGuidelines()) {
-                Intent intent = new Intent(this, com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.class);
+                Intent intent = new Intent(this, AppGuidelinesActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_up);

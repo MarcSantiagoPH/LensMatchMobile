@@ -2,6 +2,11 @@ package com.lensmatch.mobile.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
+
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -12,6 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,6 +49,7 @@ public class AppState {
     private boolean hasAcceptedEula = false;
     private long eulaAcceptanceTimestamp = 0;
     private boolean hasSeenGuidelines = false;
+    private String otpVerifiedUid = "";
 
     private AppState() {}
 
@@ -74,6 +81,7 @@ public class AppState {
         state.hasAcceptedEula = prefs.getBoolean("hasAcceptedEula", false);
         state.eulaAcceptanceTimestamp = prefs.getLong("eulaAcceptanceTimestamp", 0);
         state.hasSeenGuidelines = prefs.getBoolean("hasSeenGuidelines", false);
+        state.otpVerifiedUid = prefs.getString("otpVerifiedUid", "");
         state.applyThemeMode();
         state.loadScanHistoryFromPrefs();
     }
@@ -135,8 +143,8 @@ public class AppState {
     }
 
     public void applyThemeMode() {
-        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
-                androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
+        AppCompatDelegate.setDefaultNightMode(
+                AppCompatDelegate.MODE_NIGHT_NO);
     }
 
     public List<FrameModel> getReservedFrames() {
@@ -265,15 +273,35 @@ public class AppState {
         }
     }
 
+    public boolean isOtpVerifiedForCurrentUser() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || user.getUid() == null) return false;
+        return user.getUid().equalsIgnoreCase(otpVerifiedUid);
+    }
+
+    public void setOtpVerifiedUid(String uid) {
+        this.otpVerifiedUid = uid != null ? uid : "";
+        if (prefs != null) {
+            prefs.edit().putString("otpVerifiedUid", this.otpVerifiedUid).apply();
+        }
+    }
+
     public void logout() {
         this.isLoggedIn = false;
         this.hasSeenGuidelines = false;
+        this.otpVerifiedUid = "";
         this.userName = "John Doe";
         this.userEmail = "johndoe@example.com";
         this.userPhone = "";
         this.userAddress = "";
         this.userPhotoUrl = null;
         this.lastActiveTab = 0;
+        this.lastImagePath = null;
+        this.lastDetectedShape = null;
+        this.lastConfidence = 0.94f;
+        this.lastIsBorderline = false;
+        this.lastRunnerUpShape = null;
+        this.lastNotes = null;
         this.scanHistory.clear();
         if (prefs != null) {
             prefs.edit()
@@ -286,6 +314,13 @@ public class AppState {
                     .remove("userPhotoUrl")
                     .remove("lastActiveTab")
                     .remove("scanHistoryList")
+                    .remove("otpVerifiedUid")
+                    .remove("lastImagePath")
+                    .remove("lastDetectedShape")
+                    .remove("lastConfidence")
+                    .remove("lastIsBorderline")
+                    .remove("lastRunnerUpShape")
+                    .remove("lastNotes")
                     .apply();
         }
     }
@@ -345,10 +380,10 @@ public class AppState {
         if (scan == null) return;
         // Auto-backfill Base64 thumbnail from local disk file if missing
         if ((scan.getPhotoBase64() == null || scan.getPhotoBase64().isEmpty()) && scan.getImagePath() != null) {
-            java.io.File file = new java.io.File(scan.getImagePath());
+            File file = new File(scan.getImagePath());
             if (file.exists()) {
                 try {
-                    android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeFile(file.getAbsolutePath());
+                    Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
                     if (bmp != null) {
                         scan.setPhotoBase64(ScanModel.encodeBitmapToBase64Thumbnail(bmp, 240, 70));
                     }
@@ -412,7 +447,7 @@ public class AppState {
                     (cloudScan.getTimestamp() != null && local.getTimestamp() != null &&
                      Math.abs(cloudScan.getTimestamp().getTime() - local.getTimestamp().getTime()) < 5000 &&
                      cloudScan.getFaceShape().equalsIgnoreCase(local.getFaceShape())))) {
-                    if (local.getImagePath() != null && new java.io.File(local.getImagePath()).exists()) {
+                    if (local.getImagePath() != null && new File(local.getImagePath()).exists()) {
                         cloudScan.setImagePath(local.getImagePath());
                     }
                     if (cloudScan.getPhotoBase64() == null || cloudScan.getPhotoBase64().isEmpty()) {
@@ -426,9 +461,9 @@ public class AppState {
             if (!exists) {
                 // If cloudScan has photoBase64 but no local file, write a cache file to disk
                 if (cloudScan.getPhotoBase64() != null && !cloudScan.getPhotoBase64().isEmpty() &&
-                    (cloudScan.getImagePath() == null || !new java.io.File(cloudScan.getImagePath()).exists())) {
+                    (cloudScan.getImagePath() == null || !new File(cloudScan.getImagePath()).exists())) {
                     try {
-                        java.io.File scansDir = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "scans");
+                        File scansDir = new File(Environment.getExternalStorageDirectory(), "scans");
                         // Fallback to internal storage if needed
                     } catch (Throwable ignored) {}
                 }
@@ -467,10 +502,10 @@ public class AppState {
                     if (scan != null) {
                         // Auto-backfill Base64 thumbnail if missing but local disk image is available
                         if ((scan.getPhotoBase64() == null || scan.getPhotoBase64().isEmpty()) && scan.getImagePath() != null) {
-                            java.io.File file = new java.io.File(scan.getImagePath());
+                            File file = new File(scan.getImagePath());
                             if (file.exists()) {
                                 try {
-                                    android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeFile(file.getAbsolutePath());
+                                    Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
                                     if (bmp != null) {
                                         scan.setPhotoBase64(ScanModel.encodeBitmapToBase64Thumbnail(bmp, 240, 70));
                                         needResave = true;
@@ -488,13 +523,16 @@ public class AppState {
         if (needResave) {
             saveScanHistoryToPrefs();
         }
-        // If scan history was empty but we have a last detected shape, add it as initial scan
-        restoreLastScanIfEmpty();
     }
 
     public synchronized void restoreLastScanIfEmpty() {
         if (scanHistory.isEmpty() && lastDetectedShape != null && !lastDetectedShape.isEmpty() && !"Unknown".equalsIgnoreCase(lastDetectedShape)) {
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            FirebaseUser user = null;
+            try {
+                user = FirebaseAuth.getInstance().getCurrentUser();
+            } catch (IllegalStateException ignored) {
+                // FirebaseApp is not initialized in secondary processes such as :unity.
+            }
             String cId = user != null ? user.getUid() : "local";
             String cName = (userName != null && !userName.isEmpty() && !"John Doe".equals(userName))
                     ? userName
@@ -522,10 +560,10 @@ public class AppState {
                     "",
                     new Date()
             );
-            if (lastImagePath != null && new java.io.File(lastImagePath).exists()) {
+            if (lastImagePath != null && new File(lastImagePath).exists()) {
                 initialScan.setImagePath(lastImagePath);
                 try {
-                    android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeFile(lastImagePath);
+                    Bitmap bmp = BitmapFactory.decodeFile(lastImagePath);
                     if (bmp != null) {
                         initialScan.setPhotoBase64(ScanModel.encodeBitmapToBase64Thumbnail(bmp, 240, 70));
                     }

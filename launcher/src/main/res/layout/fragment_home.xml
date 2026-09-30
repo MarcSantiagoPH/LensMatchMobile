@@ -465,11 +465,12 @@
 
             <!-- 2. ANNOUNCEMENTS SECTION -->
             <TextView
+                android:id="@+id/tv_home_announcements_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="26dp"
                 android:layout_marginBottom="10dp"
-                android:text="UPDATES"
+                android:text="ANNOUNCEMENTS"
                 android:textColor="@color/text_secondary"
                 android:textSize="11sp"
                 android:textStyle="bold"

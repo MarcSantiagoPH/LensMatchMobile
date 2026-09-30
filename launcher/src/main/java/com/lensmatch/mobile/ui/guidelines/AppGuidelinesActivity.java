@@ -16,6 +16,7 @@ import com.google.android.material.button.MaterialButton;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.ui.MainActivity;
+import com.lensmatch.mobile.ui.auth.OtpVerificationActivity;
 import com.lensmatch.mobile.utils.StatusBarUtils;
 
 import java.util.ArrayList;
@@ -208,6 +209,17 @@ public class AppGuidelinesActivity extends AppCompatActivity {
         }
 
         AppState.getInstance().setHasSeenGuidelines(true);
+
+        if (!AppState.getInstance().isOtpVerifiedForCurrentUser()) {
+            Intent intent = new Intent(this, OtpVerificationActivity.class);
+            intent.putExtra("auto_send_otp", true);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            finish();
+            return;
+        }
+
         AppState.getInstance().setLastActiveTab(R.id.nav_home);
 
         Intent intent = new Intent(this, MainActivity.class);

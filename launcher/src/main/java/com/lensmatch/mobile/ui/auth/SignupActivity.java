@@ -24,6 +24,7 @@ import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.service.FirestoreService;
 import com.lensmatch.mobile.ui.MainActivity;
+import com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity;
 import com.lensmatch.mobile.utils.GoogleAuthHelper;
 import com.lensmatch.mobile.utils.StatusBarUtils;
 
@@ -217,7 +218,12 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private void proceedToMain() {
-        Intent intent = new Intent(this, com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.class);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.getUid() != null) {
+            AppState.getInstance().setOtpVerifiedUid(user.getUid());
+        }
+
+        Intent intent = new Intent(this, AppGuidelinesActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

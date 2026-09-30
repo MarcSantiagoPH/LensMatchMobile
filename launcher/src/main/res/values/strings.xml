@@ -40,7 +40,7 @@
     <string name="err_no_email_app">No email client found. Please contact support.</string>
 
     <!-- AR Navigation Strings -->
-    <string name="btn_ar_continue">Continue →</string>
+    <string name="btn_ar_continue">Reserve →</string>
 
     <!-- Frame Detail Color Labels -->
     <string name="label_detail_color">Color</string>
@@ -53,6 +53,8 @@
     <string name="label_reservation_deadline">Reservation Deadline</string>
     <string name="label_rejection_reason">Reason for Rejection</string>
     <string name="preview_rejection_reason">Frame unavailable</string>
+    <string name="announcement_title_singular">ANNOUNCEMENT</string>
+    <string name="announcement_title_plural">ANNOUNCEMENTS</string>
     <string name="placeholder_name">John Doe</string>
     <string name="placeholder_initials">JD</string>
     <string name="placeholder_email">johndoe@example.com</string>

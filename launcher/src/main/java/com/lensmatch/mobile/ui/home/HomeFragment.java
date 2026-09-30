@@ -17,6 +17,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
@@ -29,10 +31,12 @@ import com.lensmatch.mobile.data.AppState;
 import com.lensmatch.mobile.data.ReservationModel;
 import com.lensmatch.mobile.service.FirestoreService;
 import com.lensmatch.mobile.ui.MainActivity;
+import com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity;
 import com.lensmatch.mobile.ui.profile.HelpSupportActivity;
 import com.lensmatch.mobile.ui.profile.ReservationDetailActivity;
 import com.lensmatch.mobile.ui.profile.ReservationsActivity;
 import com.lensmatch.mobile.ui.profile.ScanHistoryActivity;
+import com.lensmatch.mobile.utils.MaxHeightNestedScrollView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,15 +44,16 @@ import java.util.List;
 public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
     private TextView tvReservationsCount;
+    private TextView tvAnnouncementsTitle;
     private ImageView ivHomeLogo;
     private LinearLayout layoutAnnouncementsContainer;
     private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh;
-    private androidx.core.widget.NestedScrollView homeScrollView;
-    private com.lensmatch.mobile.utils.MaxHeightNestedScrollView scrollAnnouncementsContainer;
+    private NestedScrollView homeScrollView;
+    private MaxHeightNestedScrollView scrollAnnouncementsContainer;
 
     // Reservation Status UI components
     private MaterialCardView cardNoReservation;
-    private com.lensmatch.mobile.utils.MaxHeightNestedScrollView scrollReservationsContainer;
+    private MaxHeightNestedScrollView scrollReservationsContainer;
     private LinearLayout layoutReservationsContainer;
 
     @Nullable
@@ -62,14 +67,15 @@ public class HomeFragment extends Fragment {
         cardNoReservation = root.findViewById(R.id.card_no_reservation);
         layoutReservationsContainer = root.findViewById(R.id.layout_reservations_container);
         tvReservationsCount = root.findViewById(R.id.tv_reservations_count);
+        tvAnnouncementsTitle = root.findViewById(R.id.tv_home_announcements_title);
         ivHomeLogo = root.findViewById(R.id.iv_home_logo);
         MaterialButton btnScanFace = root.findViewById(R.id.btn_scan_face);
 
         swipeRefresh = root.findViewById(R.id.swipe_refresh_home);
         if (swipeRefresh != null) {
             swipeRefresh.setColorSchemeColors(
-                    androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange),
-                    androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange_dark)
+                    ContextCompat.getColor(requireContext(), R.color.primary_orange),
+                    ContextCompat.getColor(requireContext(), R.color.primary_orange_dark)
             );
             swipeRefresh.setOnRefreshListener(this::refreshHomeData);
             swipeRefresh.setOnChildScrollUpCallback((parent, child) -> {
@@ -137,13 +143,11 @@ public class HomeFragment extends Fragment {
         View btnHomeAppGuidelines = root.findViewById(R.id.btn_home_app_guidelines);
         if (btnHomeAppGuidelines != null) {
             btnHomeAppGuidelines.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.class);
-                intent.putExtra(com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.EXTRA_FROM_SUPPORT, true);
+                Intent intent = new Intent(requireContext(), AppGuidelinesActivity.class);
+                intent.putExtra(AppGuidelinesActivity.EXTRA_FROM_SUPPORT, true);
                 startActivity(intent);
             });
         }
-
-
 
         if (actionQuickCatalog != null) {
             actionQuickCatalog.setOnClickListener(v -> {
@@ -199,7 +203,7 @@ public class HomeFragment extends Fragment {
             swipeRefresh.setRefreshing(true);
         }
         updateLogoForTheme();
-        com.lensmatch.mobile.service.FirestoreService.loadCustomerProfile(null);
+        FirestoreService.loadCustomerProfile(null);
         updateQuickLinks();
         loadAnnouncements();
 
@@ -271,7 +275,7 @@ public class HomeFragment extends Fragment {
                                 } else if ("Cancelled".equalsIgnoreCase(status) || "Declined".equalsIgnoreCase(status) || "Rejected".equalsIgnoreCase(status)) {
                                     tvBadge.setTextColor(Color.parseColor("#EF4444"));
                                 } else {
-                                    tvBadge.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange));
+                                    tvBadge.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_orange));
                                 }
                             }
 
@@ -344,7 +348,7 @@ public class HomeFragment extends Fragment {
         layoutAnnouncementsContainer.removeAllViews();
 
         ProgressBar pb = new ProgressBar(requireContext());
-        pb.setIndeterminateTintList(ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange)));
+        pb.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.primary_orange)));
         LinearLayout.LayoutParams pbParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         pbParams.gravity = Gravity.CENTER_HORIZONTAL;
@@ -358,9 +362,12 @@ public class HomeFragment extends Fragment {
                 layoutAnnouncementsContainer.removeAllViews();
 
                 if (list == null || list.isEmpty()) {
+                    updateAnnouncementsTitle(0);
                     showFallbackAnnouncementCard();
                     return;
                 }
+
+                updateAnnouncementsTitle(list.size());
 
                 LayoutInflater inflater = LayoutInflater.from(requireContext());
                 for (AnnouncementModel item : list) {
@@ -379,7 +386,7 @@ public class HomeFragment extends Fragment {
                     if ("NEW ARRIVALS".equals(category)) {
                         if (tvBadge != null) {
                             tvBadge.setBackgroundResource(R.drawable.bg_new_badge);
-                            tvBadge.setBackgroundTintList(ColorStateList.valueOf(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary_orange)));
+                            tvBadge.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.primary_orange)));
                             tvBadge.setTextColor(Color.parseColor("#FFFFFF"));
                         }
                         if (ivFooterIcon != null) ivFooterIcon.setImageResource(R.drawable.ic_eyeglasses);
@@ -424,14 +431,25 @@ public class HomeFragment extends Fragment {
                 if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
                 if (!isAdded() || getContext() == null || layoutAnnouncementsContainer == null) return;
                 Log.e(TAG, "Error loading announcements: " + errorMessage);
+                updateAnnouncementsTitle(0);
                 showFallbackAnnouncementCard();
             }
         });
     }
 
+    private void updateAnnouncementsTitle(int count) {
+        if (tvAnnouncementsTitle == null || !isAdded()) return;
+        if (count == 1) {
+            tvAnnouncementsTitle.setText(R.string.announcement_title_singular);
+        } else {
+            tvAnnouncementsTitle.setText(R.string.announcement_title_plural);
+        }
+    }
+
     private void showFallbackAnnouncementCard() {
         if (layoutAnnouncementsContainer == null || !isAdded() || getContext() == null) return;
         layoutAnnouncementsContainer.removeAllViews();
+        updateAnnouncementsTitle(0);
 
         View card = LayoutInflater.from(requireContext()).inflate(R.layout.item_announcement_card, layoutAnnouncementsContainer, false);
         TextView tvBadge = card.findViewById(R.id.tv_announcement_badge);

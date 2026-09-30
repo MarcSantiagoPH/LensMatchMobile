@@ -17,7 +17,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.lensmatch.mobile.R;
 import com.lensmatch.mobile.data.AppState;
+import com.lensmatch.mobile.service.AuthApiService;
+import com.lensmatch.mobile.service.FirestoreService;
 import com.lensmatch.mobile.ui.MainActivity;
+import com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity;
 import com.lensmatch.mobile.utils.GoogleAuthHelper;
 import com.lensmatch.mobile.utils.StatusBarUtils;
 
@@ -41,6 +44,16 @@ public class LoginActivity extends AppCompatActivity {
                     ? savedName
                     : (current.getDisplayName() != null && !current.getDisplayName().isEmpty() ? current.getDisplayName() : "User");
             AppState.getInstance().setUserProfile(name, current.getEmail(), null);
+
+            if (!AppState.getInstance().isOtpVerifiedForCurrentUser()) {
+                Intent intent = new Intent(this, OtpVerificationActivity.class);
+                intent.putExtra("auto_send_otp", true);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+                return;
+            }
+
             handleLogin();
             return;
         }
@@ -190,8 +203,54 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void handleLogin() {
-        com.lensmatch.mobile.service.FirestoreService.syncPendingScans(null);
-        Intent intent = new Intent(this, com.lensmatch.mobile.ui.guidelines.AppGuidelinesActivity.class);
+        FirestoreService.syncPendingScans(null);
+
+        if (!AppState.getInstance().isOtpVerifiedForCurrentUser()) {
+            if (btnLogin != null) {
+                btnLogin.setEnabled(false);
+                btnLogin.setText("Sending verification code...");
+            }
+
+            AuthApiService.sendOtp(new AuthApiService.Callback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    if (isFinishing() || isDestroyed()) return;
+                    if (btnLogin != null) {
+                        btnLogin.setEnabled(true);
+                        btnLogin.setText("Log In");
+                    }
+                    Intent intent = new Intent(LoginActivity.this, OtpVerificationActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    if (isFinishing() || isDestroyed()) return;
+                    if (btnLogin != null) {
+                        btnLogin.setEnabled(true);
+                        btnLogin.setText("Log In");
+                    }
+                    Toast.makeText(LoginActivity.this,
+                            errorMessage != null ? errorMessage : "Failed to send verification code.",
+                            Toast.LENGTH_LONG).show();
+                }
+            });
+            return;
+        }
+
+        if (!AppState.getInstance().hasSeenGuidelines()) {
+            Intent intent = new Intent(this, AppGuidelinesActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        AppState.getInstance().setLastActiveTab(R.id.nav_home);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("open_tab", R.id.nav_home);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
