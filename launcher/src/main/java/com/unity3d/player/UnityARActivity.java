@@ -230,7 +230,29 @@ public class UnityARActivity extends AppCompatActivity implements IUnityPlayerLi
             TextView label       = item.findViewById(R.id.tv_frame_label);
 
             label.setText(frame);
-            icon.setImageResource("None".equalsIgnoreCase(frame) ? R.drawable.ic_none : R.drawable.ic_eyeglasses);
+            if ("None".equalsIgnoreCase(frame)) {
+                icon.setImageResource(R.drawable.ic_none);
+            } else if ("Round".equalsIgnoreCase(frame)) {
+                icon.setImageResource(R.drawable.round_frame);
+            } else if ("Oval".equalsIgnoreCase(frame)) {
+                icon.setImageResource(R.drawable.oval_frame);
+            } else if ("Aviator".equalsIgnoreCase(frame)) {
+                icon.setImageResource(R.drawable.aviator_frame);
+            } else if ("Wayfarer".equalsIgnoreCase(frame)) {
+                icon.setImageResource(R.drawable.wayfarer_frame);
+            } else if ("Rectangle".equalsIgnoreCase(frame)) {
+                icon.setImageResource(R.drawable.rectangle_frame);
+            } else if ("Square".equalsIgnoreCase(frame)) {
+                icon.setImageResource(R.drawable.square_frame);
+            } else if ("Browline".equalsIgnoreCase(frame)) {
+                icon.setImageResource(R.drawable.browline_frame);
+            } else if ("Cat-Eye".equalsIgnoreCase(frame) || "Cat Eye".equalsIgnoreCase(frame)) {
+                icon.setImageResource(R.drawable.cat_eye_frame);
+            } else if ("Geometric".equalsIgnoreCase(frame)) {
+                icon.setImageResource(R.drawable.geometric_frame);
+            } else {
+                icon.setImageResource(R.drawable.ic_eyeglasses);
+            }
             icon.setColorFilter(Color.BLACK);
 
             boolean sel = frame.equalsIgnoreCase(selectedFrameStyle);

@@ -250,6 +250,24 @@ public class ARTryOnActivity extends AppCompatActivity {
 
             if ("None".equalsIgnoreCase(frame)) {
                 ivIcon.setImageResource(R.drawable.ic_none);
+            } else if ("Round".equalsIgnoreCase(frame)) {
+                ivIcon.setImageResource(R.drawable.round_frame);
+            } else if ("Oval".equalsIgnoreCase(frame)) {
+                ivIcon.setImageResource(R.drawable.oval_frame);
+            } else if ("Aviator".equalsIgnoreCase(frame)) {
+                ivIcon.setImageResource(R.drawable.aviator_frame);
+            } else if ("Wayfarer".equalsIgnoreCase(frame)) {
+                ivIcon.setImageResource(R.drawable.wayfarer_frame);
+            } else if ("Rectangle".equalsIgnoreCase(frame)) {
+                ivIcon.setImageResource(R.drawable.rectangle_frame);
+            } else if ("Square".equalsIgnoreCase(frame)) {
+                ivIcon.setImageResource(R.drawable.square_frame);
+            } else if ("Browline".equalsIgnoreCase(frame)) {
+                ivIcon.setImageResource(R.drawable.browline_frame);
+            } else if ("Cat-Eye".equalsIgnoreCase(frame) || "Cat Eye".equalsIgnoreCase(frame)) {
+                ivIcon.setImageResource(R.drawable.cat_eye_frame);
+            } else if ("Geometric".equalsIgnoreCase(frame)) {
+                ivIcon.setImageResource(R.drawable.geometric_frame);
             } else {
                 ivIcon.setImageResource(R.drawable.ic_eyeglasses);
             }

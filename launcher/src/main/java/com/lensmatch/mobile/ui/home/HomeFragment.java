@@ -193,6 +193,13 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (!AppState.getInstance().isOtpVerifiedForCurrentUser()) {
+            Intent intent = new Intent(requireContext(), com.lensmatch.mobile.ui.auth.LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            if (getActivity() != null) getActivity().finish();
+            return;
+        }
         updateLogoForTheme();
         updateQuickLinks();
         loadAnnouncements();

@@ -1,179 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/otp_root"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/surface_white"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:app="http://schemas.android.com/apk/res-auto" 
+    android:id="@+id/otp_root" 
+    android:layout_width="match_parent" 
+    android:layout_height="match_parent" 
+    android:background="@color/surface_white" 
     android:orientation="vertical">
 
-    <!-- Top Toolbar -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar_otp"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/surface_white"
-        app:navigationIcon="@drawable/ic_chevron_left"
-        app:navigationIconTint="@color/text_primary"
-        app:title="Security Verification"
-        app:titleTextColor="@color/text_primary" />
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true"
-        android:scrollbars="none">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="24dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="32dp">
-
-            <!-- Security Icon Circle -->
-            <FrameLayout
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/bg_avatar_circle">
-
-                <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_help"
-                    app:tint="@color/secondary_teal" />
-            </FrameLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
-                android:text="2-Step Verification"
-                android:textColor="@color/text_primary"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-medium" />
-
-            <TextView
-                android:id="@+id/tv_otp_email_subtitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:lineSpacingExtra="3dp"
-                android:text="We have sent a 6-digit verification code to your email. Please enter it below to complete login."
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
-
-            <!-- OTP Input Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                app:cardBackgroundColor="@color/surface_white"
-                app:cardCornerRadius="20dp"
-                app:strokeColor="@color/border_light"
-                app:strokeWidth="1.5dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_otp_code"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="6-Digit Verification Code"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxStrokeColor="@color/primary_orange"
-                        app:hintTextColor="@color/primary_orange">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_otp_code"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:inputType="number"
-                            android:letterSpacing="0.4"
-                            android:maxLength="6"
-                            android:textColor="@color/text_primary"
-                            android:textSize="22sp"
-                            android:textStyle="bold" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- Resend Timer Row -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/tv_resend_timer"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Resend code in 00:60"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="13sp" />
-
-                        <TextView
-                            android:id="@+id/btn_resend_otp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="4dp"
-                            android:text="Resend Code"
-                            android:textColor="@color/primary_orange"
-                            android:textSize="13sp"
-                            android:textStyle="bold"
-                            android:visibility="gone" />
-                    </LinearLayout>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Loading Indicator -->
-            <ProgressBar
-                android:id="@+id/progress_otp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="20dp"
-                android:indeterminateTint="@color/primary_orange"
-                android:visibility="gone" />
-
-            <!-- Primary Action Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_verify_otp"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="24dp"
-                android:enabled="false"
-                android:text="VERIFY &amp; CONTINUE"
-                android:textAllCaps="false"
-                android:textColor="@color/surface_white"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                app:backgroundTint="@color/primary_orange"
-                app:cornerRadius="14dp"
-                app:elevation="2dp" />
-
-        </LinearLayout>
+    <!-- Top Toolbar --> 
+    <com.google.android.material.appbar.MaterialToolbar 
+        android:id="@+id/toolbar_otp" 
+        android:layout_width="match_parent" 
+        android:layout_height="?attr/actionBarSize" 
+        android:background="@color/surface_white" 
+        app:navigationIcon="@drawable/ic_chevron_left" 
+        app:navigationIconTint="@color/text_primary" 
+        app:title="Security Verification" 
+        app:titleTextColor="@color/text_primary" /> 
+        
+    <ScrollView 
+        android:layout_width="match_parent" 
+        android:layout_height="0dp" 
+        android:layout_weight="1" 
+        android:fillViewport="true" 
+        android:scrollbars="none"> 
+        
+        <LinearLayout 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:orientation="vertical" 
+            android:paddingHorizontal="24dp" 
+            android:paddingTop="20dp" 
+            android:paddingBottom="32dp"> 
+            
+            <FrameLayout 
+                android:layout_width="64dp" 
+                android:layout_height="64dp" 
+                android:layout_gravity="center_horizontal" 
+                android:background="@drawable/bg_avatar_circle"> 
+                
+                <ImageView 
+                    android:layout_width="32dp" 
+                    android:layout_height="32dp" 
+                    android:layout_gravity="center" 
+                    android:src="@drawable/ic_help" 
+                    app:tint="@color/secondary_teal" /> 
+            </FrameLayout> 
+            
+            <TextView 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:layout_gravity="center_horizontal" 
+                android:layout_marginTop="16dp" 
+                android:text="2-Step Verification" 
+                android:textColor="@color/text_primary" 
+                android:textSize="22sp" 
+                android:textStyle="bold" 
+                android:fontFamily="sans-serif-medium" /> 
+                
+            <TextView 
+                android:id="@+id/tv_otp_email_subtitle" 
+                android:layout_width="match_parent" 
+                android:layout_height="wrap_content" 
+                android:layout_marginTop="8dp" 
+                android:gravity="center" 
+                android:lineSpacingExtra="3dp" 
+                android:text="We have sent a 6-digit verification code to your email. Please enter it below to complete login." 
+                android:textColor="@color/text_secondary" 
+                android:textSize="14sp" /> 
+                
+            <com.google.android.material.card.MaterialCardView 
+                android:layout_width="match_parent" 
+                android:layout_height="wrap_content" 
+                android:layout_marginTop="32dp" 
+                app:cardBackgroundColor="@color/surface_white" 
+                app:cardCornerRadius="24dp" 
+                app:strokeColor="@color/border_light" 
+                app:strokeWidth="1dp" 
+                app:cardElevation="4dp"> 
+                
+                <LinearLayout 
+                    android:layout_width="match_parent" 
+                    android:layout_height="wrap_content" 
+                    android:orientation="vertical" 
+                    android:padding="24dp"> 
+                    
+                    <com.google.android.material.textfield.TextInputLayout 
+                        android:id="@+id/til_otp_code" 
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" 
+                        android:layout_width="match_parent" 
+                        android:layout_height="wrap_content" 
+                        android:hint="6-Digit Verification Code" 
+                        app:boxCornerRadiusBottomEnd="16dp" 
+                        app:boxCornerRadiusBottomStart="16dp" 
+                        app:boxCornerRadiusTopEnd="16dp" 
+                        app:boxCornerRadiusTopStart="16dp" 
+                        app:boxStrokeWidth="2dp"
+                        app:boxStrokeColor="@color/primary_orange" 
+                        app:hintTextColor="@color/primary_orange"> 
+                        
+                        <com.google.android.material.textfield.TextInputEditText 
+                            android:id="@+id/et_otp_code" 
+                            android:layout_width="match_parent" 
+                            android:layout_height="wrap_content" 
+                            android:gravity="center" 
+                            android:inputType="number" 
+                            android:paddingVertical="18dp" 
+                            android:letterSpacing="0.8" 
+                            android:maxLength="6" 
+                            android:textColor="@color/text_primary" 
+                            android:textSize="26sp" 
+                            android:textStyle="bold" /> 
+                    </com.google.android.material.textfield.TextInputLayout> 
+                    
+                    <LinearLayout 
+                        android:layout_width="match_parent" 
+                        android:layout_height="wrap_content" 
+                        android:layout_marginTop="20dp" 
+                        android:gravity="center" 
+                        android:orientation="horizontal"> 
+                        
+                        <TextView 
+                            android:id="@+id/tv_resend_timer" 
+                            android:layout_width="wrap_content" 
+                            android:layout_height="wrap_content" 
+                            android:text="Resend code in 01:00" 
+                            android:textColor="@color/text_secondary" 
+                            android:textSize="14sp" /> 
+                            
+                        <TextView 
+                            android:id="@+id/btn_resend_otp" 
+                            android:layout_width="wrap_content" 
+                            android:layout_height="wrap_content" 
+                            android:layout_marginStart="8dp" 
+                            android:clickable="true" 
+                            android:focusable="true" 
+                            android:padding="8dp" 
+                            android:text="Resend Code" 
+                            android:textColor="@color/primary_orange" 
+                            android:textSize="14sp" 
+                            android:textStyle="bold" 
+                            android:visibility="gone" /> 
+                    </LinearLayout> 
+                </LinearLayout> 
+            </com.google.android.material.card.MaterialCardView> 
+            
+            <ProgressBar 
+                android:id="@+id/progress_otp" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:layout_gravity="center_horizontal" 
+                android:layout_marginTop="24dp" 
+                android:indeterminateTint="@color/primary_orange" 
+                android:visibility="gone" /> 
+                
+            <com.google.android.material.button.MaterialButton 
+                android:id="@+id/btn_verify_otp" 
+                android:layout_width="match_parent" 
+                android:layout_height="56dp" 
+                android:layout_marginTop="32dp" 
+                android:enabled="false" 
+                android:text="VERIFY &amp; CONTINUE" 
+                android:textAllCaps="false" 
+                android:textColor="@color/surface_white" 
+                android:textSize="15sp" 
+                android:textStyle="bold" 
+                app:backgroundTint="@color/primary_orange" 
+                app:cornerRadius="14dp" 
+                app:elevation="2dp" /> 
+        </LinearLayout> 
     </ScrollView>
-
+</LinearLayout>
 </LinearLayout>

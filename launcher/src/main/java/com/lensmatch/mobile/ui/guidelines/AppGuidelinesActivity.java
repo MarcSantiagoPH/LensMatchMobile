@@ -2,6 +2,7 @@ package com.lensmatch.mobile.ui.guidelines;
 
 import android.content.Intent;
 import android.os.Bundle;
+import com.lensmatch.mobile.ui.auth.OtpVerificationActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;

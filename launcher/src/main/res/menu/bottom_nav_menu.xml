@@ -14,7 +14,7 @@
         android:enabled="false" />
     <item
         android:id="@+id/nav_frame"
-        android:icon="@drawable/ic_eyeglasses"
+        android:icon="@drawable/ic_eyeglass"
         android:title="Frame" />
     <item
         android:id="@+id/nav_profile"

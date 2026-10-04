@@ -40,7 +40,7 @@
     <string name="err_no_email_app">No email client found. Please contact support.</string>
 
     <!-- AR Navigation Strings -->
-    <string name="btn_ar_continue">Reserve →</string>
+    <string name="btn_ar_continue">RESERVE →</string>
 
     <!-- Frame Detail Color Labels -->
     <string name="label_detail_color">Color</string>
@@ -72,4 +72,5 @@
     <string name="msg_keep_face_visible">Center your face.</string>
     <string name="msg_scanning_face">Scanning...</string>
     <string name="placeholder_frame_name">Classic Aviator</string>
+    <string name="verify_email_notice">Please check your email for the verification code.</string>
 </resources>

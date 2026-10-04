@@ -81,7 +81,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:text="JD"
-                            android:textColor="@color/primary_orange"
+                            android:textColor="@color/black"
                             android:textSize="30sp"
                             android:textStyle="bold" />
                     </FrameLayout>
@@ -335,7 +335,13 @@
                         android:paddingVertical="14dp">
 
                         <FrameLayout android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_avatar_circle">
-                            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center" android:src="@drawable/ic_help" app:tint="@color/secondary_teal" />
+
+                            <ImageView
+                                android:layout_width="17dp"
+                                android:layout_height="18dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_help"
+                                app:tint="@color/secondary_teal" />
                         </FrameLayout>
 
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="14dp" android:layout_weight="1" android:orientation="vertical">

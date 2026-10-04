@@ -23,6 +23,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
+import java.io.File;
+
+import androidx.appcompat.app.AppCompatDelegate;
 
 public class AppState {
     private static AppState instance;
@@ -124,6 +130,19 @@ public class AppState {
             prefs.edit()
                 .putBoolean("hasSeenGuidelines", this.hasSeenGuidelines)
                 .apply();
+        }
+    }
+
+    public boolean isOtpVerifiedForCurrentUser() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || user.getUid() == null) return false;
+        return user.getUid().equalsIgnoreCase(otpVerifiedUid);
+    }
+
+    public void setOtpVerifiedUid(String uid) {
+        this.otpVerifiedUid = uid != null ? uid : "";
+        if (prefs != null) {
+            prefs.edit().putString("otpVerifiedUid", this.otpVerifiedUid).apply();
         }
     }
 
@@ -305,8 +324,6 @@ public class AppState {
         this.scanHistory.clear();
         if (prefs != null) {
             prefs.edit()
-                    .putBoolean("isLoggedIn", false)
-                    .putBoolean("hasSeenGuidelines", false)
                     .remove("userName")
                     .remove("userEmail")
                     .remove("userPhone")

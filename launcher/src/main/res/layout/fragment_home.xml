@@ -120,7 +120,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
-                    android:text="Scan your face and find suitable frames."
+                    android:text="Welcome to LensMatch! Enjoy AR frame previews!"
                     android:textColor="@color/surface_white"
                     android:textSize="12sp"
                     android:lineSpacingExtra="2dp" />
