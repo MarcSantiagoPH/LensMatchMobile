@@ -26,6 +26,8 @@ public class ReservationModel implements Serializable {
     private String cancellationReason;
     private Date reservationDeadline;
     private String rejectionReason;
+    private String approvalNote;
+    private String completionNote;
 
     public ReservationModel() {}
 
@@ -70,11 +72,17 @@ public class ReservationModel implements Serializable {
                 ? String.valueOf(data.get("cancellationReason")) : null;
         String rejectReason = data.containsKey("rejectionReason") && data.get("rejectionReason") != null
                 ? String.valueOf(data.get("rejectionReason")).trim() : null;
+        String appNote = data.containsKey("approvalNote") && data.get("approvalNote") != null
+                ? String.valueOf(data.get("approvalNote")).trim() : null;
+        String compNote = data.containsKey("completionNote") && data.get("completionNote") != null
+                ? String.valueOf(data.get("completionNote")).trim() : null;
 
         ReservationModel model = new ReservationModel(id, cId, cName, cEmail, fId, fName, brandStr, fStyle, priceVal, img, statusStr, createdDate, updatedDate);
         model.setCancellationReason(cancelReason);
         model.setReservationDeadline(deadlineDate);
         model.setRejectionReason(rejectReason);
+        model.setApprovalNote(appNote);
+        model.setCompletionNote(compNote);
         return model;
     }
 
@@ -142,6 +150,8 @@ public class ReservationModel implements Serializable {
     public String getCancellationReason() { return cancellationReason; }
     public Date getReservationDeadline() { return reservationDeadline; }
     public String getRejectionReason() { return rejectionReason; }
+    public String getApprovalNote() { return approvalNote; }
+    public String getCompletionNote() { return completionNote; }
 
     public String getFormattedDate() {
         if (createdAt == null) return "Recent";
@@ -179,5 +189,13 @@ public class ReservationModel implements Serializable {
 
     public void setRejectionReason(String rejectionReason) {
         this.rejectionReason = rejectionReason;
+    }
+
+    public void setApprovalNote(String approvalNote) {
+        this.approvalNote = approvalNote;
+    }
+
+    public void setCompletionNote(String completionNote) {
+        this.completionNote = completionNote;
     }
 }

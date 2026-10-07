@@ -152,6 +152,24 @@ public class ReservationDetailActivity extends AppCompatActivity {
                 if (layoutDeadline != null) layoutDeadline.setVisibility(View.GONE);
             }
 
+            LinearLayout layoutApprovalNote = findViewById(R.id.layout_approval_note);
+            TextView tvApprovalNote = findViewById(R.id.tv_detail_approval_note);
+            if ("APPROVED".equals(statusUpper) && reservation.getApprovalNote() != null && !reservation.getApprovalNote().trim().isEmpty()) {
+                if (layoutApprovalNote != null) layoutApprovalNote.setVisibility(View.VISIBLE);
+                if (tvApprovalNote != null) tvApprovalNote.setText(reservation.getApprovalNote());
+            } else {
+                if (layoutApprovalNote != null) layoutApprovalNote.setVisibility(View.GONE);
+            }
+
+            LinearLayout layoutCompletionNote = findViewById(R.id.layout_completion_note);
+            TextView tvCompletionNote = findViewById(R.id.tv_detail_completion_note);
+            if ("COMPLETED".equals(statusUpper) && reservation.getCompletionNote() != null && !reservation.getCompletionNote().trim().isEmpty()) {
+                if (layoutCompletionNote != null) layoutCompletionNote.setVisibility(View.VISIBLE);
+                if (tvCompletionNote != null) tvCompletionNote.setText(reservation.getCompletionNote());
+            } else {
+                if (layoutCompletionNote != null) layoutCompletionNote.setVisibility(View.GONE);
+            }
+
             LinearLayout layoutCancellationReason = findViewById(R.id.layout_cancellation_reason);
             TextView tvCancellationReason = findViewById(R.id.tv_detail_cancellation_reason);
             if ("CANCELLED".equals(statusUpper) && reservation.getCancellationReason() != null && !reservation.getCancellationReason().trim().isEmpty()) {
