@@ -295,7 +295,7 @@ public class CameraActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 Matrix matrix = getScreenTransformMatrix(sourceTransform);
                 faceMeshOverlay.updateState(null, FaceMeshOverlayView.GuideState.SEARCHING, scanProgress, matrix, imageWidth, imageHeight);
-                setInstruction("Position face in center oval", FaceMeshOverlayView.GuideState.SEARCHING);
+                setInstruction("Position face inside frame", FaceMeshOverlayView.GuideState.SEARCHING);
             });
             return;
         }

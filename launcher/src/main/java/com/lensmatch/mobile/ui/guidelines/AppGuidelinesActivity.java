@@ -83,7 +83,7 @@ public class AppGuidelinesActivity extends AppCompatActivity {
                 "Scan Your Face",
                 "AI Facial Structure Analysis",
                 "Tap the camera button on the bottom navigation bar to capture or upload your photo. LensMatch evaluates your face proportions, cheekbones, jawline, and forehead in real-time.",
-                "Hold your phone steady at eye level inside the oval guide with balanced lighting for the most accurate face shape classification."
+                "Hold your phone steady at eye level inside the frame guide with balanced lighting for the most accurate face shape classification."
         ));
 
         // Slide 2: Recommendations
