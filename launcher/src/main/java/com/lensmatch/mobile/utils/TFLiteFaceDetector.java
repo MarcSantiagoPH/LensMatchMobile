@@ -58,7 +58,7 @@ public class TFLiteFaceDetector {
 
     public TFLiteFaceDetector(Context context) {
         try {
-            ByteBuffer modelBuffer = loadModelFile(context, "models/face_shape_model.tflite");
+            ByteBuffer modelBuffer = loadModelFile(context, "models/lensmatch_efficientnetb0.tflite");
             interpreter = new Interpreter(modelBuffer);
             Log.d(TAG, "TFLite model loaded successfully");
         } catch (Exception e) {

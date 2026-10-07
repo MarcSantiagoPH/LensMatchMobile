@@ -87,10 +87,10 @@
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/card_home_logo"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="3dp"
+                        android:layout_width="54dp"
+                        android:layout_height="54dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="4dp"
                         app:cardBackgroundColor="@color/surface_white"
                         app:strokeWidth="0dp">
 
@@ -132,87 +132,100 @@
                     android:layout_marginTop="12dp"
                     android:orientation="horizontal">
 
-                    <!-- Pill 1: AI Match Precision -->
+                    <!-- Pill 1: Face Shape Analysis (Objective 1) -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:minHeight="54dp"
                         android:background="@drawable/bg_hero_info_pill"
                         android:paddingVertical="7dp"
-                        android:paddingHorizontal="6dp"
+                        android:paddingHorizontal="4dp"
                         android:gravity="center"
                         android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="98% Match"
+                            android:text="Face Analyzer"
                             android:textColor="@color/surface_white"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:gravity="center" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="AI Precision"
+                            android:layout_marginTop="2dp"
+                            android:text="7 Face Shapes"
                             android:textColor="@color/surface_white"
-                            android:textSize="9sp" />
+                            android:textSize="9sp"
+                            android:gravity="center" />
                     </LinearLayout>
 
-                    <!-- Pill 2: Curated Styles -->
+                    <!-- Pill 2: AI Recommendation (Objective 2) -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
+                        android:minHeight="54dp"
                         android:background="@drawable/bg_hero_info_pill"
                         android:paddingVertical="7dp"
-                        android:paddingHorizontal="6dp"
+                        android:paddingHorizontal="4dp"
                         android:gravity="center"
                         android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="9 Styles"
+                            android:text="Smart Recommender"
                             android:textColor="@color/surface_white"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
+                            android:textSize="10.5sp"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:textAlignment="center" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Designer Frames"
+                            android:layout_marginTop="2dp"
+                            android:text="Gemini AI"
                             android:textColor="@color/surface_white"
-                            android:textSize="9sp" />
+                            android:textSize="9sp"
+                            android:gravity="center" />
                     </LinearLayout>
 
-                    <!-- Pill 3: Clinic In-Store Fitting -->
+                    <!-- Pill 3: AR Frame Preview (Objective 3) -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
+                        android:minHeight="54dp"
                         android:background="@drawable/bg_hero_info_pill"
                         android:paddingVertical="7dp"
-                        android:paddingHorizontal="6dp"
+                        android:paddingHorizontal="4dp"
                         android:gravity="center"
                         android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Free Fitting"
+                            android:text="Frame Preview"
                             android:textColor="@color/surface_white"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:gravity="center" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Franselle Clinic"
+                            android:layout_marginTop="2dp"
+                            android:text="Live 3D AR"
                             android:textColor="@color/surface_white"
-                            android:textSize="9sp" />
+                            android:textSize="9sp"
+                            android:gravity="center" />
                     </LinearLayout>
                 </LinearLayout>
 

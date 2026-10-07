@@ -292,19 +292,6 @@ public class AppState {
         }
     }
 
-    public boolean isOtpVerifiedForCurrentUser() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null || user.getUid() == null) return false;
-        return user.getUid().equalsIgnoreCase(otpVerifiedUid);
-    }
-
-    public void setOtpVerifiedUid(String uid) {
-        this.otpVerifiedUid = uid != null ? uid : "";
-        if (prefs != null) {
-            prefs.edit().putString("otpVerifiedUid", this.otpVerifiedUid).apply();
-        }
-    }
-
     public void logout() {
         this.isLoggedIn = false;
         this.hasSeenGuidelines = false;

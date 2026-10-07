@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/landing_root"
@@ -103,49 +103,58 @@
                 android:lineSpacingExtra="4dp"
                 android:paddingHorizontal="16dp" />
 
-            <!-- Highlight Feature Badges -->
+            <!-- Highlight Feature Badges (3 Capstone Pillars) -->
             <LinearLayout
                 android:id="@+id/layout_feature_badges"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
+                android:layout_marginTop="24dp"
                 android:orientation="horizontal"
                 android:gravity="center">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="AI Analysis"
+                    android:layout_weight="1"
+                    android:text="Face Shape\nAnalyzer"
                     android:textColor="@color/primary_orange"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
+                    android:gravity="center"
+                    android:textAlignment="center"
                     android:background="@drawable/bg_landing_pill"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="7dp" />
+                    android:paddingHorizontal="4dp"
+                    android:paddingVertical="8dp" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="3D Frame Preview"
+                    android:layout_weight="1"
+                    android:text="Smart\nRecommender"
                     android:textColor="@color/primary_orange"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
+                    android:gravity="center"
+                    android:textAlignment="center"
                     android:background="@drawable/bg_landing_pill"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="7dp" />
+                    android:paddingHorizontal="4dp"
+                    android:paddingVertical="8dp" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Virtual Catalog"
+                    android:layout_weight="1"
+                    android:text="AR Frame\nPreview"
                     android:textColor="@color/primary_orange"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
+                    android:gravity="center"
+                    android:textAlignment="center"
                     android:background="@drawable/bg_landing_pill"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="7dp" />
+                    android:paddingHorizontal="4dp"
+                    android:paddingVertical="8dp" />
             </LinearLayout>
         </LinearLayout>
 
